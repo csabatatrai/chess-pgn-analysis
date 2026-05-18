@@ -6,6 +6,14 @@ Módosítsd az alábbi értékeket a saját környezetednek megfelelően.
 import os
 import multiprocessing
 
+try:
+    import secrets as _secrets
+    GEMINI_API_KEY = _secrets.GEMINI_API_KEY
+    ELEVENLABS_API_KEY = _secrets.ELEVENLABS_API_KEY
+except ImportError:
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+    ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
+
 # A projekt gyökérkönyvtára (ez biztosítja, hogy a relatív elérési utak mindig a repo gyökérére mutassanak)
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 

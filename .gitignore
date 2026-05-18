@@ -42,6 +42,10 @@ lichess_db_standard_rated_2025-01.pgn.zst
 
 # Local configuration
 .env
+secrets.py
 
 # Stockfish binary directory
 stockfish/
+
+# Fejlesztéshez kellett
+fejlesztési_promptok.md
