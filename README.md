@@ -1,91 +1,172 @@
-# ♟️ Lichess PGN Analysis Pipeline
+# Chess PGN Analysis & Narration
 
-Nagyméretű (akár 31 GB+) Lichess PGN fájlok elemzésére és vizualizálására épített, moduláris, nagy teljesítményű pipeline.
+Sakkjátszmák elemzésére, LLM-alapú narrációgenerálásra és interaktív lejátszásra épített pipeline, jelenleg még csak lokálisan futtatható!
 
-## 📁 Projekt struktúra
+**Ellenőrizd, hogy a stockfish benne van-e a gyökérkönyvtárban, ha nincs, manuálisan innen letölthető, főkönyvtárba kicsomagolandó: https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-windows-x86-64-avx2.zip**
+
+---
+
+## Funkciók
+
+- **Saját PGN feltöltése** – bármilyen sakkjátszmát beilleszthetsz, a pipeline azonnal feldolgozza
+- **Stockfish elemzés** – lépésenkénti pozícióértékelés, hibák és brilliáns lépések detektálása
+- **LLM narráció** – a játszma szöveges elemzése OpenAI / Gemini / Anthropic / Mistral segítségével
+- **TTS hangosítás** – a narráció felolvasása OpenAI TTS vagy ElevenLabs hanggal
+- **Interaktív sakktábla lejátszó** – a narráció hangjával szinkronizált táblaállapot-váltás
+> Fejlesztés alatt: **Lichess bulk elemzés** – nagy (akár 31 GB+) PGN fájlok párhuzamos feldolgozása
+
+---
+
+## Projekt struktúra
 
 ```
-lichess_pipeline/
-├── README.md
-├── requirements.txt
-├── config.py                    # Központi konfiguráció
-├── src/
-│   ├── 01_pgn_to_parquet.py    # PGN → Parquet konverzió (multiprocessing)
-│   ├── 02_analysis.py          # DuckDB/Polars alapú statisztikák
-│   ├── 03_stockfish_analysis.py # Stockfish elemzés a top játékosok játszmájára
-│   └── run_pipeline.py         # Teljes pipeline futtatása egy lépésben
-├── notebooks/
-│   └── visualization.ipynb     # Plotly vizualizációk Jupyter Notebookban
-├── output/                     # Generált fájlok (parquet, JSON, képek)
-└── data/                       # (ide kerül a Stockfish bináris, ha szükséges)
+chess-pgn-analysis/
+├── streamlit_app.py          # Streamlit dashboard (fő belépési pont)
+├── config.py                 # Központi konfiguráció és env változók
+├── secrets.example.py        # API kulcs sablon (ezt másold le secrets.py-ként)
+├── packages.txt              # Streamlit Cloud rendszercsomagok (stockfish)
+├── requirements.txt          # Python függőségek
+└── src/
+    ├── 01_pgn_to_parquet.py  # PGN → Parquet konverzió (multiprocessing)
+    ├── 02_analysis.py        # DuckDB/Polars statisztikák
+    ├── 03_stockfish_analysis.py  # Stockfish motor elemzés
+    ├── 04_tts.py             # TTS pipeline futtatása
+    ├── llm_client.py         # LLM provider absztrakció
+    ├── tts_client.py         # TTS provider absztrakció
+    └── run_pipeline.py       # Teljes pipeline egy lépésben
 ```
 
-## 🚀 Gyors indítás
+---
 
-### 1. Függőségek telepítése
+## Gyors indítás (lokálisan)
+
+### 1. Függőségek
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Teljes pipeline futtatása
+Stockfish telepítése (ha nincs):
+- **Windows:** a pipeline automatikusan letölti az első futáskor
+- **Linux/macOS:** `sudo apt install stockfish` vagy `brew install stockfish`
+
+### 2. PGN előkészítés és pipeline futtatása
+
+A notebookok és a Streamlit app előtt a `run_pipeline.py`-t kell futtatni egyszer – ez generálja az összes szükséges kimeneti fájlt (Parquet, JSON-ok). **A notebookok ezt automatikusan elvégzik, ha a fájlok még nem léteznek** – de kézzel is indítható:
+
 ```bash
-# PGN fájlt a gyökérkönyvtárba kell helyezni, pl.: lichess_db_2024-01.pgn
-python src/run_pipeline.py --pgn your_file.pgn
+python src/run_pipeline.py --pgn sajat_jatszmaim.pgn
 ```
 
-### 3. Csak az egyes lépések futtatása
+Hasznos kapcsolók:
 ```bash
-# 1. lépés: PGN konverzió
-python src/01_pgn_to_parquet.py --pgn your_file.pgn --workers 8
+# Teszteléshez: csak az első 1000 játszma
+python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --max-games 1000
 
-# 2. lépés: Statisztikai elemzés
+# Ha a Parquet már megvan, kihagyja a konverziót
+python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --skip-conversion
+
+# Stockfish nélkül (gyorsabb)
+python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --skip-stockfish
+```
+
+### 3. API kulcsok
+
+Másold le a sablont és töltsd ki:
+
+```bash
+cp secrets.example.py secrets.py
+```
+
+A `secrets.py` tartalma:
+
+```python
+CHAT_GPT_API_KEY   = "..."   # platform.openai.com/api-keys
+GEMINI_API_KEY     = "..."   # aistudio.google.com/apikey
+ANTHROPIC_API_KEY  = "..."   # console.anthropic.com/settings/keys
+MISTRAL_API_KEY    = "..."   # console.mistral.ai/api-keys
+ELEVENLABS_API_KEY = "..."   # elevenlabs.io/app/settings/api-keys
+```
+
+Elég csak azokat kitölteni, amelyeket használni szeretnél.
+
+### 3. Streamlit indítása
+
+```bash
+streamlit run streamlit_app.py
+```
+
+---
+
+## Streamlit Community Cloud deploy
+
+**TODOs**: Ahhoz, hogy streamlitre deployolható legyen továbbfejlesztést igényel! Még nem működik deployolva a Stockfish!
+
+1. Fork-old vagy push-old a repót GitHubra
+2. [share.streamlit.io](https://share.streamlit.io) → New app → válaszd ki a repót, main fájl: `streamlit_app.py`
+3. **Secrets** mezőbe add meg az API kulcsokat TOML formátumban:
+
+```toml
+GEMINI_API_KEY     = "..."
+CHAT_GPT_API_KEY   = "..."
+ELEVENLABS_API_KEY = "..."
+```
+
+A `packages.txt` automatikusan telepíti a Stockfish-t a Cloud-on (`apt install stockfish`).
+
+---
+
+## LLM és TTS provider váltás
+
+A `config.py`-ban (vagy env változóval) állítható:
+
+| Változó | Lehetséges értékek | Alapértelmezett |
+|---|---|---|
+| `LLM_PROVIDER` | `openai` \| `gemini` \| `anthropic` \| `mistral` | `openai` |
+| `TTS_PROVIDER` | `openai` \| `elevenlabs` | `openai` |
+| `LLM_MODEL` | pl. `gpt-4o`, `gemini-2.0-flash-lite` | provider alapértelmezése |
+
+---
+
+## Lichess bulk pipeline (CLI)
+
+Nagy PGN fájlok feldolgozásához (pl. havi Lichess dump):
+
+```bash
+# Teljes pipeline
+python src/run_pipeline.py --pgn lichess_db_2024-01.pgn
+
+# Csak konverzió, elemzés kihagyásával
+python src/run_pipeline.py --pgn lichess_db_2024-01.pgn --skip-stockfish
+
+# Lépésenként
+python src/01_pgn_to_parquet.py --pgn lichess_db_2024-01.pgn --workers 8
 python src/02_analysis.py
-
-# 3. lépés: Stockfish elemzés (opcionális, Stockfish telepítés szükséges)
-# Windows esetén a pipeline automatikusan letölti és kicsomagolja a Stockfish binárist a data/stockfish könyvtárba, ha még nincs ott.
 python src/03_stockfish_analysis.py
-
-# 4. lépés: Vizualizáció
-jupyter notebook notebooks/visualization.ipynb
 ```
 
-## ⚙️ Konfiguráció
+---
 
-A `config.py` fájlban módosítható:
-- `PGN_FILE`: bemeneti PGN fájl neve
-- `WORKERS`: párhuzamos feldolgozó szálak száma
-- `CHUNK_SIZE`: memóriahatékony feldolgozáshoz
-- `STOCKFISH_PATH`: Stockfish bináris elérési útja
-- `OUTPUT_DIR`: kimeneti könyvtár
-
-## 📊 Vizualizációk saját chess.com játszmákból
-
-1. **Játszmák hosszának eloszlása PLY-ban** – A ply féllépést jelent társasjátékokban, 1 lépés = 2 féllépés (1 sötéttel, 1 világossal!)
-2. TODOs
-3. TODOs
-
-## Sakk narrátor funkció LLM és/vagy Elevenlabs segítségével
-
-TODOs
-
-## 🔧 Technológiai stack
+## Technológiai stack
 
 | Eszköz | Szerepe |
-|--------|---------|
-| `python-chess` | PGN beolvasás, táblaállapot |
-| `multiprocessing` | Párhuzamos PGN feldolgozás |
-| `pyarrow` / `parquet` | Hatékony adattárolás |
+|---|---|
+| `streamlit` | Webes dashboard |
+| `python-chess` | PGN beolvasás, táblaállapot, SVG megjelenítés |
+| `stockfish` | Sakkmotor elemzés (lépésenkénti értékelés) |
+| `openai` / `google-generativeai` | LLM narráció |
+| `elevenlabs` | TTS hangosítás |
 | `polars` | Nagy adathalmazok elemzése (LazyFrame) |
 | `duckdb` | SQL lekérdezések Parquet felett |
-| `stockfish` | Sakkmotor elemzés |
+| `pyarrow` / `parquet` | Hatékony adattárolás |
 | `plotly` | Interaktív vizualizációk |
-| `jupyter` | Notebook megjelenítés |
+| `multiprocessing` | Párhuzamos PGN feldolgozás |
 
-## 📝 Megjegyzések
+---
 
+## Megjegyzések
+
+- A `secrets.py` fájl nincs és ne kerüljön verziókövetésbe (`.gitignore`-ban van)
+- A DuckDB lekérdezőmotorként üzemel – nem hoz létre tartós `.duckdb` fájlt
 - A pipeline **bármilyen méretű PGN fájlra** működik, nem csak Lichess-re
-- A Parquet konverzió után a nyers PGN-re már nincs szükség az elemzéshez
-- Stockfish elemzés opcionális; ha nincs telepítve, a pipeline kihagyja
-- A LazyFrame API miatt még 100 GB+ adathalmazok is elemezhetők korlátozott RAM-mal
-
-> A DuckDB ebben a projektben nem adatbázis-fájlként, hanem lekérdezőmotorként üzemel: közvetlenül a Parquet fájlokon fut SQL lekérdezéseket, és nem hoz létre tartós .duckdb adatbázisfájlt. Az adatok egyetlen forrása a Parquet könyvtár marad. Így nem keletkezik redundáns adatkópia, és a repo sem terhelődik nehéz bináris fájlokkal.
+- Lichess havi dumpok: [database.lichess.org](https://database.lichess.org)
