@@ -86,6 +86,7 @@ if not os.path.isabs(OUTPUT_DIR):
 PARQUET_DIR = os.path.join(OUTPUT_DIR, "parquet")
 ANALYSIS_DIR = os.path.join(OUTPUT_DIR, "analysis")
 PLOTS_DIR = os.path.join(OUTPUT_DIR, "plots")
+LLM_ANALYSIS_DIR = os.path.join(OUTPUT_DIR, "llm-analysis")
 
 # ─────────────────────────────────────────────
 # STOCKFISH
@@ -132,6 +133,30 @@ PLOT_THEME = "plotly_dark"   # vagy "plotly_white", "ggplot2", stb.
 PLOT_HEIGHT = 500
 PLOT_WIDTH = 900
 
+# ─────────────────────────────────────────────
+# LLM ELEMZÉS KIMENETI FÁJLOK
+# ─────────────────────────────────────────────
+# Játszma sorszáma – fájlnevekben szerepel a visszakövethetőségért
+GAME_NUMBER = int(os.environ.get("GAME_NUMBER", 1))
+
+# Elemzett játszma PGN-je (az llm-analysis mappában)
+ELEMZETT_PGN = os.path.join(LLM_ANALYSIS_DIR, "elemzett.pgn")
+
+# ─────────────────────────────────────────────
+# TTS BEÁLLÍTÁSOK
+# ─────────────────────────────────────────────
+# Melyik TTS providert használja. "openai" | "elevenlabs"
+TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "openai")
+
+# OpenAI TTS hang: alloy | echo | fable | onyx | nova | shimmer
+TTS_VOICE_OPENAI = os.environ.get("TTS_VOICE_OPENAI", "nova")
+
+# OpenAI TTS modell: tts-1 | tts-1-hd
+TTS_MODEL_OPENAI = os.environ.get("TTS_MODEL_OPENAI", "tts-1")
+
+# ElevenLabs hang ID (alapértelmezett: Rachel – eleven_multilingual_v2 modellel)
+TTS_VOICE_ELEVENLABS = os.environ.get("TTS_VOICE_ELEVENLABS", "21m00Tcm4TlvDq8ikWAM")
+
 # Könyvtárak létrehozása (ha nem léteznek)
-for _dir in [OUTPUT_DIR, PARQUET_DIR, ANALYSIS_DIR, PLOTS_DIR, DATA_DIR]:
+for _dir in [OUTPUT_DIR, PARQUET_DIR, ANALYSIS_DIR, PLOTS_DIR, DATA_DIR, LLM_ANALYSIS_DIR]:
     os.makedirs(_dir, exist_ok=True)
