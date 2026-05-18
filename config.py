@@ -6,13 +6,55 @@ Módosítsd az alábbi értékeket a saját környezetednek megfelelően.
 import os
 import multiprocessing
 
+def _load_secrets():
+    """Betölti a secrets.py-t fájlútvonal alapján, elkerülve a beépített secrets modul ütközést."""
+    import importlib.util
+    _path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "secrets.py")
+    spec = importlib.util.spec_from_file_location("_project_secrets", _path)
+    if spec is None or spec.loader is None:
+        raise FileNotFoundError(_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    return mod
+
 try:
-    import secrets as _secrets
-    GEMINI_API_KEY = _secrets.GEMINI_API_KEY
-    ELEVENLABS_API_KEY = _secrets.ELEVENLABS_API_KEY
-except ImportError:
-    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+    _s = _load_secrets()
+    GEMINI_API_KEY     = getattr(_s, "GEMINI_API_KEY", "")
+    CHAT_GPT_API_KEY   = getattr(_s, "CHAT_GPT_API_KEY", "")
+    ANTHROPIC_API_KEY  = getattr(_s, "ANTHROPIC_API_KEY", "")
+    MISTRAL_API_KEY    = getattr(_s, "MISTRAL_API_KEY", "")
+    ELEVENLABS_API_KEY = getattr(_s, "ELEVENLABS_API_KEY", "")
+except FileNotFoundError:
+    GEMINI_API_KEY     = os.environ.get("GEMINI_API_KEY", "")
+    CHAT_GPT_API_KEY   = os.environ.get("CHAT_GPT_API_KEY", "")
+    ANTHROPIC_API_KEY  = os.environ.get("ANTHROPIC_API_KEY", "")
+    MISTRAL_API_KEY    = os.environ.get("MISTRAL_API_KEY", "")
     ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
+
+# ─────────────────────────────────────────────
+# NYELVI MODELL (LLM) BEÁLLÍTÁSOK
+# ─────────────────────────────────────────────
+# Melyik providert használja a narráció-generáláshoz.
+# Lehetséges értékek: "openai" | "gemini" | "anthropic" | "mistral"
+LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "openai")
+
+# Alapértelmezett modellek providerenként (felülírható env változóval)
+LLM_DEFAULT_MODELS = {
+    "openai":    "gpt-4o-mini",
+    "gemini":    "gemini-2.0-flash-lite",
+    "anthropic": "claude-haiku-4-5-20251001",
+    "mistral":   "mistral-small-latest",
+}
+LLM_MODEL = os.environ.get("LLM_MODEL", LLM_DEFAULT_MODELS.get(LLM_PROVIDER, ""))
+
+# Az aktív provider API kulcsa
+_LLM_KEY_MAP = {
+    "openai":    CHAT_GPT_API_KEY,
+    "gemini":    GEMINI_API_KEY,
+    "anthropic": ANTHROPIC_API_KEY,
+    "mistral":   MISTRAL_API_KEY,
+}
+LLM_API_KEY = _LLM_KEY_MAP.get(LLM_PROVIDER, "")
 
 # A projekt gyökérkönyvtára (ez biztosítja, hogy a relatív elérési utak mindig a repo gyökérére mutassanak)
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
