@@ -132,10 +132,13 @@ def compute_timed_anchors(paragraphs: list, all_fens: list) -> list[dict]:
 
     seen: set[int] = set()
     result = []
+    max_fen_idx = -1
     for a in raw:
-        if a["fen_idx"] not in seen:
+        # csak előre haladhatunk: kisebb vagy azonos fen_idx-et kihagyjuk
+        if a["fen_idx"] not in seen and a["fen_idx"] > max_fen_idx:
             seen.add(a["fen_idx"])
             result.append({"fen_idx": a["fen_idx"], "word_frac": a["word_frac"]})
+            max_fen_idx = a["fen_idx"]
 
     return result
 
@@ -280,7 +283,8 @@ function getFenIdx(frac) {{
 }}
 
 function mutatFen(idx) {{
-  idx = Math.max(0, Math.min(idx, TOTAL - 1));
+  // a tábla csak előre haladhat – soha ne menjünk vissza egy korábbi álláshoz
+  idx = Math.max(lastIdx, Math.min(idx, TOTAL - 1));
   targetIdx = idx;
   if (!rafQueued && idx !== lastIdx) {{
     rafQueued = true;
