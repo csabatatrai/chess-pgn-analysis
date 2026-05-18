@@ -63,18 +63,8 @@ A `config.py` fájlban módosítható:
 1. **Játszmák hosszának eloszlása PLY-ban** – A ply féllépést jelent társasjátékokban, 1 lépés = 2 féllépés (1 sötéttel, 1 világossal!)
 2. TODOs
 3. TODOs
-4. TODOs
-5. TODOs
 
-## Vizualizációk 1 havi Lichess játszmákból
-
-1. TODOs
-2. TODOs
-3. TODOs
-4. TODOs
-5. TODOs
-
-## Sakk narrátor funkció LLM + Elevenlabs segítségével
+## Sakk narrátor funkció LLM és/vagy Elevenlabs segítségével
 
 TODOs
 
