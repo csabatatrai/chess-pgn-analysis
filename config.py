@@ -87,6 +87,8 @@ PARQUET_DIR = os.path.join(OUTPUT_DIR, "parquet")
 ANALYSIS_DIR = os.path.join(OUTPUT_DIR, "analysis")
 PLOTS_DIR = os.path.join(OUTPUT_DIR, "plots")
 LLM_ANALYSIS_DIR = os.path.join(OUTPUT_DIR, "llm-analysis")
+LLM_ANALYSIS_SZOVEGES_DIR = os.path.join(LLM_ANALYSIS_DIR, "szoveges")
+LLM_ANALYSIS_HANGOS_DIR = os.path.join(LLM_ANALYSIS_DIR, "hangos_narracio")
 
 # ─────────────────────────────────────────────
 # STOCKFISH
@@ -158,5 +160,6 @@ TTS_MODEL_OPENAI = os.environ.get("TTS_MODEL_OPENAI", "tts-1")
 TTS_VOICE_ELEVENLABS = os.environ.get("TTS_VOICE_ELEVENLABS", "21m00Tcm4TlvDq8ikWAM")
 
 # Könyvtárak létrehozása (ha nem léteznek)
-for _dir in [OUTPUT_DIR, PARQUET_DIR, ANALYSIS_DIR, PLOTS_DIR, DATA_DIR, LLM_ANALYSIS_DIR]:
+for _dir in [OUTPUT_DIR, PARQUET_DIR, ANALYSIS_DIR, PLOTS_DIR, DATA_DIR, LLM_ANALYSIS_DIR,
+             LLM_ANALYSIS_SZOVEGES_DIR, LLM_ANALYSIS_HANGOS_DIR]:
     os.makedirs(_dir, exist_ok=True)
