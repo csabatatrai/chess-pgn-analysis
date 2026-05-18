@@ -1,11 +1,19 @@
 # Lichess PGN Analysis Pipeline - Dependencies
+# Ajánlott Python verzió: 3.11
+# Új környezet létrehozása:
+#   conda create -n chess_analysis python=3.11
+#   conda activate chess_analysis
+#   pip install -r requirements.txt
 
 # Chess
 python-chess>=1.10.0
 
+# Data processing
+numpy>=1.24.0
+pandas>=2.0.0
+
 # Data storage
 pyarrow>=14.0.0
-fastparquet>=2023.10.0
 
 # Fast dataframe processing
 polars>=0.20.0
@@ -13,12 +21,13 @@ polars>=0.20.0
 # Embedded analytical SQL engine
 duckdb>=0.9.0
 
-# Stockfish engine interface
-stockfish>=3.28.0
-
 # Visualization
 plotly>=5.18.0
-kaleido>=0.2.1       # Static image export for plotly
+kaleido>=0.2.1
+Pillow>=10.0.0
+
+# Streamlit app
+streamlit>=1.28.0
 
 # Jupyter
 jupyter>=1.0.0
