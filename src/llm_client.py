@@ -19,6 +19,7 @@ import config
 
 def generate_text(
     prompt: str,
+    system_prompt: str = None,
     provider: str = None,
     api_key: str = None,
     model: str = None,
@@ -27,10 +28,11 @@ def generate_text(
     Szöveget generál a konfigurált LLM providerrel.
 
     Args:
-        prompt:   A teljes prompt (rendszerüzenet + felhasználói tartalom egyben).
-        provider: "openai" | "gemini" | "anthropic" | "mistral" – None = config.LLM_PROVIDER
-        api_key:  Felülírja a config.LLM_API_KEY értékét.
-        model:    Felülírja a config.LLM_MODEL értékét.
+        prompt:        Felhasználói tartalom (user üzenet).
+        system_prompt: Rendszerszintű instrukció (system üzenet). None = nincs külön system prompt.
+        provider:      "openai" | "gemini" | "anthropic" | "mistral" – None = config.LLM_PROVIDER
+        api_key:       Felülírja a config.LLM_API_KEY értékét.
+        model:         Felülírja a config.LLM_MODEL értékét.
 
     Returns:
         A modell szöveges válasza.
@@ -46,13 +48,13 @@ def generate_text(
         )
 
     if provider == "openai":
-        return _openai(prompt, api_key, model or "gpt-4o-mini")
+        return _openai(prompt, api_key, model or "gpt-4o-mini", system_prompt)
     if provider == "gemini":
-        return _gemini(prompt, api_key, model or "gemini-2.0-flash-lite")
+        return _gemini(prompt, api_key, model or "gemini-2.0-flash-lite", system_prompt)
     if provider == "anthropic":
-        return _anthropic(prompt, api_key, model or "claude-haiku-4-5-20251001")
+        return _anthropic(prompt, api_key, model or "claude-haiku-4-5-20251001", system_prompt)
     if provider == "mistral":
-        return _mistral(prompt, api_key, model or "mistral-small-latest")
+        return _mistral(prompt, api_key, model or "mistral-small-latest", system_prompt)
 
     raise ValueError(
         f"Ismeretlen LLM provider: '{provider}'. "
@@ -62,39 +64,59 @@ def generate_text(
 
 # ── Provider implementációk ────────────────────────────────────────────────────
 
-def _openai(prompt: str, api_key: str, model: str) -> str:
+def _openai(prompt: str, api_key: str, model: str, system_prompt: str = None) -> str:
     from openai import OpenAI
-    client   = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=api_key)
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": prompt})
     response = client.chat.completions.create(
         model=model,
-        messages=[{"role": "user", "content": prompt}],
+        messages=messages,
+        response_format={"type": "json_object"} if system_prompt and "JSON" in system_prompt else None,
     )
     return response.choices[0].message.content
 
 
-def _gemini(prompt: str, api_key: str, model: str) -> str:
+def _gemini(prompt: str, api_key: str, model: str, system_prompt: str = None) -> str:
     from google import genai
-    client   = genai.Client(api_key=api_key)
-    response = client.models.generate_content(model=model, contents=prompt)
+    from google.genai import types
+    client = genai.Client(api_key=api_key)
+    config_kwargs = {}
+    if system_prompt:
+        config_kwargs["system_instruction"] = system_prompt
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=types.GenerateContentConfig(**config_kwargs) if config_kwargs else None,
+    )
     return response.text
 
 
-def _anthropic(prompt: str, api_key: str, model: str) -> str:
+def _anthropic(prompt: str, api_key: str, model: str, system_prompt: str = None) -> str:
     import anthropic
-    client   = anthropic.Anthropic(api_key=api_key)
-    message  = client.messages.create(
-        model=model,
-        max_tokens=1024,
-        messages=[{"role": "user", "content": prompt}],
-    )
+    client = anthropic.Anthropic(api_key=api_key)
+    kwargs = {
+        "model": model,
+        "max_tokens": 2048,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    if system_prompt:
+        kwargs["system"] = system_prompt
+    message = client.messages.create(**kwargs)
     return message.content[0].text
 
 
-def _mistral(prompt: str, api_key: str, model: str) -> str:
+def _mistral(prompt: str, api_key: str, model: str, system_prompt: str = None) -> str:
     from mistralai import Mistral
-    client   = Mistral(api_key=api_key)
+    client = Mistral(api_key=api_key)
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": prompt})
     response = client.chat.complete(
         model=model,
-        messages=[{"role": "user", "content": prompt}],
+        messages=messages,
     )
     return response.choices[0].message.content

@@ -144,6 +144,9 @@ GAME_NUMBER = int(os.environ.get("GAME_NUMBER", 1))
 # Elemzett játszma PGN-je (az llm-analysis mappában)
 ELEMZETT_PGN = os.path.join(LLM_ANALYSIS_DIR, "elemzett.pgn")
 
+# JSON narráció könyvtára (FEN-anchorokat is tartalmaz)
+LLM_ANALYSIS_JSON_DIR = os.path.join(LLM_ANALYSIS_DIR, "json_narracio")
+
 # ─────────────────────────────────────────────
 # TTS BEÁLLÍTÁSOK
 # ─────────────────────────────────────────────
@@ -161,5 +164,5 @@ TTS_VOICE_ELEVENLABS = os.environ.get("TTS_VOICE_ELEVENLABS", "21m00Tcm4TlvDq8ik
 
 # Könyvtárak létrehozása (ha nem léteznek)
 for _dir in [OUTPUT_DIR, PARQUET_DIR, ANALYSIS_DIR, PLOTS_DIR, DATA_DIR, LLM_ANALYSIS_DIR,
-             LLM_ANALYSIS_SZOVEGES_DIR, LLM_ANALYSIS_HANGOS_DIR]:
+             LLM_ANALYSIS_SZOVEGES_DIR, LLM_ANALYSIS_HANGOS_DIR, LLM_ANALYSIS_JSON_DIR]:
     os.makedirs(_dir, exist_ok=True)
