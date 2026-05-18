@@ -201,23 +201,30 @@ def build_player_html(
     align-items: center;
     font-family: sans-serif;
   }}
-  #board {{
-    width: 100%;
-    max-width: 480px;
+  #board-wrapper {{
+    position: relative;
+    /* Négyzet: annyi, amennyit a képernyő megenged mindkét irányban */
+    width: min(calc(100vw - 8px), calc(100vh - 50px));
   }}
-  #board svg {{ width: 100%; height: auto; display: block; }}
-  /* Csak BEFAKULÁS – a tábla soha nem tűnik el, nincs villódzás */
-  @keyframes betunik {{
-    from {{ opacity: 0.45; }}
-    to   {{ opacity: 1; }}
+  /* Rejtett méretező: a tábla természetes magasságát adja a wrappernek,
+     hogy a position:absolute rétegeknek legyen mihez igazodniuk */
+  #board-sizer {{
+    display: block;
+    visibility: hidden;
+    pointer-events: none;
   }}
-  #board.valtas {{ animation: betunik 0.28s ease-out; }}
+  #board-sizer svg, #board-a svg, #board-b svg {{
+    width: 100%; height: auto; display: block;
+  }}
+  #board-a, #board-b {{
+    position: absolute;
+    inset: 0;
+  }}
   #info {{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-    max-width: 480px;
+    width: min(calc(100vw - 8px), calc(100vh - 50px));
     margin-top: 6px;
     font-size: 13px;
     color: #555;
@@ -230,7 +237,11 @@ def build_player_html(
 </head>
 <body>
 
-<div id="board">{init_svg}</div>
+<div id="board-wrapper">
+  <div id="board-sizer">{init_svg}</div>
+  <div id="board-a" style="z-index:2;">{init_svg}</div>
+  <div id="board-b" style="z-index:1;"></div>
+</div>
 <div id="info">
   <span id="statusz">&#9654; Betöltés…</span>
   <span id="lepesszam">Kezdőállás</span>
@@ -250,9 +261,8 @@ const TOTAL     = fenSvgs.length;
 const LOOKAHEAD = 0.5;
 
 // ── DOM ───────────────────────────────────────────────────────────────────
-const audio    = document.getElementById('narr');
-const board    = document.getElementById('board');
-const statusz  = document.getElementById('statusz');
+const audio     = document.getElementById('narr');
+const statusz   = document.getElementById('statusz');
 const lepesszam = document.getElementById('lepesszam');
 
 // ── Állapot ───────────────────────────────────────────────────────────────
@@ -260,6 +270,8 @@ let lastIdx    = 0;
 let targetIdx  = 0;
 let rafQueued  = false;
 let befejezett = false;
+let front      = 'a';   // az éppen látható réteg azonosítója
+let fadeTimer  = null;
 
 // ── Lépésszám felirat ─────────────────────────────────────────────────────
 function lepesFelirat(idx) {{
@@ -300,7 +312,10 @@ function getFenIdx(frac) {{
   return TOTAL - 1;
 }}
 
-// ── Villódzásmentes SVG csere (fade-IN animáció, soha nem üres a tábla) ──
+// ── Crossfade SVG csere – a tábla soha nem tűnik el, nem villog ──────────
+// Két réteg (board-a / board-b) váltakozik: az új FEN a háttérrétegbe töltődik,
+// majd z-index=2-re kerül és 0→1 fade-in-nel jelenik meg az előző FÖLÉ.
+// Az előző réteg végig teljes opacitáson marad – soha nem látható üresség.
 function mutatFen(idx) {{
   idx = Math.max(0, Math.min(idx, TOTAL - 1));
   targetIdx = idx;
@@ -310,11 +325,27 @@ function mutatFen(idx) {{
       rafQueued = false;
       if (targetIdx === lastIdx) return;
       lastIdx = targetIdx;
-      board.innerHTML = fenSvgs[lastIdx];
-      // animation újraindítása: class levétel + reflow + visszarakás
-      board.classList.remove('valtas');
-      void board.offsetWidth;
-      board.classList.add('valtas');
+
+      const frontEl = document.getElementById('board-' + front);
+      const backId  = front === 'a' ? 'b' : 'a';
+      const backEl  = document.getElementById('board-' + backId);
+
+      if (fadeTimer) {{ clearTimeout(fadeTimer); fadeTimer = null; }}
+
+      backEl.innerHTML        = fenSvgs[lastIdx];
+      backEl.style.zIndex     = '2';
+      frontEl.style.zIndex    = '1';
+      backEl.style.transition = 'none';
+      backEl.style.opacity    = '0';
+      void backEl.offsetWidth;                    // reflow → animáció 0-ról indul
+      backEl.style.transition = 'opacity 0.22s ease-out';
+      backEl.style.opacity    = '1';
+
+      fadeTimer = setTimeout(() => {{
+        fadeTimer = null;
+        front = backId;
+      }}, 240);
+
       lepesszam.textContent = lepesFelirat(lastIdx);
     }});
   }}
@@ -423,8 +454,7 @@ if st.session_state.playing:
         narration_data=narration_data,
         autoplay=True,
     )
-    # Magasság: tábla (~480px) + info sor (~30px) + kis padding
-    st.components.v1.html(player_html, height=540, scrolling=False)
+    st.components.v1.html(player_html, height=620, scrolling=False)
 
     if st.button("⏹  Megállít", use_container_width=True):
         st.session_state.playing = False
@@ -436,8 +466,9 @@ else:
     init_fen = all_fens[0] if all_fens else chess.STARTING_FEN
     svg = fen_to_svg(init_fen)
     st.components.v1.html(
-        f'<div style="display:flex;justify-content:center">{svg}</div>',
-        height=470,
+        f'''<style>svg{{width:100%;height:auto;display:block}}</style>
+<div style="width:min(calc(100vw - 8px),570px);margin:0 auto">{svg}</div>''',
+        height=590,
         scrolling=False,
     )
 
