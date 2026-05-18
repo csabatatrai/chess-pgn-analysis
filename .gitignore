@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pyd
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python packaging and test artifacts
+dist/
+build/
+*.egg-info/
+__pypackages__/
+.pytest_cache/
+htmlcov/
+
+# Output and temporary data
+output/
+*.log
+*.tmp
+*.temp
+lichess_db_standard_rated_2025-01.pgn.zst
+
+# Local configuration
+.env
+
+# Stockfish binary directory
+stockfish/

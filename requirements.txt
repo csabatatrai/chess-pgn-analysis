@@ -1,0 +1,30 @@
+# Lichess PGN Analysis Pipeline - Dependencies
+
+# Chess
+python-chess>=1.10.0
+
+# Data storage
+pyarrow>=14.0.0
+fastparquet>=2023.10.0
+
+# Fast dataframe processing
+polars>=0.20.0
+
+# Embedded analytical SQL engine
+duckdb>=0.9.0
+
+# Stockfish engine interface
+stockfish>=3.28.0
+
+# Visualization
+plotly>=5.18.0
+kaleido>=0.2.1       # Static image export for plotly
+
+# Jupyter
+jupyter>=1.0.0
+ipykernel>=6.0.0
+nbformat>=5.9.0
+
+# Utilities
+tqdm>=4.66.0
+psutil>=5.9.0
