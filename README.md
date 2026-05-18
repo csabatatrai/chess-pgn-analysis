@@ -58,16 +58,25 @@ A `config.py` fájlban módosítható:
 - `STOCKFISH_PATH`: Stockfish bináris elérési útja
 - `OUTPUT_DIR`: kimeneti könyvtár
 
-## 📊 Generált vizualizációk
+## 📊 Vizualizációk saját chess.com játszmákból
 
-1. **Játszma végeredmények** – Fehér/Fekete/Döntetlen arányok időben
-2. **Elo eloszlás** – Játékosok ratingjének hisztogramja
-3. **Megnyitók népszerűsége** – Top 20 ECO kód
-4. **Napi/heti aktivitás** – Mikor játszanak legtöbbet
-5. **Játszma hossza** – Lépések száma szerinti eloszlás
-6. **Időkontrollok** – Bullet/Blitz/Rapid/Classical arányok
-7. **Stockfish heatmap** – Top játékosok játszmájának pozícióelemzése
-8. **Térkép: honnan játszanak** – (ha van ország adat)
+1. **Játszmák hosszának eloszlása PLY-ban** – A ply féllépést jelent társasjátékokban, 1 lépés = 2 féllépés (1 sötéttel, 1 világossal!)
+2. TODOs
+3. TODOs
+4. TODOs
+5. TODOs
+
+## Vizualizációk 1 havi Lichess játszmákból
+
+1. TODOs
+2. TODOs
+3. TODOs
+4. TODOs
+5. TODOs
+
+## Sakk narrátor funkció LLM + Elevenlabs segítségével
+
+TODOs
 
 ## 🔧 Technológiai stack
 
@@ -88,3 +97,5 @@ A `config.py` fájlban módosítható:
 - A Parquet konverzió után a nyers PGN-re már nincs szükség az elemzéshez
 - Stockfish elemzés opcionális; ha nincs telepítve, a pipeline kihagyja
 - A LazyFrame API miatt még 100 GB+ adathalmazok is elemezhetők korlátozott RAM-mal
+
+> A DuckDB ebben a projektben nem adatbázis-fájlként, hanem lekérdezőmotorként üzemel: közvetlenül a Parquet fájlokon fut SQL lekérdezéseket, és nem hoz létre tartós .duckdb adatbázisfájlt. Az adatok egyetlen forrása a Parquet könyvtár marad. Így nem keletkezik redundáns adatkópia, és a repo sem terhelődik nehéz bináris fájlokkal.
