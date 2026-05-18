@@ -40,7 +40,7 @@ LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "openai")
 
 # Alapértelmezett modellek providerenként (felülírható env változóval)
 LLM_DEFAULT_MODELS = {
-    "openai":    "gpt-4o-mini",
+    "openai":    "gpt-4o",
     "gemini":    "gemini-2.0-flash-lite",
     "anthropic": "claude-haiku-4-5-20251001",
     "mistral":   "mistral-small-latest",

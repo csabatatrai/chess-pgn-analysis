@@ -7,7 +7,7 @@ Indítás:
 
 UI:
   - Játszmaválasztó dropdown
-  - Sakktábla (automatikusan frissül lejátszás közben)
+  - Sakktábla (slideshow: minden lépés FEN-je szinkronban a hangfelvétellel)
   - PLAY / STOP gomb
 """
 
@@ -65,17 +65,54 @@ def starting_svg(size: int = 440) -> str:
     return chess.svg.board(chess.Board(), size=size)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Anchor időzítés számítása (karakterarány → audio-arány)
+# FEN-sorozat és anchor-időzítés
 # ─────────────────────────────────────────────────────────────────────────────
 
-def compute_anchors(paragraphs: list) -> list[dict]:
+def fen_position_key(fen: str) -> str:
+    """FEN első 4 mezője (táblaállás, szín, sáncolás, en passant) – összehasonlításhoz."""
+    return " ".join(fen.strip().split()[:4])
+
+
+def get_all_fens(narration_data: dict, paragraphs: list) -> list[str]:
     """
-    Minden anchorhoz kiszámítja a char_frac értéket:
-      char_frac = karakter-pozíció a teljes szövegben / összes karakter
-    Ez lesz vetítve az audio időtartamára a böngészőben.
+    Visszaadja a lejátszandó FEN-ek rendezett listáját.
+    Új JSON: 'moves' mező tartalmazza az összes lépés FEN-jét.
+    Régi JSON: az anchor FEN-ekből rekonstruálja (fallback).
     """
+    if narration_data.get("moves"):
+        fens = [chess.STARTING_FEN]
+        for m in narration_data["moves"]:
+            if m.get("fen"):
+                fens.append(m["fen"])
+        return fens
+
+    # Fallback: anchor FEN-ek dokumentum-sorrendben
+    seen = {fen_position_key(chess.STARTING_FEN)}
+    fens = [chess.STARTING_FEN]
+    for para in paragraphs:
+        for anchor in para.get("anchors", []):
+            f = anchor.get("fen", "")
+            if f:
+                k = fen_position_key(f)
+                if k not in seen:
+                    fens.append(f)
+                    seen.add(k)
+    return fens
+
+
+def compute_timed_anchors(paragraphs: list, all_fens: list) -> list[dict]:
+    """
+    Szóalapú (word-count) időzítési frakciót számít minden érvényes anchorhoz,
+    és meghatározza a hozzá tartozó FEN indexét az all_fens tömbben.
+
+    Visszatér: [{fen_idx, word_frac}] – word_frac szerint rendezve.
+    Érvényes anchor: trigger_word szó szerint szerepel a szövegben ÉS
+                     az anchor FEN megtalálható az all_fens tömbben.
+    """
+    fen_idx_map = {fen_position_key(f): i for i, f in enumerate(all_fens)}
+
     full_text = ""
-    result = []
+    raw = []
 
     for para in paragraphs:
         text = para.get("text", "")
@@ -86,49 +123,70 @@ def compute_anchors(paragraphs: list) -> list[dict]:
                 continue
             pos = text.find(trigger)
             if pos < 0:
-                continue
-            result.append({
-                "fen": fen,
-                "trigger": trigger,
-                "char_pos": len(full_text) + pos,
-            })
+                continue  # broken trigger_word – kihagyjuk
+
+            word_pos = len((full_text + text[:pos]).split())
+            fen_idx = fen_idx_map.get(fen_position_key(fen), -1)
+            if fen_idx >= 0:
+                raw.append({"fen_idx": fen_idx, "word_pos": word_pos})
+
         full_text += text + "  "
 
-    total = len(full_text) or 1
-    for a in result:
-        a["char_frac"] = round(a["char_pos"] / total, 6)
+    total_words = max(len(full_text.split()), 1)
+    for a in raw:
+        a["word_frac"] = round(a["word_pos"] / total_words, 6)
 
-    result.sort(key=lambda x: x["char_frac"])
+    raw.sort(key=lambda x: x["word_frac"])
+
+    # Egyedi fen_idx: csak az első előfordulás marad (ha ugyanaz a FEN kétszer szerepel)
+    seen: set[int] = set()
+    result = []
+    for a in raw:
+        if a["fen_idx"] not in seen:
+            seen.add(a["fen_idx"])
+            result.append({"fen_idx": a["fen_idx"], "word_frac": a["word_frac"]})
+
     return result
 
 # ─────────────────────────────────────────────────────────────────────────────
 # HTML lejátszó komponens
 # ─────────────────────────────────────────────────────────────────────────────
 
-def build_player_html(paragraphs: list, mp3_path: str, autoplay: bool = True) -> str:
+def build_player_html(
+    paragraphs: list,
+    mp3_path: str,
+    narration_data: dict | None = None,
+    autoplay: bool = True,
+) -> str:
     """
     Önálló HTML oldal:
-      - Sakktábla (SVG), ami az anchor-időknek megfelelően frissül
-      - Rejtett audio elem, ami a narráció MP3-at játssza le
-      - JavaScript: audio timeupdate → megfelelő SVG megjelenítése
+      - Összes FEN-pozíció SVG-ként előrenderelve (slideshow)
+      - Rejtett audio elem a narráció MP3-ával
+      - JavaScript:
+          * audio timeupdate → szóarány-alapú interpoláció → FEN index
+          * 0.5 s lookahead: az anchor pozícióját kicsit KORÁBBAN mutatja,
+            hogy a néző biztosan látja, amikor a narrátor épp arról beszél
+          * Opacity fade (0.25 s) az átmenetekhez
+          * audio.ended → utolsó állás legalább 3 s-ig látható
     """
-    anchors = compute_anchors(paragraphs)
+    narration_data = narration_data or {}
 
-    # Kezdőállás: az első anchor FEN-je, vagy a teljes kezdőállás
-    init_svg = fen_to_svg(anchors[0]["fen"]) if anchors else starting_svg()
+    all_fens = get_all_fens(narration_data, paragraphs)
+    timed_anchors = compute_timed_anchors(paragraphs, all_fens)
 
-    # Minden anchor SVG-jét beágyazzuk rejtett <div>-ekbe
-    hidden_svgs_html = ""
-    for i, a in enumerate(anchors):
-        svg = fen_to_svg(a["fen"])
-        hidden_svgs_html += f'<div id="svg{i}" style="display:none">{svg}</div>\n'
+    # Összes FEN SVG-vé konvertálva – JS tömbbe ágyazva
+    svgs = [fen_to_svg(f) for f in all_fens]
+    total_fens = len(svgs)
 
-    # JS anchor adat (csak char_frac kell, az SVG a DOM-ban van)
-    js_fracs = json.dumps([a["char_frac"] for a in anchors])
+    svgs_json = json.dumps(svgs)
+    js_anchors = json.dumps([
+        {"fenIdx": a["fen_idx"], "wordFrac": a["word_frac"]}
+        for a in timed_anchors
+    ])
 
-    # Audio base64
     mp3_data = audio_b64(mp3_path)
     autoplay_attr = "autoplay" if autoplay else ""
+    init_svg = svgs[0] if svgs else starting_svg()
 
     html = f"""<!DOCTYPE html>
 <html>
@@ -141,81 +199,153 @@ def build_player_html(paragraphs: list, mp3_path: str, autoplay: bool = True) ->
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-family: sans-serif;
+  }}
+  #board {{
+    width: 100%;
+    max-width: 480px;
   }}
   #board svg {{ width: 100%; height: auto; display: block; }}
-  #board {{ width: 100%; max-width: 480px; }}
-  #status {{
-    font-family: sans-serif;
+  /* Csak BEFAKULÁS – a tábla soha nem tűnik el, nincs villódzás */
+  @keyframes betunik {{
+    from {{ opacity: 0.45; }}
+    to   {{ opacity: 1; }}
+  }}
+  #board.valtas {{ animation: betunik 0.28s ease-out; }}
+  #info {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 480px;
+    margin-top: 6px;
     font-size: 13px;
     color: #555;
-    margin-top: 6px;
-    min-height: 18px;
+  }}
+  #lepesszam {{
+    font-variant-numeric: tabular-nums;
+    opacity: 0.65;
   }}
 </style>
 </head>
 <body>
 
 <div id="board">{init_svg}</div>
-<div id="status">&#9654; Betöltés...</div>
-
-<!-- Rejtett SVG-k minden anchor-hoz -->
-<div style="display:none" id="svgstore">
-{hidden_svgs_html}
+<div id="info">
+  <span id="statusz">&#9654; Betöltés…</span>
+  <span id="lepesszam">Kezdőállás</span>
 </div>
 
-<!-- Audio -->
 <audio id="narr" {autoplay_attr}
        src="data:audio/mpeg;base64,{mp3_data}"
-       style="display:none">
-</audio>
+       style="display:none"></audio>
 
 <script>
-  const fracs = {js_fracs};
-  const audio  = document.getElementById('narr');
-  const board  = document.getElementById('board');
-  const status = document.getElementById('status');
-  const total  = fracs.length;
+// ── Adatok ────────────────────────────────────────────────────────────────
+const fenSvgs   = {svgs_json};
+const anchors   = {js_anchors};
+const TOTAL     = fenSvgs.length;
+// Lookahead: ennyi másodperccel KORÁBBAN jelenik meg az anchor állás,
+// hogy a néző biztosan lássa, mielőtt a narrátor kimondja
+const LOOKAHEAD = 0.5;
 
-  let lastIdx = -1;
+// ── DOM ───────────────────────────────────────────────────────────────────
+const audio    = document.getElementById('narr');
+const board    = document.getElementById('board');
+const statusz  = document.getElementById('statusz');
+const lepesszam = document.getElementById('lepesszam');
 
-  function showSvg(idx) {{
-    if (idx === lastIdx || idx < 0 || idx >= total) return;
-    const el = document.getElementById('svg' + idx);
-    if (el) {{
-      board.innerHTML = el.innerHTML;
-      lastIdx = idx;
+// ── Állapot ───────────────────────────────────────────────────────────────
+let lastIdx    = 0;
+let targetIdx  = 0;
+let rafQueued  = false;
+let befejezett = false;
+
+// ── Lépésszám felirat ─────────────────────────────────────────────────────
+function lepesFelirat(idx) {{
+  if (idx === 0) return 'Kezdőállás';
+  return idx + '. lépés / ' + (TOTAL - 1);
+}}
+
+// ── FEN-index számítás ────────────────────────────────────────────────────
+// Lineáris interpoláció az anchor szinkronpontok között.
+// frac: 0…1 (a lookahead-del eltolt audió-idő aránya)
+function getFenIdx(frac) {{
+  frac = Math.max(0, Math.min(1, frac));
+
+  if (!anchors.length) {{
+    return Math.min(Math.floor(frac * TOTAL), TOTAL - 1);
+  }}
+
+  if (frac <= anchors[0].wordFrac) {{
+    const r = anchors[0].wordFrac > 0 ? frac / anchors[0].wordFrac : 0;
+    return Math.round(r * anchors[0].fenIdx);
+  }}
+
+  const last = anchors[anchors.length - 1];
+  if (frac >= last.wordFrac) {{
+    const rem = 1 - last.wordFrac;
+    const r   = rem > 0 ? (frac - last.wordFrac) / rem : 1;
+    return Math.min(last.fenIdx + Math.round(r * (TOTAL - 1 - last.fenIdx)), TOTAL - 1);
+  }}
+
+  for (let i = 0; i < anchors.length - 1; i++) {{
+    const a = anchors[i], b = anchors[i + 1];
+    if (frac >= a.wordFrac && frac < b.wordFrac) {{
+      const r = (frac - a.wordFrac) / (b.wordFrac - a.wordFrac);
+      return Math.round(a.fenIdx + r * (b.fenIdx - a.fenIdx));
     }}
   }}
 
-  audio.addEventListener('loadedmetadata', () => {{
-    status.textContent = '\\u25BA Lejátszás folyamatban...';
-    audio.play().catch(() => {{
-      status.textContent = '\\u25BA Kattints a böngészőn belül az indításhoz.';
+  return TOTAL - 1;
+}}
+
+// ── Villódzásmentes SVG csere (fade-IN animáció, soha nem üres a tábla) ──
+function mutatFen(idx) {{
+  idx = Math.max(0, Math.min(idx, TOTAL - 1));
+  targetIdx = idx;
+  if (!rafQueued && idx !== lastIdx) {{
+    rafQueued = true;
+    requestAnimationFrame(() => {{
+      rafQueued = false;
+      if (targetIdx === lastIdx) return;
+      lastIdx = targetIdx;
+      board.innerHTML = fenSvgs[lastIdx];
+      // animation újraindítása: class levétel + reflow + visszarakás
+      board.classList.remove('valtas');
+      void board.offsetWidth;
+      board.classList.add('valtas');
+      lepesszam.textContent = lepesFelirat(lastIdx);
     }});
-  }});
-
-  audio.addEventListener('timeupdate', () => {{
-    if (!audio.duration) return;
-    const frac = audio.currentTime / audio.duration;
-    let idx = -1;
-    for (let i = 0; i < total; i++) {{
-      if (fracs[i] <= frac) idx = i;
-    }}
-    showSvg(idx);
-  }});
-
-  audio.addEventListener('ended', () => {{
-    status.textContent = '\\u2713 Lejátszás kész.';
-  }});
-
-  audio.addEventListener('error', () => {{
-    status.textContent = '\\u26A0 Hangfájl betöltési hiba.';
-  }});
-
-  // Fallback: ha autoplay blokkolva van, visszük a init SVG-t
-  if (total === 0) {{
-    status.textContent = 'Nincs anchor adat.';
   }}
+}}
+
+// ── Audio eseménykezelők ──────────────────────────────────────────────────
+audio.addEventListener('loadedmetadata', () => {{
+  statusz.textContent = '► Narráció lejátszása…';
+  audio.play().catch(() => {{
+    statusz.textContent = '► Kattintson a lejátszáshoz!';
+  }});
+}});
+
+audio.addEventListener('timeupdate', () => {{
+  if (befejezett || !audio.duration) return;
+  const frac = (audio.currentTime + LOOKAHEAD) / audio.duration;
+  mutatFen(getFenIdx(frac));
+}});
+
+audio.addEventListener('ended', () => {{
+  befejezett = true;
+  mutatFen(TOTAL - 1);          // biztosan az utolsó állás
+  statusz.textContent = '⏸ Végállás – még látható…';
+  setTimeout(() => {{
+    statusz.textContent = '✓ Lejátszás befejezve.';
+  }}, 3000);
+}});
+
+audio.addEventListener('error', () => {{
+  statusz.textContent = '⚠ A hangfájl nem töltődött be.';
+}});
 </script>
 </body>
 </html>"""
@@ -231,7 +361,6 @@ st.set_page_config(
     layout="centered",
 )
 
-# Minimális stílus: középre igazított, tiszta UI
 st.markdown("""
 <style>
   .block-container { max-width: 540px; padding-top: 2rem; }
@@ -278,7 +407,6 @@ selected_name = st.selectbox(
 )
 selected = game_map[selected_name]
 
-# Ha játszmát váltottunk, leállítjuk a lejátszást
 if st.session_state.last_game != selected_name:
     st.session_state.playing = False
     st.session_state.last_game = selected_name
@@ -289,20 +417,23 @@ narration_data = load_json(selected["json"])
 paragraphs     = narration_data.get("paragraphs", [])
 
 if st.session_state.playing:
-    # ── LEJÁTSZÓ MÓD: HTML komponens (tábla + audio) ──────────────────────────
-    player_html = build_player_html(paragraphs, selected["mp3"], autoplay=True)
-
-    # Magasság: tábla (~480px) + státusz (~30px) + kis padding
+    player_html = build_player_html(
+        paragraphs,
+        selected["mp3"],
+        narration_data=narration_data,
+        autoplay=True,
+    )
+    # Magasság: tábla (~480px) + info sor (~30px) + kis padding
     st.components.v1.html(player_html, height=540, scrolling=False)
 
-    if st.button("⏹  Stop", use_container_width=True):
+    if st.button("⏹  Megállít", use_container_width=True):
         st.session_state.playing = False
         st.rerun()
 
 else:
-    # ── ÁLLÓ MÓD: Streamlit tábla (első anchor FEN, vagy kezdőállás) ──────────
-    anchors = compute_anchors(paragraphs)
-    init_fen = anchors[0]["fen"] if anchors else chess.STARTING_FEN
+    # Álló mód: kezdőállás vagy az első anchor FEN-je
+    all_fens = get_all_fens(narration_data, paragraphs)
+    init_fen = all_fens[0] if all_fens else chess.STARTING_FEN
     svg = fen_to_svg(init_fen)
     st.components.v1.html(
         f'<div style="display:flex;justify-content:center">{svg}</div>',
@@ -310,6 +441,6 @@ else:
         scrolling=False,
     )
 
-    if st.button("▶  Play", use_container_width=True):
+    if st.button("▶  Lejátszás", use_container_width=True):
         st.session_state.playing = True
         st.rerun()
