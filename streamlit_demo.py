@@ -79,11 +79,13 @@ def find_games() -> list[dict]:
     return games
 
 
+@st.cache_data
 def load_json(path: str) -> dict:
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
+@st.cache_data(show_spinner=False)
 def audio_b64(mp3_path: str) -> str:
     with open(mp3_path, "rb") as f:
         return base64.b64encode(f.read()).decode()
@@ -217,10 +219,18 @@ html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direc
 #board-sizer{{display:block;visibility:hidden;pointer-events:none;}}
 #board-sizer svg,#board-a svg,#board-b svg{{width:100%;height:auto;display:block;}}
 #board-a,#board-b{{position:absolute;inset:0;}}
+#load-overlay{{position:absolute;inset:0;z-index:50;background:rgba(248,249,251,0.93);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.65rem;border-radius:14px;transition:opacity 0.45s ease;pointer-events:none;}}
+#load-piece{{font-size:2.8rem;color:#A81022;animation:loadBounce 1.3s cubic-bezier(0.36,0.07,0.19,0.97) infinite;transform-origin:center bottom;}}
+#load-ring{{width:48px;height:48px;border:3px solid rgba(168,16,34,0.15);border-top-color:#A81022;border-radius:50%;animation:loadSpin 0.9s linear infinite;position:absolute;top:50%;left:50%;margin:-24px 0 0 -24px;}}
+#load-label{{font-size:0.78rem;font-weight:700;color:#A81022;letter-spacing:0.1em;text-transform:uppercase;}}
+#load-dots{{display:inline-block;animation:loadDots 1.4s steps(4,end) infinite;}}
 #info{{display:flex;align-items:center;gap:14px;width:min(calc(100vw - 12px),calc(100vh - 78px));margin-top:8px;padding:10px 16px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.07);border-radius:10px;}}
 #statusz{{font-size:0.92rem;font-weight:600;letter-spacing:0.02em;color:#A81022;white-space:nowrap;flex-shrink:0;}}
 #pbar-wrap{{flex:1;height:10px;background:rgba(168,16,34,0.12);border-radius:99px;overflow:hidden;}}
 #pbar-fill{{width:0%;height:100%;background:linear-gradient(90deg,#A81022,#c41428);border-radius:99px;transition:width 0.35s ease;}}
+@keyframes loadBounce{{0%,100%{{transform:translateY(0) scale(1);}}45%{{transform:translateY(-14px) scale(1.08);}}55%{{transform:translateY(-14px) scale(1.08);}}}}
+@keyframes loadSpin{{to{{transform:rotate(360deg);}}}}
+@keyframes loadDots{{0%{{content:'';}}25%{{content:'.';}}50%{{content:'..';}}75%{{content:'...';}}100%{{content:'';}} }}
 </style>
 </head>
 <body>
@@ -228,6 +238,13 @@ html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direc
   <div id="board-sizer">{init_svg}</div>
   <div id="board-a" style="z-index:2;">{init_svg}</div>
   <div id="board-b" style="z-index:1;"></div>
+  <div id="load-overlay">
+    <div style="position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+      <div id="load-ring"></div>
+      <div id="load-piece">♟</div>
+    </div>
+    <div id="load-label">Narration loading<span id="load-dots"></span></div>
+  </div>
 </div>
 <div id="info">
   <span id="statusz">&#9654; Loading…</span>
@@ -267,7 +284,9 @@ function mutatFen(idx){{
     updatePbar(lastIdx);
   }});}}
 }}
-audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Playing narration…';audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});}});
+function hideLoadOverlay(){{var ol=document.getElementById('load-overlay');if(ol){{ol.style.opacity='0';setTimeout(function(){{if(ol&&ol.parentNode)ol.parentNode.removeChild(ol);}},480);}}}}
+audio.addEventListener('loadedmetadata',()=>{{hideLoadOverlay();statusz.textContent='► Playing narration…';audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});}});
+audio.addEventListener('error',()=>{{hideLoadOverlay();}});
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
@@ -395,7 +414,7 @@ html,body,[class*="css"]{
   text-rendering:optimizeLegibility!important;
 }
 
-#MainMenu,footer,header,[data-testid="stToolbar"],[data-testid="stDecoration"],.stDeployButton{display:none!important;height:0!important;min-height:0!important;visibility:hidden!important;position:absolute!important;}
+#MainMenu,footer,header,[data-testid="stToolbar"],[data-testid="stDecoration"],.stDeployButton,[data-testid="collapsedControl"],[data-testid="stSidebarNav"]{display:none!important;height:0!important;min-height:0!important;visibility:hidden!important;position:absolute!important;}
 
 [data-testid="stHeader"]{display:none!important;height:0!important;min-height:0!important;visibility:hidden!important;position:absolute!important;}
 
@@ -628,7 +647,11 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 .mobile-top-spacer{display:none;}
 
 @media (max-width:768px){
-  /* ── Csak függőleges görgetés, semmi vízszintes ─────────────────────── */
+  /* ── 1. Sidebar és toggle elrejtése (ne tolja el a tartalmat) ────────── */
+  [data-testid="stSidebar"]{display:none!important;width:0!important;min-width:0!important;}
+  [data-testid="collapsedControl"]{display:none!important;width:0!important;}
+
+  /* ── 2. Görgetés: csak függőleges, semmi vízszintes ─────────────────── */
   html,body{
     height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;
     max-width:100vw!important;touch-action:pan-y!important;
@@ -637,37 +660,57 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
     height:auto!important;min-height:100svh!important;
     overflow-y:auto!important;overflow-x:hidden!important;max-width:100vw!important;
   }
+  /* stAppViewContainer: megtartjuk az eredeti flex-row irányt – csak overflow */
   [data-testid="stAppViewContainer"]{
     height:auto!important;overflow-y:auto!important;
     overflow-x:hidden!important;max-width:100vw!important;
   }
-  [data-testid="stMain"],[data-testid="stMainBlockContainer"]{
-    overflow-x:hidden!important;overflow-y:visible!important;
-    height:auto!important;max-width:100vw!important;
+  /* section.main kitölti a sidebar nélkül maradó teljes szélességet */
+  section.main{
+    flex:1 1 0%!important;min-width:0!important;width:100%!important;
+    overflow-x:hidden!important;margin-left:0!important;
   }
-  /* ── Minimális alsó padding: görgetés megáll a Play gombnál ─────────── */
+  [data-testid="stMain"],[data-testid="stMainBlockContainer"]{
+    overflow-x:hidden!important;overflow-y:visible!important;height:auto!important;
+  }
+
+  /* ── 3. Block container: szimmetrikus padding, nincs extra lap alul ──── */
   .main .block-container{
+    width:100%!important;max-width:100%!important;
     padding:0.4rem 0.75rem 0.5rem!important;
-    max-width:100vw!important;overflow-x:hidden!important;
+    margin:0 auto!important;
+    overflow-x:hidden!important;box-sizing:border-box!important;
   }
   [data-testid="stMainBlockContainer"]{padding-bottom:0.5rem!important;}
-  /* ── Oszlopok egymás alá, 100% széles ───────────────────────────────── */
+
+  /* ── 4. Oszlopok egymás alá, teljesen szimmetrikusan centered ────────── */
   [data-testid="stHorizontalBlock"]{
-    flex-direction:column!important;gap:0.5rem!important;width:100%!important;
+    flex-direction:column!important;gap:0.5rem!important;
+    width:100%!important;align-items:stretch!important;
+    margin-left:0!important;margin-right:0!important;
   }
-  [data-testid="column"]{min-width:100%!important;width:100%!important;max-width:100%!important;}
-  /* ── Üres spacer-oszlopok elrejtése (gombsor középre igazítás) ────────
-     Desktop-on [_, btn, _] oszlopok centrázzák a gombot; mobilon elrejtjük. */
+  [data-testid="column"]{
+    min-width:100%!important;width:100%!important;max-width:100%!important;
+    box-sizing:border-box!important;margin-left:0!important;margin-right:0!important;
+  }
+
+  /* ── 5. Üres spacer-oszlopok elrejtése (desktop gombsor-centering) ───── */
   [data-testid="column"]:has([data-testid="stVerticalBlock"]:empty),
   [data-testid="column"]:has([data-testid="stVerticalBlock"]:not(:has(*))){
     display:none!important;padding:0!important;margin:0!important;min-height:0!important;
   }
-  /* ── Elemek közti rés csökkentése ───────────────────────────────────── */
+
+  /* ── 6. Elemek közti rés csökkentése ─────────────────────────────────── */
   [data-testid="stVerticalBlock"]{gap:0.4rem!important;}
   div[data-testid="stVerticalBlock"]>div{gap:0.4rem!important;}
-  /* ── Sakktábla méretezés ─────────────────────────────────────────────── */
-  .chess-board-wrap{width:min(100%,calc(100vw - 24px))!important;margin:4px auto!important;}
-  /* ── Mobilos spacer megjelenítése ────────────────────────────────────── */
+
+  /* ── 7. Sakktábla: középre igazítva, nem lóg ki ─────────────────────── */
+  .chess-board-wrap{
+    width:min(100%,calc(100vw - 24px))!important;
+    margin:4px auto!important;display:block!important;
+  }
+
+  /* ── 8. Mobilos spacer megjelenítése ────────────────────────────────── */
   .mobile-top-spacer{display:block!important;height:0.75rem!important;}
 }
 """
