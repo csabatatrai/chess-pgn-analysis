@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import config
 
 CUSTOM_GAME_STEM    = "sajat_jatszma"
-CUSTOM_GAME_DISPLAY = "My game"
+CUSTOM_GAME_DISPLAY = "★My favourite"
 
 _DEMO_CARD_HTML = """
 <div style="
@@ -271,7 +271,7 @@ audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Playing n
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
-(function(){{function setH(){{try{{var h=Math.max(450,window.parent.innerHeight-130);window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
+(function(){{function setH(){{try{{var h=Math.max(400,window.parent.innerHeight-260);window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
 </script>
 </body>
 </html>"""
@@ -572,19 +572,16 @@ button[kind="secondary"]:hover::before{
 [data-testid="stSelectbox"] [data-baseweb="select"]>div span{color:#ffffff!important;}
 [data-testid="stSelectbox"] [data-baseweb="select"]>div svg{fill:rgba(255,255,255,0.85)!important;}
 
-[data-baseweb="popover"],[data-baseweb="menu"]{
+[data-baseweb="popover"],[data-baseweb="menu"],ul[role="listbox"]{
   background:var(--accent)!important;
   border:1px solid #8a0d1b!important;
   border-radius:10px!important;
   box-shadow:var(--shadow-lg)!important;
 }
 
-[data-baseweb="menu"] li,[data-baseweb="menu-item"]{color:#ffffff!important;font-size:1rem!important;background:var(--accent)!important;transition:background 0.15s ease,box-shadow 0.15s ease!important;}
-[data-baseweb="menu"] li:hover,[data-baseweb="menu-item"]:hover{background:linear-gradient(135deg,#d4182e 0%,#e81830 100%)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)!important;}
-[data-baseweb="menu-item"] *,[data-baseweb="menu"] li *{color:#ffffff!important;}
-li[role="option"]{background:var(--accent)!important;color:#ffffff!important;transition:background 0.15s ease,box-shadow 0.15s ease!important;}
-li[role="option"]:hover{background:linear-gradient(135deg,#d4182e 0%,#e81830 100%)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)!important;}
-li[role="option"] *{color:#ffffff!important;}
+[data-baseweb="menu"] li,[data-baseweb="menu-item"],[data-baseweb="list-item"],li[role="option"],[role="option"]{color:#ffffff!important;font-size:1rem!important;background:var(--accent)!important;transition:background 0.15s ease,box-shadow 0.15s ease!important;}
+[data-baseweb="menu"] li:hover,[data-baseweb="menu-item"]:hover,[data-baseweb="list-item"]:hover,li[role="option"]:hover,[role="option"]:hover,[data-baseweb="menu"] li[data-highlighted],[data-baseweb="menu-item"][data-highlighted],[data-baseweb="list-item"][data-highlighted],li[role="option"][data-highlighted],[role="option"][data-highlighted]{background:linear-gradient(135deg,#d4182e 0%,#e81830 100%)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)!important;}
+[data-baseweb="menu-item"] *,[data-baseweb="menu"] li *,[data-baseweb="list-item"] *,li[role="option"] *,[role="option"] *{color:#ffffff!important;}
 
 [data-testid="stAlert"]{
   background:#fff8f8!important;
@@ -692,7 +689,7 @@ if st.session_state.playing:
         narration_data=narration_data,
         autoplay=True,
     )
-    stc.html(player_html, height=560, scrolling=False)
+    stc.html(player_html, height=490, scrolling=False)
 
     gap_l, btn_col, gap_r = st.columns([2, 3, 2])
     with btn_col:
