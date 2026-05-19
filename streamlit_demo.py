@@ -768,8 +768,6 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 .chess-board-wrap:hover::before{left:150%;transition:left 0.55s ease;}
 .chess-board-wrap svg{width:100%!important;display:block;}
 
-.mobile-top-spacer{display:none;}
-
 @media (max-width:768px){
   /* ── 1. Sidebar és toggle elrejtése (ne tolja el a tartalmat) ────────── */
   [data-testid="stSidebar"]{display:none!important;width:0!important;min-width:0!important;}
@@ -835,8 +833,6 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
     margin:4px auto!important;display:block!important;
   }
 
-  /* ── 8. Mobilos spacer megjelenítése ────────────────────────────────── */
-  .mobile-top-spacer{display:block!important;height:0.75rem!important;}
 }
 
 /* ── Play mód: gombok a tábla két oldalán ───────────────────────────────── */
@@ -962,7 +958,6 @@ else:
                 unsafe_allow_html=True,
             )
         else:
-            st.markdown('<div class="mobile-top-spacer"></div>', unsafe_allow_html=True)
             st.markdown('<div class="section-label">Select a game</div>', unsafe_allow_html=True)
 
             selected_name = st.selectbox(
