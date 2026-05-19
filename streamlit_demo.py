@@ -379,7 +379,15 @@ function onNarrReady(){{
       setTimeout(function(){{_ol.style.display='none';_ol.style.opacity='1';_ol.style.transition='';}},580);}}
   }}catch(_e){{try{{window.parent.postMessage({{type:'chess-narr-started'}},'*');}}catch(_x){{}}}}
   statusz.textContent='► Playing narration…';
-  audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});
+  audio.play().catch(()=>{{
+    statusz.textContent='► Click anywhere to play';
+    document.body.style.cursor='pointer';
+    document.addEventListener('click',function startOnClick(){{
+      audio.play().catch(()=>{{}});
+      document.body.style.cursor='';
+      document.removeEventListener('click',startOnClick);
+    }},{{once:true}});
+  }});
 }}
 /* Több esemény: base64 audionál loadedmetadata elszalad a listener előtt */
 ['loadedmetadata','canplay','play'].forEach(function(ev){{audio.addEventListener(ev,onNarrReady);}});
@@ -391,7 +399,21 @@ if(audio.readyState>=1)setTimeout(onNarrReady,0);
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
-(function(){{function setH(){{try{{var vw=window.parent.innerWidth;var vh=window.parent.innerHeight;var h;if(vw<768){{var bsz=Math.min(vw-12,vh-78);h=Math.max(360,bsz+80);}}else{{h=Math.max(400,vh-130);}}window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
+(function(){{
+  function setH(){{
+    /* Fix magasság iframe beágyazáshoz (portfólió oldal: 650px magas iframe).
+       window.parent cross-origin esetén nem olvasható, ezért fix értéket küldünk. */
+    var h=600;
+    try{{
+      var vw=window.innerWidth;
+      if(vw<768){{h=Math.max(360,vw+68);}}
+    }}catch(e){{}}
+    window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');
+  }}
+  setH();
+  window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});
+  setTimeout(setH,300);
+}})();
 </script>
 </body>
 </html>"""
@@ -825,9 +847,13 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child [data-testid="stVerticalBlock"]>div{flex:0 0 auto!important;}
 
 @media (max-width:768px){
-  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child{order:2!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child{order:3!important;}
   [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2){order:1!important;}
-  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child{order:3!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child{order:2!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child,
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child{height:auto!important;min-height:0!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"],
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child [data-testid="stVerticalBlock"]{flex:0 0 auto!important;height:auto!important;}
 }
 """
 
