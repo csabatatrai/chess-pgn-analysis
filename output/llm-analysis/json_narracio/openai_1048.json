@@ -1,0 +1,397 @@
+{
+  "paragraphs": [
+    {
+      "text": "The game kicks off with DougGemmell pushing the pawn to e4, setting the stage for a Classical Center. Wujajin counters with pawn to c6, a hint at the Caro-Kann Defense, which is known for its solid structure and, often, slower battle tempo. After both players develop their central pawns with d4 and d5 respectively, DougGemmell decides to push pawn to e5, grabbing some space and kicking off a space-gaining variant. It's all standard until DougGemmell opts for pawns exchange with dxc5 after Wujajin challenges the center with c5.",
+      "anchors": [
+        {
+          "fen": "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+          "trigger_word": "DougGemmell pushing the pawn to e4"
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3pP3/3P4/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "trigger_word": "push pawn to e5"
+        }
+      ]
+    },
+    {
+      "text": "In a bold but questionable move, DougGemmell advances with pawn to b4, which slightly weakens his queenside but aims to support his advanced c5 pawn. Wujajin seizes the chance and moves knight to c6, putting pressure on White's center. DougGemmell fortifies this pawn with c3, yet leaves his position somewhat prone. Wujajin immediately strikes with pawn to a5, testing White's defensive moves.",
+      "anchors": [
+        {
+          "fen": "rnbqkbnr/pp3ppp/4p3/2PpP3/1P6/8/P1P2PPP/RNBQKBNR b KQkq - 0 5",
+          "trigger_word": "advance with pawn to b4"
+        },
+        {
+          "fen": "r1bqkbnr/pp3ppp/2n1p3/2PpP3/1P6/2P5/P4PPP/RNBQKBNR w KQkq - 0 6",
+          "trigger_word": "fortifies this pawn with c3"
+        }
+      ]
+    },
+    {
+      "text": "The pressure escalates as DougGemmell captures with pawn to cxb4, yet Wujajin's knight soon jumps into action, capturing on b4, placing DougGemmell in a tighter spot. As the game progresses with both players maneuvering their pieces, Wujajin delivers queen to a5, check, maintaining pressure. DougGemmell's responding bishop to d2 tries to alleviate the threats.",
+      "anchors": [
+        {
+          "fen": "r1bqkbnr/1p3ppp/2n1p3/2PpP3/1P6/P7/5PPP/RNBQKBNR b KQkq - 0 8",
+          "trigger_word": "captures with pawn to cxb4"
+        },
+        {
+          "fen": "r3kbnr/3b1ppp/2p1p3/q1npP3/8/P4N2/2BB1PPP/RN1QK2R b KQkq - 7 14",
+          "trigger_word": "queen to a5, check"
+        }
+      ]
+    },
+    {
+      "text": "Now here's a critical moment — Wujajin moves queen to b6, allowing DougGemmell to smoothly castle kingside. The position is simmering with tension, and interestingly, White's knight lands on a4, inviting complex maneuvers from both sides.",
+      "anchors": [
+        {
+          "fen": "r3kbnr/3b1ppp/1qp1p3/2npP3/8/P1N2N2/2BB1PPP/R2QK2R w KQkq - 10 16",
+          "trigger_word": "queen to b6"
+        },
+        {
+          "fen": "r3k1nr/3bbppp/1qp1p3/2npP3/N7/P4N2/2BB1PPP/R2Q1RK1 b kq - 13 17",
+          "trigger_word": "lands on a4"
+        }
+      ]
+    },
+    {
+      "text": "The turning point of this game arrives in dramatic fashion with Wujajin's move queen to c3, mistakenly ignoring the lurking danger of White's queen. This one wrong step opens the floodgates, allowing DougGemmell to checkmate with queen takes h7. A masterclass in seizing the opportunity when your opponent falters. The decisive mistake here was leaving DougGemmell an unchecked path to exploit the fateful position completely.",
+      "anchors": [
+        {
+          "fen": "r1n2rk1/3b1ppp/4p3/P2pq3/2p5/4PN1Q/2B3PP/R4RK1 b - - 1 26",
+          "trigger_word": "queen to c3, mistakenly ignoring"
+        },
+        {
+          "fen": "r1n2rk1/3b1ppQ/4p3/P2p4/2p5/2q1PN2/2B3PP/R4RK1 b - - 0 27",
+          "trigger_word": "checkmate with queen takes h7"
+        }
+      ]
+    }
+  ],
+  "moves": [
+    {
+      "move_number": 0,
+      "color": "start",
+      "san": "",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    },
+    {
+      "move_number": 1,
+      "color": "white",
+      "san": "e4",
+      "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+    },
+    {
+      "move_number": 1,
+      "color": "black",
+      "san": "c6",
+      "fen": "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"
+    },
+    {
+      "move_number": 2,
+      "color": "white",
+      "san": "d4",
+      "fen": "rnbqkbnr/pp1ppppp/2p5/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2"
+    },
+    {
+      "move_number": 2,
+      "color": "black",
+      "san": "d5",
+      "fen": "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3"
+    },
+    {
+      "move_number": 3,
+      "color": "white",
+      "san": "e5",
+      "fen": "rnbqkbnr/pp2pppp/2p5/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3"
+    },
+    {
+      "move_number": 3,
+      "color": "black",
+      "san": "c5",
+      "fen": "rnbqkbnr/pp2pppp/8/2ppP3/3P4/8/PPP2PPP/RNBQKBNR w KQkq - 0 4"
+    },
+    {
+      "move_number": 4,
+      "color": "white",
+      "san": "dxc5",
+      "fen": "rnbqkbnr/pp2pppp/8/2PpP3/8/8/PPP2PPP/RNBQKBNR b KQkq - 0 4"
+    },
+    {
+      "move_number": 4,
+      "color": "black",
+      "san": "e6",
+      "fen": "rnbqkbnr/pp3ppp/4p3/2PpP3/8/8/PPP2PPP/RNBQKBNR w KQkq - 0 5"
+    },
+    {
+      "move_number": 5,
+      "color": "white",
+      "san": "b4",
+      "fen": "rnbqkbnr/pp3ppp/4p3/2PpP3/1P6/8/P1P2PPP/RNBQKBNR b KQkq - 0 5"
+    },
+    {
+      "move_number": 5,
+      "color": "black",
+      "san": "Nc6",
+      "fen": "r1bqkbnr/pp3ppp/2n1p3/2PpP3/1P6/8/P1P2PPP/RNBQKBNR w KQkq - 1 6"
+    },
+    {
+      "move_number": 6,
+      "color": "white",
+      "san": "c3",
+      "fen": "r1bqkbnr/pp3ppp/2n1p3/2PpP3/1P6/2P5/P4PPP/RNBQKBNR b KQkq - 0 6"
+    },
+    {
+      "move_number": 6,
+      "color": "black",
+      "san": "a5",
+      "fen": "r1bqkbnr/1p3ppp/2n1p3/p1PpP3/1P6/2P5/P4PPP/RNBQKBNR w KQkq - 0 7"
+    },
+    {
+      "move_number": 7,
+      "color": "white",
+      "san": "a3",
+      "fen": "r1bqkbnr/1p3ppp/2n1p3/p1PpP3/1P6/P1P5/5PPP/RNBQKBNR b KQkq - 0 7"
+    },
+    {
+      "move_number": 7,
+      "color": "black",
+      "san": "axb4",
+      "fen": "r1bqkbnr/1p3ppp/2n1p3/2PpP3/1p6/P1P5/5PPP/RNBQKBNR w KQkq - 0 8"
+    },
+    {
+      "move_number": 8,
+      "color": "white",
+      "san": "cxb4",
+      "fen": "r1bqkbnr/1p3ppp/2n1p3/2PpP3/1P6/P7/5PPP/RNBQKBNR b KQkq - 0 8"
+    },
+    {
+      "move_number": 8,
+      "color": "black",
+      "san": "Nxb4",
+      "fen": "r1bqkbnr/1p3ppp/4p3/2PpP3/1n6/P7/5PPP/RNBQKBNR w KQkq - 0 9"
+    },
+    {
+      "move_number": 9,
+      "color": "white",
+      "san": "Bb5+",
+      "fen": "r1bqkbnr/1p3ppp/4p3/1BPpP3/1n6/P7/5PPP/RNBQK1NR b KQkq - 1 9"
+    },
+    {
+      "move_number": 9,
+      "color": "black",
+      "san": "Bd7",
+      "fen": "r2qkbnr/1p1b1ppp/4p3/1BPpP3/1n6/P7/5PPP/RNBQK1NR w KQkq - 2 10"
+    },
+    {
+      "move_number": 10,
+      "color": "white",
+      "san": "c6",
+      "fen": "r2qkbnr/1p1b1ppp/2P1p3/1B1pP3/1n6/P7/5PPP/RNBQK1NR b KQkq - 0 10"
+    },
+    {
+      "move_number": 10,
+      "color": "black",
+      "san": "bxc6",
+      "fen": "r2qkbnr/3b1ppp/2p1p3/1B1pP3/1n6/P7/5PPP/RNBQK1NR w KQkq - 0 11"
+    },
+    {
+      "move_number": 11,
+      "color": "white",
+      "san": "Ba4",
+      "fen": "r2qkbnr/3b1ppp/2p1p3/3pP3/Bn6/P7/5PPP/RNBQK1NR b KQkq - 1 11"
+    },
+    {
+      "move_number": 11,
+      "color": "black",
+      "san": "Na6",
+      "fen": "r2qkbnr/3b1ppp/n1p1p3/3pP3/B7/P7/5PPP/RNBQK1NR w KQkq - 2 12"
+    },
+    {
+      "move_number": 12,
+      "color": "white",
+      "san": "Nf3",
+      "fen": "r2qkbnr/3b1ppp/n1p1p3/3pP3/B7/P4N2/5PPP/RNBQK2R b KQkq - 3 12"
+    },
+    {
+      "move_number": 12,
+      "color": "black",
+      "san": "Nc5",
+      "fen": "r2qkbnr/3b1ppp/2p1p3/2npP3/B7/P4N2/5PPP/RNBQK2R w KQkq - 4 13"
+    },
+    {
+      "move_number": 13,
+      "color": "white",
+      "san": "Bc2",
+      "fen": "r2qkbnr/3b1ppp/2p1p3/2npP3/8/P4N2/2B2PPP/RNBQK2R b KQkq - 5 13"
+    },
+    {
+      "move_number": 13,
+      "color": "black",
+      "san": "Qa5+",
+      "fen": "r3kbnr/3b1ppp/2p1p3/q1npP3/8/P4N2/2B2PPP/RNBQK2R w KQkq - 6 14"
+    },
+    {
+      "move_number": 14,
+      "color": "white",
+      "san": "Bd2",
+      "fen": "r3kbnr/3b1ppp/2p1p3/q1npP3/8/P4N2/2BB1PPP/RN1QK2R b KQkq - 7 14"
+    },
+    {
+      "move_number": 14,
+      "color": "black",
+      "san": "Qb5",
+      "fen": "r3kbnr/3b1ppp/2p1p3/1qnpP3/8/P4N2/2BB1PPP/RN1QK2R w KQkq - 8 15"
+    },
+    {
+      "move_number": 15,
+      "color": "white",
+      "san": "Nc3",
+      "fen": "r3kbnr/3b1ppp/2p1p3/1qnpP3/8/P1N2N2/2BB1PPP/R2QK2R b KQkq - 9 15"
+    },
+    {
+      "move_number": 15,
+      "color": "black",
+      "san": "Qb6",
+      "fen": "r3kbnr/3b1ppp/1qp1p3/2npP3/8/P1N2N2/2BB1PPP/R2QK2R w KQkq - 10 16"
+    },
+    {
+      "move_number": 16,
+      "color": "white",
+      "san": "O-O",
+      "fen": "r3kbnr/3b1ppp/1qp1p3/2npP3/8/P1N2N2/2BB1PPP/R2Q1RK1 b kq - 11 16"
+    },
+    {
+      "move_number": 16,
+      "color": "black",
+      "san": "Be7",
+      "fen": "r3k1nr/3bbppp/1qp1p3/2npP3/8/P1N2N2/2BB1PPP/R2Q1RK1 w kq - 12 17"
+    },
+    {
+      "move_number": 17,
+      "color": "white",
+      "san": "Na4",
+      "fen": "r3k1nr/3bbppp/1qp1p3/2npP3/N7/P4N2/2BB1PPP/R2Q1RK1 b kq - 13 17"
+    },
+    {
+      "move_number": 17,
+      "color": "black",
+      "san": "Qc7",
+      "fen": "r3k1nr/2qbbppp/2p1p3/2npP3/N7/P4N2/2BB1PPP/R2Q1RK1 w kq - 14 18"
+    },
+    {
+      "move_number": 18,
+      "color": "white",
+      "san": "Nxc5",
+      "fen": "r3k1nr/2qbbppp/2p1p3/2NpP3/8/P4N2/2BB1PPP/R2Q1RK1 b kq - 0 18"
+    },
+    {
+      "move_number": 18,
+      "color": "black",
+      "san": "Bxc5",
+      "fen": "r3k1nr/2qb1ppp/2p1p3/2bpP3/8/P4N2/2BB1PPP/R2Q1RK1 w kq - 0 19"
+    },
+    {
+      "move_number": 19,
+      "color": "white",
+      "san": "Be3",
+      "fen": "r3k1nr/2qb1ppp/2p1p3/2bpP3/8/P3BN2/2B2PPP/R2Q1RK1 b kq - 1 19"
+    },
+    {
+      "move_number": 19,
+      "color": "black",
+      "san": "Bxe3",
+      "fen": "r3k1nr/2qb1ppp/2p1p3/3pP3/8/P3bN2/2B2PPP/R2Q1RK1 w kq - 0 20"
+    },
+    {
+      "move_number": 20,
+      "color": "white",
+      "san": "fxe3",
+      "fen": "r3k1nr/2qb1ppp/2p1p3/3pP3/8/P3PN2/2B3PP/R2Q1RK1 b kq - 0 20"
+    },
+    {
+      "move_number": 20,
+      "color": "black",
+      "san": "Ne7",
+      "fen": "r3k2r/2qbnppp/2p1p3/3pP3/8/P3PN2/2B3PP/R2Q1RK1 w kq - 1 21"
+    },
+    {
+      "move_number": 21,
+      "color": "white",
+      "san": "Nh4",
+      "fen": "r3k2r/2qbnppp/2p1p3/3pP3/7N/P3P3/2B3PP/R2Q1RK1 b kq - 2 21"
+    },
+    {
+      "move_number": 21,
+      "color": "black",
+      "san": "Qxe5",
+      "fen": "r3k2r/3bnppp/2p1p3/3pq3/7N/P3P3/2B3PP/R2Q1RK1 w kq - 0 22"
+    },
+    {
+      "move_number": 22,
+      "color": "white",
+      "san": "Qf3",
+      "fen": "r3k2r/3bnppp/2p1p3/3pq3/7N/P3PQ2/2B3PP/R4RK1 b kq - 1 22"
+    },
+    {
+      "move_number": 22,
+      "color": "black",
+      "san": "O-O",
+      "fen": "r4rk1/3bnppp/2p1p3/3pq3/7N/P3PQ2/2B3PP/R4RK1 w - - 2 23"
+    },
+    {
+      "move_number": 23,
+      "color": "white",
+      "san": "a4",
+      "fen": "r4rk1/3bnppp/2p1p3/3pq3/P6N/4PQ2/2B3PP/R4RK1 b - - 0 23"
+    },
+    {
+      "move_number": 23,
+      "color": "black",
+      "san": "c5",
+      "fen": "r4rk1/3bnppp/4p3/2ppq3/P6N/4PQ2/2B3PP/R4RK1 w - - 0 24"
+    },
+    {
+      "move_number": 24,
+      "color": "white",
+      "san": "a5",
+      "fen": "r4rk1/3bnppp/4p3/P1ppq3/7N/4PQ2/2B3PP/R4RK1 b - - 0 24"
+    },
+    {
+      "move_number": 24,
+      "color": "black",
+      "san": "Nc8",
+      "fen": "r1n2rk1/3b1ppp/4p3/P1ppq3/7N/4PQ2/2B3PP/R4RK1 w - - 1 25"
+    },
+    {
+      "move_number": 25,
+      "color": "white",
+      "san": "Qh3",
+      "fen": "r1n2rk1/3b1ppp/4p3/P1ppq3/7N/4P2Q/2B3PP/R4RK1 b - - 2 25"
+    },
+    {
+      "move_number": 25,
+      "color": "black",
+      "san": "c4",
+      "fen": "r1n2rk1/3b1ppp/4p3/P2pq3/2p4N/4P2Q/2B3PP/R4RK1 w - - 0 26"
+    },
+    {
+      "move_number": 26,
+      "color": "white",
+      "san": "Nf3",
+      "fen": "r1n2rk1/3b1ppp/4p3/P2pq3/2p5/4PN1Q/2B3PP/R4RK1 b - - 1 26"
+    },
+    {
+      "move_number": 26,
+      "color": "black",
+      "san": "Qc3",
+      "fen": "r1n2rk1/3b1ppp/4p3/P2p4/2p5/2q1PN1Q/2B3PP/R4RK1 w - - 2 27"
+    },
+    {
+      "move_number": 27,
+      "color": "white",
+      "san": "Qxh7#",
+      "fen": "r1n2rk1/3b1ppQ/4p3/P2p4/2p5/2q1PN2/2B3PP/R4RK1 b - - 0 27"
+    }
+  ],
+  "white": "DougGemmell",
+  "black": "Wujajin"
+}
