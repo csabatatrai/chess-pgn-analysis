@@ -62,16 +62,26 @@ def audio_b64(mp3_path: str) -> str:
 # SVG generálás
 # ─────────────────────────────────────────────────────────────────────────────
 
+_BOARD_COLORS = {"margin": "#A81022", "coord": "#FFFFFF"}
+
+
 def fen_to_svg(fen: str, size: int = 440) -> str:
     try:
         board = chess.Board(fen)
     except Exception:
         board = chess.Board()
-    return chess.svg.board(board, size=size)
+    return chess.svg.board(board, size=size, colors=_BOARD_COLORS)
 
 
 def starting_svg(size: int = 440) -> str:
-    return chess.svg.board(chess.Board(), size=size)
+    return chess.svg.board(chess.Board(), size=size, colors=_BOARD_COLORS)
+
+
+def make_svg_responsive(svg: str) -> str:
+    """SVG szélességét 100%-ra állítja, magasságát eltávolítja – a viewBox tartja az arányt."""
+    svg = re.sub(r'\bwidth="\d+"', 'width="100%"', svg, count=1)
+    svg = re.sub(r'\s*\bheight="\d+"', '', svg, count=1)
+    return svg
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FEN-sorozat és anchor-időzítés
@@ -227,6 +237,7 @@ audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Narráci�
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Végállás – még látható…';setTimeout(()=>{{statusz.textContent='✓ Lejátszás befejezve.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ A hangfájl nem töltődött be.';}});
+(function(){{function setH(){{try{{var h=Math.max(450,window.parent.innerHeight-130);window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
 </script>
 </body>
 </html>"""
@@ -651,7 +662,13 @@ _RAW_CSS = """
 
 *,*::before,*::after{box-sizing:border-box;}
 
-.stApp{background:var(--bg)!important;min-height:100vh;}
+.stApp{background:var(--bg)!important;height:100vh!important;overflow:hidden!important;}
+
+html,body{height:100vh!important;overflow:hidden!important;}
+
+[data-testid="stAppViewContainer"]{height:100vh!important;overflow:hidden!important;}
+
+[data-testid="stMain"],[data-testid="stMainBlockContainer"]{overflow:hidden!important;}
 
 html,body,[class*="css"]{
   font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
@@ -661,28 +678,48 @@ html,body,[class*="css"]{
   text-rendering:optimizeLegibility!important;
 }
 
-#MainMenu,footer,header,[data-testid="stToolbar"],[data-testid="stDecoration"],.stDeployButton{display:none!important;height:0!important;min-height:0!important;}
+#MainMenu,footer,header,[data-testid="stToolbar"],[data-testid="stDecoration"],.stDeployButton{display:none!important;height:0!important;min-height:0!important;visibility:hidden!important;position:absolute!important;}
 
-[data-testid="stHeader"]{display:none!important;height:0!important;min-height:0!important;}
+[data-testid="stHeader"]{display:none!important;height:0!important;min-height:0!important;visibility:hidden!important;position:absolute!important;}
 
-.main .block-container{max-width:1380px!important;padding:0 2rem 5rem!important;margin:0 auto;}
+.main .block-container{max-width:1380px!important;padding:0.4rem 1.5rem 0.5rem!important;margin:0 auto;}
 
 section.main>div:first-child{padding-top:0!important;}
 
 [data-testid="stAppViewContainer"]>section>div{padding-top:0!important;}
 
-[data-testid="stHorizontalBlock"]{gap:1.25rem!important;align-items:start!important;}
+[data-testid="stMain"]{padding-top:0!important;}
+
+[data-testid="stMain"]>div{padding-top:0!important;}
+
+[data-testid="stMainBlockContainer"]{padding-top:0.4rem!important;}
+
+[data-testid="stHorizontalBlock"]{gap:1.25rem!important;align-items:stretch!important;}
 
 [data-testid="column"]{
   background:var(--surf)!important;
   border:1px solid var(--border)!important;
   border-radius:var(--radius-lg)!important;
-  padding:1.75rem!important;
+  padding:1rem!important;
   box-shadow:var(--shadow)!important;
   transition:border-color 0.25s ease,box-shadow 0.25s ease!important;
+  display:flex!important;
+  flex-direction:column!important;
 }
 
 [data-testid="column"]:hover{border-color:var(--border2)!important;box-shadow:var(--shadow-lg)!important;}
+
+[data-testid="column"] [data-testid="stVerticalBlock"]{flex:1!important;display:flex!important;flex-direction:column!important;}
+[data-testid="column"] [data-testid="stVerticalBlock"]>div{flex:1!important;display:flex!important;flex-direction:column!important;}
+[data-testid="stTextArea"]{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
+[data-testid="stTextArea"]>label{flex:0 0 auto!important;}
+[data-testid="stTextArea"]>[data-baseweb="textarea"]{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
+[data-testid="stTextArea"] [data-baseweb="textarea"]>div{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
+/* Button row transparent panels */
+[data-testid="stMarkdown"]:has(#ch-btn-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]{background:transparent!important;border:none!important;box-shadow:none!important;padding:0.25rem 0 0!important;}
+[data-testid="stMarkdown"]:has(#ch-btn-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:hover{border:none!important;box-shadow:none!important;}
+/* Selectbox placeholder */
+.pgn-selectbox-placeholder{height:42px!important;flex:0 0 42px!important;}
 
 h1,h2,h3,h4{font-family:'Space Grotesk',system-ui,sans-serif!important;letter-spacing:-0.02em!important;color:var(--text)!important;}
 
@@ -743,6 +780,10 @@ label,[data-testid="stWidgetLabel"] p,[data-testid="stTextArea"] label,[data-tes
 }
 
 textarea{
+  flex:1!important;
+  height:100%!important;
+  min-height:200px!important;
+  resize:vertical!important;
   background:#ffffff!important;
   border:1px solid var(--border)!important;
   border-radius:10px!important;
@@ -775,20 +816,24 @@ textarea::placeholder{color:#d1d5db!important;}
 [data-testid="stSelectbox"] [data-baseweb="select"]>div svg{fill:rgba(255,255,255,0.85)!important;}
 
 [data-baseweb="popover"],[data-baseweb="menu"]{
-  background:#ffffff!important;
-  border:1px solid var(--border2)!important;
+  background:var(--accent)!important;
+  border:1px solid #8a0d1b!important;
   border-radius:10px!important;
   box-shadow:var(--shadow-lg)!important;
 }
 
-[data-baseweb="menu"] li{color:var(--text)!important;font-size:1rem!important;}
-[data-baseweb="menu"] li:hover{background:var(--surf)!important;}
+[data-baseweb="menu"] li,[data-baseweb="menu-item"]{color:#ffffff!important;font-size:1rem!important;background:var(--accent)!important;}
+[data-baseweb="menu"] li:hover,[data-baseweb="menu-item"]:hover{background:#8a0d1b!important;}
+[data-baseweb="menu-item"] *,[data-baseweb="menu"] li *{color:#ffffff!important;}
+li[role="option"]{background:var(--accent)!important;color:#ffffff!important;}
+li[role="option"]:hover{background:#8a0d1b!important;}
+li[role="option"] *{color:#ffffff!important;}
 
 [data-testid="stProgress"]{margin:0.4rem 0!important;}
 
 [data-testid="stProgress"]>div{background:var(--surf3)!important;border-radius:99px!important;height:5px!important;overflow:hidden!important;}
 
-[data-testid="stProgress"]>div>div{background:linear-gradient(90deg,var(--accent) 0%,var(--green2) 100%)!important;border-radius:99px!important;transition:width 0.5s ease!important;}
+[data-testid="stProgress"]>div>div{background:var(--accent)!important;border-radius:99px!important;transition:width 0.5s ease!important;}
 
 [data-testid="stAlert"]{
   background:#fff8f8!important;
@@ -833,6 +878,9 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 }
 
 .section-label::after{content:'';flex:1;height:1px;background:rgba(168,16,34,0.15);}
+
+.chess-board-wrap{width:min(100%,calc(100vh - 240px));margin:4px auto 8px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 12px 40px rgba(0,0,0,0.10);}
+.chess-board-wrap svg{width:100%!important;display:block;}
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -840,7 +888,7 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 # ─────────────────────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="ChessNarr · Sakk narráció",
+    page_title="ChessNarrator · Sakk narráció",
     page_icon="♟️",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -849,7 +897,6 @@ st.set_page_config(
 _inject_css(_RAW_CSS)
 
 render_sidebar()
-render_header()
 
 # ── Session state ─────────────────────────────────────────────────────────────
 
@@ -906,27 +953,29 @@ if st.session_state.playing:
         narration_data=narration_data,
         autoplay=True,
     )
-    st.components.v1.html(player_html, height=640, scrolling=False)
+    st.components.v1.html(player_html, height=560, scrolling=False)
 
     gap_l, btn_col, gap_r = st.columns([2, 3, 2])
     with btn_col:
-        if st.button("⏹  Megállítás", use_container_width=True, type="primary"):
+        if st.button("← Visszalépés", use_container_width=True, type="primary"):
             st.session_state.playing = False
             st.rerun()
 
 # ── ÁLLÓ MÓD ─────────────────────────────────────────────────────────────────
 
 else:
-    col_pgn, col_board = st.columns([5, 7], gap="large")
+    col_pgn, col_board = st.columns([1, 1], gap="large")
 
     # ── Bal oszlop: PGN bevitel ───────────────────────────────────────────────
     with col_pgn:
         st.markdown('<div class="section-label">Saját játszma elemzése</div>', unsafe_allow_html=True)
 
+        st.markdown('<div class="pgn-selectbox-placeholder"></div>', unsafe_allow_html=True)
         pgn_text = st.text_area(
             "PGN",
-            height=298,
+            height=400,
             key="pgn_input",
+            label_visibility="collapsed",
             placeholder=(
                 '[Event "Live Chess"]\n'
                 '[White "Fehér"]\n'
@@ -939,26 +988,6 @@ else:
                 "fejléc nélkül, csak lépésekkel is működik."
             ),
         )
-
-        if st.button(
-            "Elemzés indítása",
-            disabled=pipeline_is_running,
-            use_container_width=True,
-            type="primary",
-        ):
-            if pgn_text.strip():
-                progress = {"step": "Indítás...", "pct": 0.0, "done": False, "error": None}
-                st.session_state.pipeline_progress = progress
-                t = threading.Thread(
-                    target=run_custom_pipeline,
-                    args=(pgn_text, progress),
-                    daemon=True,
-                )
-                t.start()
-                st.session_state.pipeline_thread = t
-                st.rerun()
-            else:
-                st.warning("Kérlek illessz be egy PGN-t az elemzés megkezdéséhez!")
 
         prog = st.session_state.pipeline_progress
         if prog is not None:
@@ -998,7 +1027,6 @@ else:
             all_fens       = get_all_fens(narration_data, paragraphs)
             init_fen       = all_fens[0] if all_fens else chess.STARTING_FEN
             move_count     = len(all_fens) - 1
-            para_count     = len(paragraphs)
             svg            = fen_to_svg(init_fen)
 
             # Lépésszám a selectbox alatt
@@ -1009,22 +1037,36 @@ else:
                     unsafe_allow_html=True,
                 )
 
-            # Sakktábla – teljes szélességgel, maximális méretben
-            st.components.v1.html(
-                f'<style>'
-                f'html,body{{margin:0;padding:0;background:#f8f9fb;'
-                f'display:flex;align-items:flex-start;justify-content:center;}}'
-                f'.frame{{width:min(calc(100vw - 8px),calc(100vh - 10px));'
-                f'border-radius:12px;overflow:hidden;'
-                f'box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 12px 40px rgba(0,0,0,0.10);'
-                f'margin:4px auto 0;}}'
-                f'svg{{width:100%;height:auto;display:block;}}'
-                f'</style>'
-                f'<div class="frame">{svg}</div>',
-                height=568,
-                scrolling=False,
+            st.markdown(
+                f'<div class="chess-board-wrap">{make_svg_responsive(svg)}</div>',
+                unsafe_allow_html=True,
             )
 
+    # ── Gombsor – mindkét gomb egy vonalban, panel stílus nélkül ─────────────
+    st.markdown('<div id="ch-btn-row" style="height:0;overflow:hidden;"></div>', unsafe_allow_html=True)
+    btn_col1, btn_col2 = st.columns([1, 1], gap="large")
+    with btn_col1:
+        if st.button(
+            "Elemzés indítása",
+            disabled=pipeline_is_running,
+            use_container_width=True,
+            type="primary",
+        ):
+            if pgn_text.strip():
+                progress = {"step": "Indítás...", "pct": 0.0, "done": False, "error": None}
+                st.session_state.pipeline_progress = progress
+                t = threading.Thread(
+                    target=run_custom_pipeline,
+                    args=(pgn_text, progress),
+                    daemon=True,
+                )
+                t.start()
+                st.session_state.pipeline_thread = t
+                st.rerun()
+            else:
+                pass
+    with btn_col2:
+        if games:
             if st.button("▶  Lejátszás", use_container_width=True, type="primary"):
                 st.session_state.playing = True
                 st.rerun()
