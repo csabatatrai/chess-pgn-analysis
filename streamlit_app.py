@@ -415,6 +415,8 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
             "pct":  0.62,
         })
         narration_json = generate_narration(game_data, evaluations)
+        narration_json["white"] = game_data["white"]
+        narration_json["black"] = game_data["black"]
         narration_json["moves"] = moves_for_json
 
         progress.update({"step": "Narráció JSON mentése...", "pct": 0.78})
@@ -928,7 +930,11 @@ if st.session_state.playing:
         st.session_state.playing = False
         st.rerun()
 
-    game_display = selected["name"]
+    narration_data = load_json(selected["json"])
+    white_name = narration_data.get("white") or selected["name"]
+    black_name = narration_data.get("black") or ""
+    matchup    = f"{white_name} vs {black_name}" if black_name else white_name
+
     st.markdown(
         f'<div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;'
         f'padding:0.6rem 1.25rem;background:rgba(168,16,34,0.05);'
@@ -936,17 +942,16 @@ if st.session_state.playing:
         f'<span style="width:8px;height:8px;border-radius:50%;background:#A81022;'
         f'box-shadow:0 0 8px rgba(168,16,34,0.6);flex-shrink:0;'
         f'animation:nblink 1.5s ease-in-out infinite;"></span>'
-        f'<span style="font-size:0.82rem;font-weight:600;color:#A81022;letter-spacing:0.03em;">'
-        f'Most játszik</span>'
-        f'<span style="font-size:0.78rem;color:#6b7280;padding:0.15rem 0.6rem;'
-        f'background:rgba(0,0,0,0.05);border-radius:99px;border:1px solid rgba(0,0,0,0.08);">'
-        f'{game_display}</span>'
+        f'<span style="font-size:0.9rem;font-weight:600;color:#111827;letter-spacing:0.01em;">'
+        f'{white_name}</span>'
+        f'<span style="font-size:0.78rem;font-weight:500;color:#A81022;letter-spacing:0.06em;'
+        f'text-transform:uppercase;">vs</span>'
+        f'<span style="font-size:0.9rem;font-weight:600;color:#111827;letter-spacing:0.01em;">'
+        f'{black_name}</span>'
         f'</div>'
         f'<style>@keyframes nblink{{0%,100%{{opacity:1;box-shadow:0 0 8px rgba(168,16,34,0.6);}}50%{{opacity:0.3;box-shadow:0 0 3px rgba(168,16,34,0.3);}}}}</style>',
         unsafe_allow_html=True,
     )
-
-    narration_data = load_json(selected["json"])
     paragraphs     = narration_data.get("paragraphs", [])
     player_html    = build_player_html(
         paragraphs, selected["mp3"],
@@ -1025,9 +1030,9 @@ else:
             narration_data = load_json(selected["json"])
             paragraphs     = narration_data.get("paragraphs", [])
             all_fens       = get_all_fens(narration_data, paragraphs)
-            init_fen       = all_fens[0] if all_fens else chess.STARTING_FEN
+            last_fen       = all_fens[-1] if all_fens else chess.STARTING_FEN
             move_count     = len(all_fens) - 1
-            svg            = fen_to_svg(init_fen)
+            svg            = fen_to_svg(last_fen)
 
             # Lépésszám a selectbox alatt
             if move_count:

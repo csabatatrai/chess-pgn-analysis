@@ -164,6 +164,6 @@ TTS_MODEL_OPENAI = os.environ.get("TTS_MODEL_OPENAI", "tts-1-hd")
 TTS_VOICE_ELEVENLABS = os.environ.get("TTS_VOICE_ELEVENLABS", "21m00Tcm4TlvDq8ikWAM")
 
 # Könyvtárak létrehozása (ha nem léteznek)
-for _dir in [OUTPUT_DIR, PARQUET_DIR, ANALYSIS_DIR, PLOTS_DIR, DATA_DIR, LLM_ANALYSIS_DIR,
+for _dir in [OUTPUT_DIR, PARQUET_DIR, ANALYSIS_DIR, PLOTS_DIR, LLM_ANALYSIS_DIR,
              LLM_ANALYSIS_SZOVEGES_DIR, LLM_ANALYSIS_HANGOS_DIR, LLM_ANALYSIS_JSON_DIR]:
     os.makedirs(_dir, exist_ok=True)
