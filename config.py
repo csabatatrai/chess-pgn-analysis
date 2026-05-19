@@ -154,10 +154,10 @@ LLM_ANALYSIS_JSON_DIR = os.path.join(LLM_ANALYSIS_DIR, "json_narracio")
 TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "openai")
 
 # OpenAI TTS hang: alloy | echo | fable | onyx | nova | shimmer
-TTS_VOICE_OPENAI = os.environ.get("TTS_VOICE_OPENAI", "nova")
+TTS_VOICE_OPENAI = os.environ.get("TTS_VOICE_OPENAI", "onyx")
 
 # OpenAI TTS modell: tts-1 | tts-1-hd
-TTS_MODEL_OPENAI = os.environ.get("TTS_MODEL_OPENAI", "tts-1")
+TTS_MODEL_OPENAI = os.environ.get("TTS_MODEL_OPENAI", "tts-1-hd")
 
 # ElevenLabs hang ID (alapértelmezett: Rachel – eleven_multilingual_v2 modellel)
 TTS_VOICE_ELEVENLABS = os.environ.get("TTS_VOICE_ELEVENLABS", "21m00Tcm4TlvDq8ikWAM")
