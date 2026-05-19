@@ -38,6 +38,7 @@ output/*
 !output/plots/
 output/plots/*
 !output/plots/plycount.png
+!output/llm-analysis/
 *.log
 *.tmp
 *.temp

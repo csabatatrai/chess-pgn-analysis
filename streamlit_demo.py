@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-streamlit_app.py – Sakk narráció lejátszó + egyedi PGN pipeline.
+streamlit_demo.py – ChessNarr demó verzió: csak lejátszás, elemzési pipeline nélkül.
 
 Indítás:
-    streamlit run streamlit_app.py
+    streamlit run streamlit_demo.py
 """
 
 import os
 import sys
-import io
 import re
 import json
 import glob
 import base64
-import threading
 import time
-import shutil
-import traceback
 
 import streamlit as st
 import streamlit.components.v1 as stc
@@ -26,12 +22,45 @@ import chess.pgn
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import config
-from src.llm_client import generate_text
-from src.tts_client import generate_audio
-from src.narrator import generate_narration
 
 CUSTOM_GAME_STEM    = "sajat_jatszma"
 CUSTOM_GAME_DISPLAY = "My game"
+
+_DEMO_CARD_HTML = """
+<div style="
+    background: rgba(122,11,24,0.07);
+    border: 1.5px solid rgba(122,11,24,0.28);
+    border-radius: 12px;
+    padding: 1.35rem 1.5rem;
+    color: #7a0b18;
+    margin-top: 0.25rem;
+    flex: 1;
+">
+    <div style="font-size:0.97rem;line-height:1.75;font-weight:500;margin-bottom:1rem;">
+        Csak lokálisan letöltött változatban elérhető a saját játszma elemzése funkció.
+        Privát API kulcsokat igényel!
+    </div>
+    <div style="font-size:0.88rem;line-height:2;">
+        <div>
+            <strong>Repo:</strong>&nbsp;
+            <a href="https://github.com/csabatatrai/chess-pgn-analysis" target="_blank"
+               style="color:#7a0b18;font-weight:600;word-break:break-all;text-decoration:underline;">
+                https://github.com/csabatatrai/chess-pgn-analysis
+            </a>
+        </div>
+        <div>
+            <strong>Készítette:</strong> Tátrai Csaba Attila
+        </div>
+        <div>
+            <strong>LinkedIn:</strong>&nbsp;
+            <a href="https://www.linkedin.com/in/csabatatrai-datascientist/" target="_blank"
+               style="color:#7a0b18;font-weight:600;word-break:break-all;text-decoration:underline;">
+                https://www.linkedin.com/in/csabatatrai-datascientist/
+            </a>
+        </div>
+    </div>
+</div>
+"""
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Adatbetöltés
@@ -79,7 +108,6 @@ def starting_svg(size: int = 440) -> str:
 
 
 def make_svg_responsive(svg: str) -> str:
-    """SVG szélességét 100%-ra állítja, magasságát eltávolítja – a viewBox tartja az arányt."""
     svg = re.sub(r'\bwidth="\d+"', 'width="100%"', svg, count=1)
     svg = re.sub(r'\s*\bheight="\d+"', '', svg, count=1)
     return svg
@@ -250,239 +278,10 @@ audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed 
     return html
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Egyedi PGN pipeline – segédfüggvények
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _find_stockfish() -> str | None:
-    if config.STOCKFISH_PATH and os.path.isfile(config.STOCKFISH_PATH):
-        return config.STOCKFISH_PATH
-    for name in ["stockfish", "stockfish_x86-64", "stockfish-windows-x86-64-avx2"]:
-        path = shutil.which(name)
-        if path:
-            return path
-    candidates = [
-        os.path.join(config.ROOT_DIR, "stockfish", "stockfish-windows-x86-64-avx2.exe"),
-        os.path.join(config.ROOT_DIR, "stockfish", "stockfish.exe"),
-        config.STOCKFISH_BINARY,
-    ]
-    for c in candidates:
-        if os.path.isfile(c):
-            return c
-    return None
-
-
-def _parse_pgn(pgn_text: str) -> dict:
-    game = chess.pgn.read_game(io.StringIO(pgn_text.strip()))
-    if game is None:
-        raise ValueError("Failed to parse PGN! Check the format.")
-    moves_uci = []
-    board = game.board()
-    for move in game.mainline_moves():
-        moves_uci.append(move.uci())
-        board.push(move)
-    if not moves_uci:
-        raise ValueError("No moves found in the PGN!")
-    headers = dict(game.headers)
-    return {
-        "white":     headers.get("White", "White"),
-        "black":     headers.get("Black", "Black"),
-        "white_elo": headers.get("WhiteElo", "?"),
-        "black_elo": headers.get("BlackElo", "?"),
-        "eco":       headers.get("ECO", "?"),
-        "opening":   headers.get("Opening", ""),
-        "result":    headers.get("Result", "*"),
-        "moves_uci": moves_uci,
-    }
-
-
-def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
-    """Közvetlen UCI subprocess – asyncio-mentes, háttérszálból is működik Windows-on."""
-    import subprocess
-    proc = subprocess.Popen(
-        [sf_path],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        text=True,
-        bufsize=1,
-    )
-
-    def send(cmd: str) -> None:
-        proc.stdin.write(cmd + "\n")
-        proc.stdin.flush()
-
-    def expect(prefix: str) -> str:
-        while True:
-            line = proc.stdout.readline()
-            if not line:
-                raise RuntimeError("Stockfish terminated unexpectedly!")
-            if line.startswith(prefix):
-                return line.rstrip()
-
-    try:
-        send("uci");  expect("uciok")
-        send("isready"); expect("readyok")
-        board = chess.Board()
-        evals = []
-        total = min(len(moves_uci), config.STOCKFISH_MOVES_LIMIT)
-        for i, uci in enumerate(moves_uci[:total]):
-            move = chess.Move.from_uci(uci)
-            if move not in board.legal_moves:
-                break
-            san = board.san(move)
-            board.push(move)
-            fen          = board.fen()
-            side_to_move = board.turn
-            send(f"position fen {fen}")
-            send("go depth 12")
-            cp_white  = None
-            mate_val  = None
-            last_info = ""
-            while True:
-                line = proc.stdout.readline().rstrip()
-                if "score" in line and line.startswith("info"):
-                    last_info = line
-                elif line.startswith("bestmove"):
-                    break
-            if last_info:
-                parts = last_info.split()
-                try:
-                    si    = parts.index("score")
-                    stype = parts[si + 1]
-                    sval  = int(parts[si + 2])
-                    sign  = 1 if side_to_move == chess.WHITE else -1
-                    if stype == "cp":
-                        cp_white = sign * sval
-                    elif stype == "mate":
-                        mate_val = sign * sval
-                except (ValueError, IndexError):
-                    pass
-            evals.append({
-                "move_number": (i // 2) + 1,
-                "color":       "white" if i % 2 == 0 else "black",
-                "uci":         uci,
-                "san":         san,
-                "cp":          cp_white,
-                "mate":        mate_val,
-                "fen":         fen,
-            })
-            progress["pct"]  = 0.10 + 0.50 * (i + 1) / total
-            progress["step"] = f"Stockfish analysis: {i + 1}/{total} moves..."
-    finally:
-        try:
-            send("quit")
-            proc.wait(timeout=3)
-        except Exception:
-            proc.kill()
-    return evals
-
-
-def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
-    """Teljes pipeline futtatása egyedi PGN-re (háttérszálon hívva)."""
-    try:
-        progress.update({"step": "Parsing PGN...", "pct": 0.02})
-        game_data = _parse_pgn(pgn_text)
-
-        progress.update({"step": "Locating Stockfish...", "pct": 0.07})
-        sf_path = _find_stockfish()
-        if not sf_path:
-            raise RuntimeError(
-                "Stockfish not found! Install it or set the path in config.py."
-            )
-
-        progress.update({"step": "Starting Stockfish analysis...", "pct": 0.10})
-        evaluations = _stockfish_analyze(game_data["moves_uci"], progress, sf_path)
-
-        moves_for_json = (
-            [{"move_number": 0, "color": "start", "san": "", "fen": chess.STARTING_FEN}]
-            + [{"move_number": e["move_number"], "color": e["color"],
-                "san": e["san"], "fen": e["fen"]}
-               for e in evaluations]
-        )
-        remaining_ucis = game_data["moves_uci"][len(evaluations):]
-        if remaining_ucis:
-            board = chess.Board()
-            for e in evaluations:
-                board.push(chess.Move.from_uci(e["uci"]))
-            for i, uci in enumerate(remaining_ucis):
-                move = chess.Move.from_uci(uci)
-                san = board.san(move)
-                board.push(move)
-                ply = len(evaluations) + i
-                moves_for_json.append({
-                    "move_number": (ply // 2) + 1,
-                    "color": "white" if ply % 2 == 0 else "black",
-                    "san": san,
-                    "fen": board.fen(),
-                })
-
-        progress.update({
-            "step": "Generating LLM narration (API call, a few seconds)...",
-            "pct":  0.62,
-        })
-        narration_json = generate_narration(game_data, evaluations)
-        narration_json["white"] = game_data["white"]
-        narration_json["black"] = game_data["black"]
-        narration_json["moves"] = moves_for_json
-
-        progress.update({"step": "Saving narration JSON...", "pct": 0.78})
-        json_path = os.path.join(config.LLM_ANALYSIS_JSON_DIR, f"{CUSTOM_GAME_STEM}.json")
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(narration_json, f, ensure_ascii=False, indent=2)
-
-        progress.update({
-            "step": "Generating audio with TTS (1–2 min)...",
-            "pct":  0.82,
-        })
-        tts_text = "\n\n".join(p["text"] for p in narration_json.get("paragraphs", []))
-        mp3_path = os.path.join(config.LLM_ANALYSIS_HANGOS_DIR, f"{CUSTOM_GAME_STEM}.mp3")
-        generate_audio(tts_text, mp3_path)
-
-        progress.update({
-            "step": "Done! Select \"My game\" and press Play!",
-            "pct":  1.0,
-            "done": True,
-        })
-    except Exception as exc:
-        tb = traceback.format_exc()
-        err_msg = str(exc) or type(exc).__name__
-        progress.update({
-            "step":      f"Error in step »{progress.get('step', '?')}«: {err_msg}",
-            "pct":       progress.get("pct", 0.0),
-            "done":      True,
-            "has_error": True,
-            "traceback": tb,
-        })
-
-# ─────────────────────────────────────────────────────────────────────────────
 # UI segédfüggvények
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _provider_color(provider: str) -> str:
-    return {
-        "openai":    "#10a37f",
-        "gemini":    "#4285f4",
-        "anthropic": "#cc785c",
-        "mistral":   "#f7630c",
-        "elevenlabs":"#6c4be4",
-    }.get(provider.lower(), "#6b7280")
-
-
-def _badge(label: str, color: str) -> str:
-    return (
-        f'<span style="display:inline-flex;align-items:center;padding:0.2rem 0.6rem;'
-        f'border-radius:99px;font-size:0.7rem;font-weight:600;letter-spacing:0.04em;'
-        f'background:{color}18;color:{color};border:1px solid {color}35;">'
-        f'{label}</span>'
-    )
-
-
 def _inject_css(css: str) -> None:
-    """CSS injektálás Python-Markdown HTML-blokk truncation nélkül.
-
-    A Markdown parser az első üres sornál lezárja a <style> blokkot,
-    ezért az üres sorokat egyre tömörítjük injektálás előtt.
-    """
     compressed = re.sub(r"\n[ \t]*\n", "\n", css)
     st.markdown(f"<style>{compressed}</style>", unsafe_allow_html=True)
 
@@ -509,6 +308,21 @@ def render_sidebar() -> None:
             unsafe_allow_html=True,
         )
 
+        st.markdown(
+            '<div style="background:rgba(122,11,24,0.07);border:1px solid rgba(122,11,24,0.22);'
+            'border-radius:10px;padding:0.9rem 1rem;color:#7a0b18;font-size:0.85rem;line-height:1.65;">'
+            '<strong>Demo mód</strong><br>'
+            'Ez a verzió a lejátszás funkciót tartalmazza. '
+            'Az elemzési pipeline helyi telepítést és privát API kulcsokat igényel.'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            '<div style="height:1px;background:rgba(0,0,0,0.08);margin:1.25rem 0;"></div>',
+            unsafe_allow_html=True,
+        )
+
         steps_html = "".join(
             f'<div style="display:flex;align-items:center;gap:0.65rem;padding:0.45rem 0;">'
             f'<span style="width:22px;height:22px;border-radius:7px;'
@@ -518,10 +332,10 @@ def render_sidebar() -> None:
             f'<span style="font-size:0.85rem;color:#4b5563;">{icon} {label}</span>'
             f'</div>'
             for num, icon, label in [
-                ("1", "📄", "PGN input"),
-                ("2", "♟", "Stockfish analysis"),
-                ("3", "🤖", "AI narration"),
-                ("4", "🔊", "Speech synthesis"),
+                ("1", "♟", "Stockfish analysis"),
+                ("2", "🤖", "AI narration"),
+                ("3", "🔊", "Speech synthesis"),
+                ("4", "▶", "Demo playback"),
             ]
         )
         st.markdown(
@@ -532,114 +346,9 @@ def render_sidebar() -> None:
             unsafe_allow_html=True,
         )
 
-        st.markdown(
-            '<div style="height:1px;background:rgba(0,0,0,0.08);margin:0 0 1.25rem;"></div>',
-            unsafe_allow_html=True,
-        )
-
-        llm_color = _provider_color(config.LLM_PROVIDER)
-        tts_color = _provider_color(config.TTS_PROVIDER)
-        st.markdown(
-            f'<div>'
-            f'<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.09em;'
-            f'color:#9ca3af;font-weight:600;margin-bottom:0.65rem;">Configuration</div>'
-            f'<div style="display:flex;flex-direction:column;gap:0.5rem;">'
-            f'<div style="display:flex;justify-content:space-between;align-items:center;">'
-            f'<span style="font-size:0.8rem;color:#6b7280;">LLM</span>'
-            f'{_badge(config.LLM_PROVIDER.upper(), llm_color)}</div>'
-            f'<div style="display:flex;justify-content:space-between;align-items:center;">'
-            f'<span style="font-size:0.8rem;color:#6b7280;">TTS</span>'
-            f'{_badge(config.TTS_PROVIDER.upper(), tts_color)}</div>'
-            f'<div style="display:flex;justify-content:space-between;align-items:center;">'
-            f'<span style="font-size:0.8rem;color:#6b7280;">Depth</span>'
-            f'{_badge(f"depth {config.STOCKFISH_DEPTH}", "#6b7280")}</div>'
-            f'</div></div>',
-            unsafe_allow_html=True,
-        )
-
-
-
-def render_header() -> None:
-    st.markdown(
-        '<div style="padding:0 0 1.1rem;text-align:center;">'
-        '<div style="display:inline-flex;align-items:center;gap:0.9rem;margin-bottom:0.6rem;">'
-        '<div style="width:52px;height:52px;background:linear-gradient(135deg,#A81022 0%,#7a0b18 100%);'
-        'border-radius:15px;display:flex;align-items:center;justify-content:center;'
-        'font-size:1.75rem;line-height:1;color:#fff;'
-        'box-shadow:0 6px 24px rgba(168,16,34,0.35),0 2px 6px rgba(0,0,0,0.15);">&#9818;</div>'
-        '<div style="text-align:left;">'
-        '<div style="font-family:\'Space Grotesk\',system-ui,sans-serif;font-size:1.9rem;'
-        'font-weight:700;color:#111827;letter-spacing:-0.03em;line-height:1;">'
-        'Chess<span style="color:#A81022;">Narr</span></div>'
-        '<div style="font-size:0.72rem;color:#9ca3af;letter-spacing:0.08em;'
-        'text-transform:uppercase;font-weight:500;margin-top:0.3rem;">'
-        'AI-powered game commentary</div>'
-        '</div></div>'
-        '<div style="width:80px;height:2px;background:linear-gradient(90deg,transparent,#A8102255,transparent);'
-        'margin:0.75rem auto 0;border-radius:99px;"></div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def render_pipeline_progress(prog: dict) -> None:
-    pct       = prog.get("pct", 0.0)
-    step      = prog.get("step", "")
-    has_error = prog.get("has_error", False)
-    done      = prog.get("done", False)
-
-    st.progress(min(pct, 1.0))
-
-    if has_error:
-        st.error(step)
-        tb = prog.get("traceback", "")
-        if tb:
-            with st.expander("Error details"):
-                st.code(tb, language="python")
-        return
-
-    if done and pct >= 1.0:
-        st.success(step)
-        return
-
-    pipeline_steps = [
-        (0.02, 0.10, "📄", "PGN parsing"),
-        (0.10, 0.62, "♟",  "Stockfish analysis"),
-        (0.62, 0.82, "🤖", "AI narration"),
-        (0.82, 1.00, "🔊", "Speech synthesis"),
-    ]
-
-    rows = []
-    for s_start, s_end, icon, label in pipeline_steps:
-        if pct >= s_end:
-            ind, col_i, bg, border, tc = "✓", "#059669", "rgba(5,150,105,0.08)", "rgba(5,150,105,0.22)", "#059669"
-        elif pct >= s_start:
-            ind, col_i, bg, border, tc = "●", "#A81022", "rgba(168,16,34,0.07)", "rgba(168,16,34,0.25)", "#111827"
-        else:
-            ind, col_i, bg, border, tc = "○", "#d1d5db", "rgba(0,0,0,0.02)", "rgba(0,0,0,0.07)", "#9ca3af"
-        anim = "animation:chpulse 1.4s ease-in-out infinite;" if pct >= s_start and pct < s_end else ""
-        rows.append(
-            f'<div style="display:flex;align-items:center;gap:0.7rem;padding:0.55rem 0.9rem;'
-            f'border-radius:9px;background:{bg};border:1px solid {border};">'
-            f'<span style="color:{col_i};font-size:1rem;width:18px;text-align:center;{anim}">{ind}</span>'
-            f'<span style="font-size:0.95rem;color:{tc};">{icon} {label}</span>'
-            f'</div>'
-        )
-
-    step_safe = step.replace("<", "&lt;").replace(">", "&gt;")
-    st.markdown(
-        f'<style>@keyframes chpulse{{0%,100%{{opacity:1}}50%{{opacity:0.35}}}}</style>'
-        f'<div style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.4rem;">'
-        + "".join(rows)
-        + f'<div style="font-size:0.85rem;color:#9ca3af;padding:0.3rem 0.5rem;'
-          f'font-family:monospace;">{step_safe}</div>'
-          f'</div>',
-        unsafe_allow_html=True,
-    )
-
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Globális CSS  (tömörítve injektálva – lásd _inject_css)
+# Globális CSS
 # ─────────────────────────────────────────────────────────────────────────────
 
 _RAW_CSS = """
@@ -719,21 +428,15 @@ section.main>div:first-child{padding-top:0!important;}
 
 [data-testid="column"] [data-testid="stVerticalBlock"]{flex:1!important;display:flex!important;flex-direction:column!important;}
 [data-testid="column"] [data-testid="stVerticalBlock"]>div{flex:1!important;display:flex!important;flex-direction:column!important;}
-[data-testid="stTextArea"]{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
-[data-testid="stTextArea"]>label{flex:0 0 auto!important;}
-[data-testid="stTextArea"]>[data-baseweb="textarea"]{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
-[data-testid="stTextArea"] [data-baseweb="textarea"]>div{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
 /* Button row transparent panels */
 [data-testid="stMarkdown"]:has(#ch-btn-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]{background:transparent!important;border:none!important;box-shadow:none!important;padding:0.25rem 0 0!important;}
 [data-testid="stMarkdown"]:has(#ch-btn-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:hover{border:none!important;box-shadow:none!important;}
-/* Selectbox placeholder */
-.pgn-selectbox-placeholder{height:42px!important;flex:0 0 42px!important;}
 
 h1,h2,h3,h4{font-family:'Space Grotesk',system-ui,sans-serif!important;letter-spacing:-0.02em!important;color:var(--text)!important;}
 
 h3{font-size:1.2rem!important;font-weight:600!important;margin:0 0 1rem!important;}
 
-label,[data-testid="stWidgetLabel"] p,[data-testid="stTextArea"] label,[data-testid="stSelectbox"] label{
+label,[data-testid="stWidgetLabel"] p,[data-testid="stSelectbox"] label{
   color:var(--muted)!important;
   font-size:0.85rem!important;
   text-transform:uppercase!important;
@@ -796,16 +499,6 @@ button[kind="primary"]:hover::before{
 [data-testid="stBaseButton-primary"]:active,
 button[kind="primary"]:active{transform:translateY(0)!important;}
 
-[data-testid="baseButton-primary"]:disabled,
-[data-testid="stBaseButton-primary"]:disabled,
-button[kind="primary"]:disabled{
-  background:var(--surf3)!important;
-  color:var(--faint)!important;
-  box-shadow:none!important;
-  transform:none!important;
-  cursor:not-allowed!important;
-}
-
 [data-testid="baseButton-secondary"],
 [data-testid="stBaseButton-secondary"],
 button[kind="secondary"]{
@@ -842,28 +535,6 @@ button[kind="secondary"]:hover::before{
   left:150%;
   transition:left 0.45s ease;
 }
-
-textarea{
-  flex:1!important;
-  height:100%!important;
-  min-height:200px!important;
-  resize:vertical!important;
-  background:#ffffff!important;
-  border:1px solid var(--border)!important;
-  border-radius:10px!important;
-  color:var(--text)!important;
-  font-family:'JetBrains Mono','Fira Code','Cascadia Code',monospace!important;
-  font-size:0.95rem!important;
-  line-height:1.65!important;
-  transition:border-color 0.2s ease,box-shadow 0.2s ease!important;
-  padding:0.85rem!important;
-  box-shadow:0 1px 4px rgba(0,0,0,0.05)!important;
-  caret-color:#A81022!important;
-}
-
-textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-glow)!important;outline:none!important;}
-
-textarea::placeholder{color:#d1d5db!important;}
 
 [data-testid="stSelectbox"] [data-baseweb="select"]>div{
   background:linear-gradient(135deg,#A81022 0%,#8a0d1b 100%)!important;
@@ -915,12 +586,6 @@ li[role="option"]{background:var(--accent)!important;color:#ffffff!important;tra
 li[role="option"]:hover{background:linear-gradient(135deg,#d4182e 0%,#e81830 100%)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)!important;}
 li[role="option"] *{color:#ffffff!important;}
 
-[data-testid="stProgress"]{margin:0.4rem 0!important;}
-
-[data-testid="stProgress"]>div{background:var(--surf3)!important;border-radius:99px!important;height:5px!important;overflow:hidden!important;}
-
-[data-testid="stProgress"]>div>div{background:var(--accent)!important;border-radius:99px!important;transition:width 0.5s ease!important;}
-
 [data-testid="stAlert"]{
   background:#fff8f8!important;
   border-radius:10px!important;
@@ -928,17 +593,6 @@ li[role="option"] *{color:#ffffff!important;}
   padding:0.85rem 1.1rem!important;
   color:var(--text)!important;
 }
-
-[data-testid="stAlert"] p,[data-testid="stAlert"] span,[data-testid="stAlert"] div{color:var(--text)!important;font-size:1rem!important;}
-
-.stSuccess{border-color:rgba(5,150,105,0.35)!important;background:rgba(5,150,105,0.07)!important;}
-.stError{border-color:rgba(220,38,38,0.35)!important;background:rgba(220,38,38,0.07)!important;}
-.stWarning{border-color:rgba(168,16,34,0.25)!important;background:#fff8f8!important;}
-.stInfo{border-color:rgba(37,99,235,0.3)!important;background:rgba(37,99,235,0.06)!important;}
-
-[data-testid="stExpander"]{background:var(--surf)!important;border:1px solid var(--border)!important;border-radius:10px!important;}
-
-[data-testid="stExpander"] summary{color:var(--muted)!important;font-size:0.9rem!important;}
 
 [data-testid="stSidebar"]{background:var(--surf)!important;border-right:1px solid var(--border)!important;}
 
@@ -980,7 +634,7 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 # ─────────────────────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="ChessNarrator · Chess narration",
+    page_title="ChessNarrator · Demo",
     page_icon="♟️",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -996,21 +650,12 @@ if "playing" not in st.session_state:
     st.session_state.playing = False
 if "last_game" not in st.session_state:
     st.session_state.last_game = None
-if "pipeline_progress" not in st.session_state:
-    st.session_state.pipeline_progress = None
-if "pipeline_thread" not in st.session_state:
-    st.session_state.pipeline_thread = None
 
 # ── Játékok betöltése ─────────────────────────────────────────────────────────
 
 games      = find_games()
 game_names = [g["name"] for g in games]
 game_map   = {g["name"]: g for g in games}
-
-pipeline_is_running = (
-    st.session_state.pipeline_thread is not None
-    and st.session_state.pipeline_thread.is_alive()
-)
 
 # ── LEJÁTSZÓ MÓD ─────────────────────────────────────────────────────────────
 
@@ -1023,7 +668,6 @@ if st.session_state.playing:
     narration_data = load_json(selected["json"])
     white_name = narration_data.get("white") or selected["name"]
     black_name = narration_data.get("black") or ""
-    matchup    = f"{white_name} vs {black_name}" if black_name else white_name
 
     st.markdown(
         f'<div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;'
@@ -1042,8 +686,8 @@ if st.session_state.playing:
         f'<style>@keyframes nblink{{0%,100%{{opacity:1;box-shadow:0 0 8px rgba(168,16,34,0.6);}}50%{{opacity:0.3;box-shadow:0 0 3px rgba(168,16,34,0.3);}}}}</style>',
         unsafe_allow_html=True,
     )
-    paragraphs     = narration_data.get("paragraphs", [])
-    player_html    = build_player_html(
+    paragraphs  = narration_data.get("paragraphs", [])
+    player_html = build_player_html(
         paragraphs, selected["mp3"],
         narration_data=narration_data,
         autoplay=True,
@@ -1059,34 +703,12 @@ if st.session_state.playing:
 # ── ÁLLÓ MÓD ─────────────────────────────────────────────────────────────────
 
 else:
-    col_pgn, col_board = st.columns([1, 1], gap="large")
+    col_info, col_board = st.columns([1, 1], gap="large")
 
-    # ── Bal oszlop: PGN bevitel ───────────────────────────────────────────────
-    with col_pgn:
+    # ── Bal oszlop: demó infókártya ───────────────────────────────────────────
+    with col_info:
         st.markdown('<div class="section-label">Analyse your game</div>', unsafe_allow_html=True)
-
-        st.markdown('<div class="pgn-selectbox-placeholder"></div>', unsafe_allow_html=True)
-        pgn_text = st.text_area(
-            "PGN",
-            height=400,
-            key="pgn_input",
-            label_visibility="collapsed",
-            placeholder=(
-                '[Event "Live Chess"]\n'
-                '[White "White"]\n'
-                '[Black "Black"]\n'
-                '[Result "1-0"]\n\n'
-                "1. e4 e5 2. Nf3 Nc6 3. Bb5 ..."
-            ),
-            help=(
-                "Any standard PGN format is accepted – "
-                "headers are optional, moves-only works too."
-            ),
-        )
-
-        prog = st.session_state.pipeline_progress
-        if prog is not None:
-            render_pipeline_progress(prog)
+        st.markdown(_DEMO_CARD_HTML, unsafe_allow_html=True)
 
     # ── Jobb oszlop: játszmaválasztó + sakktábla ──────────────────────────────
     with col_board:
@@ -1098,9 +720,7 @@ else:
                 '<div style="font-size:0.95rem;font-weight:600;color:#9ca3af;margin-bottom:0.5rem;">'
                 'No analysed games</div>'
                 '<div style="font-size:0.8rem;color:#d1d5db;line-height:1.7;max-width:280px;">'
-                'Paste a PGN in the left panel and start the analysis, '
-                'or run the <code style="color:#9ca3af;background:rgba(0,0,0,0.05);'
-                'padding:0 0.3rem;border-radius:4px;">jatek_elemzese.ipynb</code> notebook.'
+                'No pre-generated analyses found in the repository.'
                 '</div></div>',
                 unsafe_allow_html=True,
             )
@@ -1125,7 +745,6 @@ else:
             move_count     = len(all_fens) - 1
             svg            = fen_to_svg(last_fen)
 
-            # Lépésszám a selectbox alatt
             if move_count:
                 st.markdown(
                     f'<div style="font-size:0.85rem;color:#9ca3af;margin:-0.15rem 0 0.25rem;'
@@ -1138,36 +757,16 @@ else:
                 unsafe_allow_html=True,
             )
 
-    # ── Gombsor – mindkét gomb egy vonalban, panel stílus nélkül ─────────────
+    # ── Gombsor ──────────────────────────────────────────────────────────────
     st.markdown('<div id="ch-btn-row" style="height:0;overflow:hidden;"></div>', unsafe_allow_html=True)
-    btn_col1, btn_col2 = st.columns([1, 1], gap="large")
-    with btn_col1:
-        if st.button(
-            "Start analysis",
-            disabled=pipeline_is_running,
-            use_container_width=True,
-            type="primary",
-        ):
-            if pgn_text.strip():
-                progress = {"step": "Starting...", "pct": 0.0, "done": False, "error": None}
-                st.session_state.pipeline_progress = progress
-                t = threading.Thread(
-                    target=run_custom_pipeline,
-                    args=(pgn_text, progress),
-                    daemon=True,
-                )
-                t.start()
-                st.session_state.pipeline_thread = t
-                st.rerun()
-            else:
-                pass
-    with btn_col2:
+    _, btn_col, _ = st.columns([1, 2, 1], gap="large")
+    with btn_col:
         if games:
             if st.button("▶  Play", use_container_width=True, type="primary"):
                 st.session_state.playing = True
                 st.rerun()
 
-    # ── Selectbox keresés tiltása < 10 játszma esetén (oszlopokon kívül, layout-semleges) ──
+    # ── Selectbox keresés tiltása < 10 játszma esetén ────────────────────────
     if len(games) < 10:
         st.markdown(
             '<style>'
@@ -1196,8 +795,3 @@ else:
             height=0,
             scrolling=False,
         )
-
-    # ── Auto-refresh ha pipeline fut ─────────────────────────────────────────
-    if pipeline_is_running:
-        time.sleep(0.5)
-        st.rerun()
