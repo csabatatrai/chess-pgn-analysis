@@ -105,8 +105,8 @@ STOCKFISH_DOWNLOAD_URL_WINDOWS = os.environ.get(
 # Stockfish elemzési mélység
 STOCKFISH_DEPTH = int(os.environ.get("STOCKFISH_DEPTH", 18))
 
-# Hány lépést elemezzen játszmánként
-STOCKFISH_MOVES_LIMIT = int(os.environ.get("STOCKFISH_MOVES_LIMIT", 40))
+# Hány lépést elemezzen játszmánként (300 = a leghosszabb normál játszmákat is lefedi)
+STOCKFISH_MOVES_LIMIT = int(os.environ.get("STOCKFISH_MOVES_LIMIT", 300))
 
 # Stockfish bináris és letöltési adatok
 DATA_DIR = os.environ.get("LICHESS_DATA_DIR", "data")
