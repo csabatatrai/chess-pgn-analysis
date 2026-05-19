@@ -34,7 +34,10 @@ __pypackages__/
 htmlcov/
 
 # Output and temporary data
-output/
+output/*
+!output/plots/
+output/plots/*
+!output/plots/plycount.png
 *.log
 *.tmp
 *.temp
