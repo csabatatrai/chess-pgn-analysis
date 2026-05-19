@@ -292,8 +292,8 @@ def build_player_html(
 <head>
 <meta charset="utf-8">
 <style>
-html{{margin:0;padding:0;background:#f8f9fb;}}
-body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direction:column;align-items:center;font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}}
+html{{margin:0;padding:0;background:#ffffff;}}
+body{{margin:0;padding:0 6px 6px;background:#ffffff;display:flex;flex-direction:column;align-items:center;font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}}
 #board-wrapper{{position:relative;width:min(calc(100vw - 12px),calc(100vh - 80px));border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 16px 48px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);margin-top:6px;transition:box-shadow 0.18s ease;}}
 #board-wrapper:hover{{box-shadow:0 8px 32px rgba(168,16,34,0.65),0 0 0 3px rgba(212,24,46,0.22),0 2px 8px rgba(0,0,0,0.14);}}
 #board-wrapper svg rect:first-child{{transition:fill 0.18s ease;}}
