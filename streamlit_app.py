@@ -19,6 +19,7 @@ import shutil
 import traceback
 
 import streamlit as st
+import streamlit.components.v1 as stc
 import chess
 import chess.svg
 import chess.pgn
@@ -179,7 +180,12 @@ def build_player_html(
 <meta charset="utf-8">
 <style>
 html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direction:column;align-items:center;font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}}
-#board-wrapper{{position:relative;width:min(calc(100vw - 12px),calc(100vh - 78px));border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 16px 48px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);margin-top:6px;}}
+#board-wrapper{{position:relative;width:min(calc(100vw - 12px),calc(100vh - 78px));border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 16px 48px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);margin-top:6px;transition:box-shadow 0.18s ease;}}
+#board-wrapper:hover{{box-shadow:0 8px 32px rgba(168,16,34,0.65),0 0 0 3px rgba(212,24,46,0.22),0 2px 8px rgba(0,0,0,0.14);}}
+#board-wrapper svg rect:first-child{{transition:fill 0.18s ease;}}
+#board-wrapper:hover svg rect:first-child{{fill:#d4182e!important;}}
+#board-wrapper::before{{content:'';position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.18) 50%,transparent 100%);transform:skewX(-15deg);pointer-events:none;z-index:10;transition:none;}}
+#board-wrapper:hover::before{{left:150%;transition:left 0.55s ease;}}
 #board-sizer{{display:block;visibility:hidden;pointer-events:none;}}
 #board-sizer svg,#board-a svg,#board-b svg{{width:100%;height:auto;display:block;}}
 #board-a,#board-b{{position:absolute;inset:0;}}
@@ -959,7 +965,12 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 
 .section-label::after{content:'';flex:1;height:1px;background:rgba(168,16,34,0.15);}
 
-.chess-board-wrap{width:min(100%,calc(100vh - 240px));margin:4px auto 8px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 12px 40px rgba(0,0,0,0.10);}
+.chess-board-wrap{width:min(100%,calc(100vh - 240px));margin:4px auto 8px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 12px 40px rgba(0,0,0,0.10);position:relative;transition:box-shadow 0.18s ease;}
+.chess-board-wrap:hover{box-shadow:0 8px 32px rgba(168,16,34,0.65),0 0 0 3px rgba(212,24,46,0.22),0 2px 8px rgba(0,0,0,0.14);}
+.chess-board-wrap svg rect:first-child{transition:fill 0.18s ease;}
+.chess-board-wrap:hover svg rect:first-child{fill:#d4182e!important;}
+.chess-board-wrap::before{content:'';position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.18) 50%,transparent 100%);transform:skewX(-15deg);pointer-events:none;z-index:10;transition:none;}
+.chess-board-wrap:hover::before{left:150%;transition:left 0.55s ease;}
 .chess-board-wrap svg{width:100%!important;display:block;}
 """
 
@@ -1036,7 +1047,7 @@ if st.session_state.playing:
         narration_data=narration_data,
         autoplay=True,
     )
-    st.components.v1.html(player_html, height=560, scrolling=False)
+    stc.html(player_html, height=560, scrolling=False)
 
     gap_l, btn_col, gap_r = st.columns([2, 3, 2])
     with btn_col:
@@ -1100,6 +1111,7 @@ else:
                 options=game_names,
                 label_visibility="collapsed",
             )
+
             selected = game_map[selected_name]
 
             if st.session_state.last_game != selected_name:
@@ -1153,6 +1165,36 @@ else:
             if st.button("▶  Play", use_container_width=True, type="primary"):
                 st.session_state.playing = True
                 st.rerun()
+
+    # ── Selectbox keresés tiltása < 10 játszma esetén (oszlopokon kívül, layout-semleges) ──
+    if len(games) < 10:
+        st.markdown(
+            '<style>'
+            '[data-testid="stSelectbox"] [data-baseweb="select"]>div,'
+            '[data-testid="stSelectbox"] input{cursor:pointer!important;}'
+            '</style>',
+            unsafe_allow_html=True,
+        )
+        stc.html(
+            """<script>
+            (function() {
+                function patch() {
+                    var inp = window.parent.document.querySelector(
+                        '[data-testid="stSelectbox"] input');
+                    if (inp) {
+                        inp.setAttribute('readonly', 'readonly');
+                        inp.style.caretColor = 'transparent';
+                        inp.style.cursor = 'pointer';
+                    } else {
+                        requestAnimationFrame(patch);
+                    }
+                }
+                patch();
+            })();
+            </script>""",
+            height=0,
+            scrolling=False,
+        )
 
     # ── Auto-refresh ha pipeline fut ─────────────────────────────────────────
     if pipeline_is_running:
