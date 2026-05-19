@@ -293,7 +293,7 @@ def build_player_html(
 <meta charset="utf-8">
 <style>
 html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direction:column;align-items:center;font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}}
-#board-wrapper{{position:relative;width:min(calc(100vw - 12px),calc(100vh - 78px));border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 16px 48px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);margin-top:6px;transition:box-shadow 0.18s ease;}}
+#board-wrapper{{position:relative;width:min(calc(100vw - 12px),calc(100vh - 56px));border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 16px 48px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);margin-top:6px;transition:box-shadow 0.18s ease;}}
 #board-wrapper:hover{{box-shadow:0 8px 32px rgba(168,16,34,0.65),0 0 0 3px rgba(212,24,46,0.22),0 2px 8px rgba(0,0,0,0.14);}}
 #board-wrapper svg rect:first-child{{transition:fill 0.18s ease;}}
 #board-wrapper:hover svg rect:first-child{{fill:#d4182e!important;}}
@@ -307,7 +307,7 @@ html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direc
 #load-ring{{width:48px;height:48px;border:3px solid rgba(168,16,34,0.15);border-top-color:#A81022;border-radius:50%;animation:loadSpin 0.9s linear infinite;position:absolute;top:50%;left:50%;margin:-24px 0 0 -24px;}}
 #load-label{{font-size:0.78rem;font-weight:700;color:#A81022;letter-spacing:0.1em;text-transform:uppercase;}}
 #load-dots{{display:inline-block;animation:loadDots 1.4s steps(4,end) infinite;}}
-#info{{display:flex;align-items:center;gap:14px;width:min(calc(100vw - 12px),calc(100vh - 78px));margin-top:8px;padding:10px 16px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.07);border-radius:10px;}}
+#info{{display:flex;align-items:center;gap:14px;width:min(calc(100vw - 12px),calc(100vh - 56px));margin-top:8px;padding:10px 16px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.07);border-radius:10px;}}
 #statusz{{font-size:0.92rem;font-weight:600;letter-spacing:0.02em;color:#A81022;white-space:nowrap;flex-shrink:0;}}
 #pbar-wrap{{flex:1;height:10px;background:rgba(168,16,34,0.12);border-radius:99px;overflow:hidden;}}
 #pbar-fill{{width:0%;height:100%;background:linear-gradient(90deg,#A81022,#c41428);border-radius:99px;transition:width 0.35s ease;}}
@@ -391,7 +391,7 @@ if(audio.readyState>=1)setTimeout(onNarrReady,0);
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
-(function(){{function setH(){{try{{var vw=window.parent.innerWidth;var vh=window.parent.innerHeight;var h;if(vw<768){{var bsz=Math.min(vw-12,vh-78);h=Math.max(360,bsz+80);}}else{{h=Math.max(400,vh-155);}}window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
+(function(){{function setH(){{try{{var vw=window.parent.innerWidth;var vh=window.parent.innerHeight;var h;if(vw<768){{var bsz=Math.min(vw-12,vh-78);h=Math.max(360,bsz+80);}}else{{h=Math.max(400,vh-130);}}window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
 </script>
 </body>
 </html>"""
@@ -815,6 +815,20 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
   /* ── 8. Mobilos spacer megjelenítése ────────────────────────────────── */
   .mobile-top-spacer{display:block!important;height:0.75rem!important;}
 }
+
+/* ── Play mód: gombok a tábla két oldalán ───────────────────────────────── */
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]{background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;}
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:hover{border:none!important;box-shadow:none!important;}
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"],
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child [data-testid="stVerticalBlock"]{justify-content:center!important;}
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"]>div,
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child [data-testid="stVerticalBlock"]>div{flex:0 0 auto!important;}
+
+@media (max-width:768px){
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child{order:2!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2){order:1!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child{order:3!important;}
+}
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -880,14 +894,21 @@ if st.session_state.playing:
         narration_data=narration_data,
         autoplay=True,
     )
-    stc.html(player_html, height=460, scrolling=False)
-
-    st.markdown('<div id="ch-btn-row" style="height:0;overflow:hidden;"></div>', unsafe_allow_html=True)
-    gap_l, btn_col, gap_r = st.columns([2, 3, 2])
-    with btn_col:
+    st.markdown('<div id="ch-play-row" style="height:0;overflow:hidden;"></div>', unsafe_allow_html=True)
+    back_col, board_col, next_col = st.columns([1, 5, 1])
+    with back_col:
         if st.button("← Back", use_container_width=True, type="primary"):
             st.session_state.playing = False
             st.rerun()
+    with board_col:
+        stc.html(player_html, height=650, scrolling=False)
+    with next_col:
+        if len(games) > 1:
+            current_idx = game_names.index(st.session_state.last_game)
+            next_idx = (current_idx + 1) % len(game_names)
+            if st.button("Next →", use_container_width=True, type="primary"):
+                st.session_state.last_game = game_names[next_idx]
+                st.rerun()
 
 # ── ÁLLÓ MÓD ─────────────────────────────────────────────────────────────────
 
