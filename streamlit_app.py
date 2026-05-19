@@ -9,6 +9,7 @@ Indítás:
 import os
 import sys
 import io
+import re
 import json
 import glob
 import base64
@@ -103,10 +104,8 @@ def get_all_fens(narration_data: dict, paragraphs: list) -> list[str]:
 
 def compute_timed_anchors(paragraphs: list, all_fens: list) -> list[dict]:
     fen_idx_map = {fen_position_key(f): i for i, f in enumerate(all_fens)}
-
     full_text = ""
     raw       = []
-
     for para in paragraphs:
         text = para.get("text", "")
         for anchor in para.get("anchors", []):
@@ -117,38 +116,28 @@ def compute_timed_anchors(paragraphs: list, all_fens: list) -> list[dict]:
             pos = text.find(trigger)
             if pos < 0:
                 continue
-
             word_pos = len((full_text + text[:pos]).split())
             fen_idx  = fen_idx_map.get(fen_position_key(fen), -1)
             if fen_idx >= 0:
                 raw.append({"fen_idx": fen_idx, "word_pos": word_pos})
-
         full_text += text + "  "
-
     total_words = max(len(full_text.split()), 1)
     for a in raw:
         a["word_frac"] = round(a["word_pos"] / total_words, 6)
-
     raw.sort(key=lambda x: x["word_frac"])
-
     seen: set[int] = set()
     result = []
     max_fen_idx = -1
     for a in raw:
-        # csak előre haladhatunk: kisebb vagy azonos fen_idx-et kihagyjuk
         if a["fen_idx"] not in seen and a["fen_idx"] > max_fen_idx:
             seen.add(a["fen_idx"])
             result.append({"fen_idx": a["fen_idx"], "word_frac": a["word_frac"]})
             max_fen_idx = a["fen_idx"]
-
-    # Ha az LLM nem horgonyozta le a végállást, adjuk hozzá automatikusan,
-    # hogy a tábla az összefoglaló végén a valódi végpozíciót mutassa.
     final_idx = len(all_fens) - 1
     if final_idx > 0 and (not result or result[-1]["fen_idx"] < final_idx):
         last_frac = result[-1]["word_frac"] if result else 0.0
         auto_frac = round(last_frac + (1.0 - last_frac) * 0.65, 6)
         result.append({"fen_idx": final_idx, "word_frac": auto_frac})
-
     return result
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -162,69 +151,35 @@ def build_player_html(
     autoplay: bool = True,
 ) -> str:
     narration_data = narration_data or {}
-
     all_fens      = get_all_fens(narration_data, paragraphs)
     timed_anchors = compute_timed_anchors(paragraphs, all_fens)
-
-    svgs       = [fen_to_svg(f) for f in all_fens]
-    total_fens = len(svgs)
-
-    svgs_json  = json.dumps(svgs)
-    js_anchors = json.dumps([
+    svgs          = [fen_to_svg(f) for f in all_fens]
+    svgs_json     = json.dumps(svgs)
+    js_anchors    = json.dumps([
         {"fenIdx": a["fen_idx"], "wordFrac": a["word_frac"]}
         for a in timed_anchors
     ])
-
-    mp3_data       = audio_b64(mp3_path)
-    autoplay_attr  = "autoplay" if autoplay else ""
-    init_svg       = svgs[0] if svgs else starting_svg()
+    mp3_data      = audio_b64(mp3_path)
+    autoplay_attr = "autoplay" if autoplay else ""
+    init_svg      = svgs[0] if svgs else starting_svg()
 
     html = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <style>
-  html, body {{
-    margin: 0; padding: 0;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: sans-serif;
-  }}
-  #board-wrapper {{
-    position: relative;
-    width: min(calc(100vw - 8px), calc(100vh - 50px));
-  }}
-  #board-sizer {{
-    display: block;
-    visibility: hidden;
-    pointer-events: none;
-  }}
-  #board-sizer svg, #board-a svg, #board-b svg {{
-    width: 100%; height: auto; display: block;
-  }}
-  #board-a, #board-b {{
-    position: absolute;
-    inset: 0;
-  }}
-  #info {{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: min(calc(100vw - 8px), calc(100vh - 50px));
-    margin-top: 6px;
-    font-size: 13px;
-    color: #555;
-  }}
-  #lepesszam {{
-    font-variant-numeric: tabular-nums;
-    opacity: 0.65;
-  }}
+html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direction:column;align-items:center;font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}}
+#board-wrapper{{position:relative;width:min(calc(100vw - 12px),calc(100vh - 78px));border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 16px 48px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);margin-top:6px;}}
+#board-sizer{{display:block;visibility:hidden;pointer-events:none;}}
+#board-sizer svg,#board-a svg,#board-b svg{{width:100%;height:auto;display:block;}}
+#board-a,#board-b{{position:absolute;inset:0;}}
+#info{{display:flex;align-items:center;gap:14px;width:min(calc(100vw - 12px),calc(100vh - 78px));margin-top:8px;padding:10px 16px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.07);border-radius:10px;}}
+#statusz{{font-size:0.92rem;font-weight:600;letter-spacing:0.02em;color:#A81022;white-space:nowrap;flex-shrink:0;}}
+#pbar-wrap{{flex:1;height:10px;background:rgba(168,16,34,0.12);border-radius:99px;overflow:hidden;}}
+#pbar-fill{{width:0%;height:100%;background:linear-gradient(90deg,#A81022,#c41428);border-radius:99px;transition:width 0.35s ease;}}
 </style>
 </head>
 <body>
-
 <div id="board-wrapper">
   <div id="board-sizer">{init_svg}</div>
   <div id="board-a" style="z-index:2;">{init_svg}</div>
@@ -232,132 +187,50 @@ def build_player_html(
 </div>
 <div id="info">
   <span id="statusz">&#9654; Betöltés…</span>
-  <span id="lepesszam">Kezdőállás</span>
+  <div id="pbar-wrap"><div id="pbar-fill"></div></div>
 </div>
-
-<audio id="narr" {autoplay_attr}
-       src="data:audio/mpeg;base64,{mp3_data}"
-       style="display:none"></audio>
-
+<audio id="narr" {autoplay_attr} src="data:audio/mpeg;base64,{mp3_data}" style="display:none"></audio>
 <script>
-const fenSvgs   = {svgs_json};
-const anchors   = {js_anchors};
-const TOTAL     = fenSvgs.length;
-const LOOKAHEAD = 0.5;
-
-const audio     = document.getElementById('narr');
-const statusz   = document.getElementById('statusz');
-const lepesszam = document.getElementById('lepesszam');
-
-let lastIdx    = 0;
-let targetIdx  = 0;
-let rafQueued  = false;
-let befejezett = false;
-let front      = 'a';
-let fadeTimer  = null;
-
-function lepesFelirat(idx) {{
-  if (idx === 0) return 'Kezdőállás';
-  return idx + '. lépés / ' + (TOTAL - 1);
+const fenSvgs={svgs_json};
+const anchors={js_anchors};
+const TOTAL=fenSvgs.length;
+const LOOKAHEAD=0.5;
+const audio=document.getElementById('narr');
+const statusz=document.getElementById('statusz');
+const pbarFill=document.getElementById('pbar-fill');
+let lastIdx=0,targetIdx=0,rafQueued=false,befejezett=false,front='a',fadeTimer=null;
+function updatePbar(idx){{pbarFill.style.width=(TOTAL>1?(idx/(TOTAL-1))*100:0)+'%';}}
+function getFenIdx(frac){{
+  frac=Math.max(0,Math.min(1,frac));
+  if(!anchors.length)return Math.min(Math.floor(frac*TOTAL),TOTAL-1);
+  if(frac<=anchors[0].wordFrac){{const r=anchors[0].wordFrac>0?frac/anchors[0].wordFrac:0;return Math.round(r*anchors[0].fenIdx);}}
+  const last=anchors[anchors.length-1];
+  if(frac>=last.wordFrac){{const rem=1-last.wordFrac;const r=rem>0?(frac-last.wordFrac)/rem:1;return Math.min(last.fenIdx+Math.round(r*(TOTAL-1-last.fenIdx)),TOTAL-1);}}
+  for(let i=0;i<anchors.length-1;i++){{const a=anchors[i],b=anchors[i+1];if(frac>=a.wordFrac&&frac<b.wordFrac){{const r=(frac-a.wordFrac)/(b.wordFrac-a.wordFrac);return Math.round(a.fenIdx+r*(b.fenIdx-a.fenIdx));}}}}
+  return TOTAL-1;
 }}
-
-function getFenIdx(frac) {{
-  frac = Math.max(0, Math.min(1, frac));
-
-  if (!anchors.length) {{
-    return Math.min(Math.floor(frac * TOTAL), TOTAL - 1);
-  }}
-
-  if (frac <= anchors[0].wordFrac) {{
-    const r = anchors[0].wordFrac > 0 ? frac / anchors[0].wordFrac : 0;
-    return Math.round(r * anchors[0].fenIdx);
-  }}
-
-  const last = anchors[anchors.length - 1];
-  if (frac >= last.wordFrac) {{
-    const rem = 1 - last.wordFrac;
-    const r   = rem > 0 ? (frac - last.wordFrac) / rem : 1;
-    return Math.min(last.fenIdx + Math.round(r * (TOTAL - 1 - last.fenIdx)), TOTAL - 1);
-  }}
-
-  for (let i = 0; i < anchors.length - 1; i++) {{
-    const a = anchors[i], b = anchors[i + 1];
-    if (frac >= a.wordFrac && frac < b.wordFrac) {{
-      const r = (frac - a.wordFrac) / (b.wordFrac - a.wordFrac);
-      return Math.round(a.fenIdx + r * (b.fenIdx - a.fenIdx));
-    }}
-  }}
-
-  return TOTAL - 1;
+function mutatFen(idx){{
+  idx=Math.max(lastIdx,Math.min(idx,TOTAL-1));targetIdx=idx;
+  if(!rafQueued&&idx!==lastIdx){{rafQueued=true;requestAnimationFrame(()=>{{
+    rafQueued=false;if(targetIdx===lastIdx)return;lastIdx=targetIdx;
+    const frontEl=document.getElementById('board-'+front);
+    const backId=front==='a'?'b':'a';const backEl=document.getElementById('board-'+backId);
+    if(fadeTimer){{clearTimeout(fadeTimer);fadeTimer=null;}}
+    backEl.innerHTML=fenSvgs[lastIdx];backEl.style.zIndex='2';frontEl.style.zIndex='1';
+    backEl.style.transition='none';backEl.style.opacity='0';void backEl.offsetWidth;
+    backEl.style.transition='opacity 0.22s ease-out';backEl.style.opacity='1';
+    fadeTimer=setTimeout(()=>{{fadeTimer=null;front=backId;}},240);
+    updatePbar(lastIdx);
+  }});}}
 }}
-
-function mutatFen(idx) {{
-  // a tábla csak előre haladhat – soha ne menjünk vissza egy korábbi álláshoz
-  idx = Math.max(lastIdx, Math.min(idx, TOTAL - 1));
-  targetIdx = idx;
-  if (!rafQueued && idx !== lastIdx) {{
-    rafQueued = true;
-    requestAnimationFrame(() => {{
-      rafQueued = false;
-      if (targetIdx === lastIdx) return;
-      lastIdx = targetIdx;
-
-      const frontEl = document.getElementById('board-' + front);
-      const backId  = front === 'a' ? 'b' : 'a';
-      const backEl  = document.getElementById('board-' + backId);
-
-      if (fadeTimer) {{ clearTimeout(fadeTimer); fadeTimer = null; }}
-
-      backEl.innerHTML        = fenSvgs[lastIdx];
-      backEl.style.zIndex     = '2';
-      frontEl.style.zIndex    = '1';
-      backEl.style.transition = 'none';
-      backEl.style.opacity    = '0';
-      void backEl.offsetWidth;
-      backEl.style.transition = 'opacity 0.22s ease-out';
-      backEl.style.opacity    = '1';
-
-      fadeTimer = setTimeout(() => {{
-        fadeTimer = null;
-        front = backId;
-      }}, 240);
-
-      lepesszam.textContent = lepesFelirat(lastIdx);
-    }});
-  }}
-}}
-
-audio.addEventListener('loadedmetadata', () => {{
-  statusz.textContent = '► Narráció lejátszása…';
-  audio.play().catch(() => {{
-    statusz.textContent = '► Kattintson a lejátszáshoz!';
-  }});
-}});
-
-audio.addEventListener('timeupdate', () => {{
-  if (befejezett || !audio.duration) return;
-  const frac = (audio.currentTime + LOOKAHEAD) / audio.duration;
-  mutatFen(getFenIdx(frac));
-}});
-
-audio.addEventListener('ended', () => {{
-  befejezett = true;
-  mutatFen(TOTAL - 1);
-  statusz.textContent = '⏸ Végállás – még látható…';
-  setTimeout(() => {{
-    statusz.textContent = '✓ Lejátszás befejezve.';
-  }}, 3000);
-}});
-
-audio.addEventListener('error', () => {{
-  statusz.textContent = '⚠ A hangfájl nem töltődött be.';
-}});
+audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Narráció lejátszása…';audio.play().catch(()=>{{statusz.textContent='► Kattintson a lejátszáshoz!';}});}});
+audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
+audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Végállás – még látható…';setTimeout(()=>{{statusz.textContent='✓ Lejátszás befejezve.';}},3000);}});
+audio.addEventListener('error',()=>{{statusz.textContent='⚠ A hangfájl nem töltődött be.';}});
 </script>
 </body>
 </html>"""
     return html
-
-# NARRATION_SYSTEM_PROMPT es generate_narration -> src/narrator.py
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Egyedi PGN pipeline – segédfüggvények
@@ -408,7 +281,6 @@ def _parse_pgn(pgn_text: str) -> dict:
 def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
     """Közvetlen UCI subprocess – asyncio-mentes, háttérszálból is működik Windows-on."""
     import subprocess
-
     proc = subprocess.Popen(
         [sf_path],
         stdin=subprocess.PIPE,
@@ -431,45 +303,36 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
                 return line.rstrip()
 
     try:
-        send("uci")
-        expect("uciok")
-        send("isready")
-        expect("readyok")
-
+        send("uci");  expect("uciok")
+        send("isready"); expect("readyok")
         board = chess.Board()
         evals = []
         total = min(len(moves_uci), config.STOCKFISH_MOVES_LIMIT)
-
         for i, uci in enumerate(moves_uci[:total]):
             move = chess.Move.from_uci(uci)
             if move not in board.legal_moves:
                 break
             san = board.san(move)
             board.push(move)
-            fen           = board.fen()
-            side_to_move  = board.turn  # kinek a köre a lépés UTÁN
-
+            fen          = board.fen()
+            side_to_move = board.turn
             send(f"position fen {fen}")
             send("go depth 12")
-
             cp_white  = None
             mate_val  = None
             last_info = ""
-
             while True:
                 line = proc.stdout.readline().rstrip()
                 if "score" in line and line.startswith("info"):
                     last_info = line
                 elif line.startswith("bestmove"):
                     break
-
             if last_info:
                 parts = last_info.split()
                 try:
                     si    = parts.index("score")
                     stype = parts[si + 1]
                     sval  = int(parts[si + 2])
-                    # Stockfish score a soron lévő játékos szemszögéből → fehér perspektíva
                     sign  = 1 if side_to_move == chess.WHITE else -1
                     if stype == "cp":
                         cp_white = sign * sval
@@ -477,7 +340,6 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
                         mate_val = sign * sval
                 except (ValueError, IndexError):
                     pass
-
             evals.append({
                 "move_number": (i // 2) + 1,
                 "color":       "white" if i % 2 == 0 else "black",
@@ -489,14 +351,12 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
             })
             progress["pct"]  = 0.10 + 0.50 * (i + 1) / total
             progress["step"] = f"Stockfish elemzés: {i + 1}/{total} lépés..."
-
     finally:
         try:
             send("quit")
             proc.wait(timeout=3)
         except Exception:
             proc.kill()
-
     return evals
 
 
@@ -522,7 +382,6 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
                 "san": e["san"], "fen": e["fen"]}
                for e in evaluations]
         )
-        # Stockfish-határon túli lépések annotáció nélkül – a tábla végig kövesse a játszmát
         remaining_ucis = game_data["moves_uci"][len(evaluations):]
         if remaining_ucis:
             board = chess.Board()
@@ -561,16 +420,15 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
         generate_audio(tts_text, mp3_path)
 
         progress.update({
-            "step": "✅ Kész! Válaszd ki a \"Saját játszmám\" opciót és nyomj Lejátszást!",
+            "step": "Kész! Válaszd ki a \"Saját játszmám\" opciót és nyomj Lejátszást!",
             "pct":  1.0,
             "done": True,
         })
-
     except Exception as exc:
         tb = traceback.format_exc()
         err_msg = str(exc) or type(exc).__name__
         progress.update({
-            "step":      f"❌ Hiba a(z) »{progress.get('step', '?')}« lépésnél: {err_msg}",
+            "step":      f"Hiba a(z) »{progress.get('step', '?')}« lépésnél: {err_msg}",
             "pct":       progress.get("pct", 0.0),
             "done":      True,
             "has_error": True,
@@ -578,34 +436,420 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
         })
 
 # ─────────────────────────────────────────────────────────────────────────────
+# UI segédfüggvények
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _provider_color(provider: str) -> str:
+    return {
+        "openai":    "#10a37f",
+        "gemini":    "#4285f4",
+        "anthropic": "#cc785c",
+        "mistral":   "#f7630c",
+        "elevenlabs":"#6c4be4",
+    }.get(provider.lower(), "#6b7280")
+
+
+def _badge(label: str, color: str) -> str:
+    return (
+        f'<span style="display:inline-flex;align-items:center;padding:0.2rem 0.6rem;'
+        f'border-radius:99px;font-size:0.7rem;font-weight:600;letter-spacing:0.04em;'
+        f'background:{color}18;color:{color};border:1px solid {color}35;">'
+        f'{label}</span>'
+    )
+
+
+def _inject_css(css: str) -> None:
+    """CSS injektálás Python-Markdown HTML-blokk truncation nélkül.
+
+    A Markdown parser az első üres sornál lezárja a <style> blokkot,
+    ezért az üres sorokat egyre tömörítjük injektálás előtt.
+    """
+    compressed = re.sub(r"\n[ \t]*\n", "\n", css)
+    st.markdown(f"<style>{compressed}</style>", unsafe_allow_html=True)
+
+
+def render_sidebar() -> None:
+    with st.sidebar:
+        st.markdown(
+            '<div style="padding:0.5rem 0 1.5rem;text-align:center;">'
+            '<div style="width:52px;height:52px;background:linear-gradient(135deg,#A81022,#7a0b18);'
+            'border-radius:16px;display:inline-flex;align-items:center;justify-content:center;'
+            'font-size:1.8rem;line-height:1;box-shadow:0 6px 20px rgba(168,16,34,0.3);'
+            'margin-bottom:0.75rem;">&#9818;</div>'
+            '<div style="font-family:\'Space Grotesk\',system-ui,sans-serif;font-size:1.15rem;'
+            'font-weight:700;color:#111827;letter-spacing:-0.02em;">'
+            'Chess<span style="color:#A81022;">Narr</span></div>'
+            '<div style="font-size:0.7rem;color:#9ca3af;letter-spacing:0.06em;'
+            'text-transform:uppercase;margin-top:0.2rem;">AI · Stockfish · TTS</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            '<div style="height:1px;background:rgba(0,0,0,0.08);margin:0 0 1.25rem;"></div>',
+            unsafe_allow_html=True,
+        )
+
+        steps_html = "".join(
+            f'<div style="display:flex;align-items:center;gap:0.65rem;padding:0.45rem 0;">'
+            f'<span style="width:22px;height:22px;border-radius:7px;'
+            f'background:rgba(168,16,34,0.08);border:1px solid rgba(168,16,34,0.18);'
+            f'display:inline-flex;align-items:center;justify-content:center;'
+            f'font-size:0.7rem;font-weight:700;color:#A81022;flex-shrink:0;">{num}</span>'
+            f'<span style="font-size:0.85rem;color:#4b5563;">{icon} {label}</span>'
+            f'</div>'
+            for num, icon, label in [
+                ("1", "📄", "PGN beillesztés"),
+                ("2", "♟", "Stockfish elemzés"),
+                ("3", "🤖", "AI narráció"),
+                ("4", "🔊", "Hangszintézis"),
+            ]
+        )
+        st.markdown(
+            f'<div style="margin-bottom:1.5rem;">'
+            f'<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.09em;'
+            f'color:#9ca3af;font-weight:600;margin-bottom:0.5rem;">Hogyan működik</div>'
+            f'{steps_html}</div>',
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            '<div style="height:1px;background:rgba(0,0,0,0.08);margin:0 0 1.25rem;"></div>',
+            unsafe_allow_html=True,
+        )
+
+        llm_color = _provider_color(config.LLM_PROVIDER)
+        tts_color = _provider_color(config.TTS_PROVIDER)
+        st.markdown(
+            f'<div>'
+            f'<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.09em;'
+            f'color:#9ca3af;font-weight:600;margin-bottom:0.65rem;">Konfiguráció</div>'
+            f'<div style="display:flex;flex-direction:column;gap:0.5rem;">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;">'
+            f'<span style="font-size:0.8rem;color:#6b7280;">LLM</span>'
+            f'{_badge(config.LLM_PROVIDER.upper(), llm_color)}</div>'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;">'
+            f'<span style="font-size:0.8rem;color:#6b7280;">TTS</span>'
+            f'{_badge(config.TTS_PROVIDER.upper(), tts_color)}</div>'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;">'
+            f'<span style="font-size:0.8rem;color:#6b7280;">Mélység</span>'
+            f'{_badge(f"depth {config.STOCKFISH_DEPTH}", "#6b7280")}</div>'
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
+
+
+
+def render_header() -> None:
+    st.markdown(
+        '<div style="padding:0 0 1.1rem;text-align:center;">'
+        '<div style="display:inline-flex;align-items:center;gap:0.9rem;margin-bottom:0.6rem;">'
+        '<div style="width:52px;height:52px;background:linear-gradient(135deg,#A81022 0%,#7a0b18 100%);'
+        'border-radius:15px;display:flex;align-items:center;justify-content:center;'
+        'font-size:1.75rem;line-height:1;color:#fff;'
+        'box-shadow:0 6px 24px rgba(168,16,34,0.35),0 2px 6px rgba(0,0,0,0.15);">&#9818;</div>'
+        '<div style="text-align:left;">'
+        '<div style="font-family:\'Space Grotesk\',system-ui,sans-serif;font-size:1.9rem;'
+        'font-weight:700;color:#111827;letter-spacing:-0.03em;line-height:1;">'
+        'Chess<span style="color:#A81022;">Narr</span></div>'
+        '<div style="font-size:0.72rem;color:#9ca3af;letter-spacing:0.08em;'
+        'text-transform:uppercase;font-weight:500;margin-top:0.3rem;">'
+        'AI-alapú játszma kommentár</div>'
+        '</div></div>'
+        '<div style="width:80px;height:2px;background:linear-gradient(90deg,transparent,#A8102255,transparent);'
+        'margin:0.75rem auto 0;border-radius:99px;"></div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_pipeline_progress(prog: dict) -> None:
+    pct       = prog.get("pct", 0.0)
+    step      = prog.get("step", "")
+    has_error = prog.get("has_error", False)
+    done      = prog.get("done", False)
+
+    st.progress(min(pct, 1.0))
+
+    if has_error:
+        st.error(step)
+        tb = prog.get("traceback", "")
+        if tb:
+            with st.expander("Részletes hibaüzenet"):
+                st.code(tb, language="python")
+        return
+
+    if done and pct >= 1.0:
+        st.success(step)
+        return
+
+    pipeline_steps = [
+        (0.02, 0.10, "📄", "PGN értelmezés"),
+        (0.10, 0.62, "♟",  "Stockfish elemzés"),
+        (0.62, 0.82, "🤖", "AI narráció"),
+        (0.82, 1.00, "🔊", "Hangszintézis"),
+    ]
+
+    rows = []
+    for s_start, s_end, icon, label in pipeline_steps:
+        if pct >= s_end:
+            ind, col_i, bg, border, tc = "✓", "#059669", "rgba(5,150,105,0.08)", "rgba(5,150,105,0.22)", "#059669"
+        elif pct >= s_start:
+            ind, col_i, bg, border, tc = "●", "#A81022", "rgba(168,16,34,0.07)", "rgba(168,16,34,0.25)", "#111827"
+        else:
+            ind, col_i, bg, border, tc = "○", "#d1d5db", "rgba(0,0,0,0.02)", "rgba(0,0,0,0.07)", "#9ca3af"
+        anim = "animation:chpulse 1.4s ease-in-out infinite;" if pct >= s_start and pct < s_end else ""
+        rows.append(
+            f'<div style="display:flex;align-items:center;gap:0.7rem;padding:0.55rem 0.9rem;'
+            f'border-radius:9px;background:{bg};border:1px solid {border};">'
+            f'<span style="color:{col_i};font-size:1rem;width:18px;text-align:center;{anim}">{ind}</span>'
+            f'<span style="font-size:0.95rem;color:{tc};">{icon} {label}</span>'
+            f'</div>'
+        )
+
+    step_safe = step.replace("<", "&lt;").replace(">", "&gt;")
+    st.markdown(
+        f'<style>@keyframes chpulse{{0%,100%{{opacity:1}}50%{{opacity:0.35}}}}</style>'
+        f'<div style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.4rem;">'
+        + "".join(rows)
+        + f'<div style="font-size:0.85rem;color:#9ca3af;padding:0.3rem 0.5rem;'
+          f'font-family:monospace;">{step_safe}</div>'
+          f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Globális CSS  (tömörítve injektálva – lásd _inject_css)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_RAW_CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:          #ffffff;
+  --surf:        #f8f9fb;
+  --surf2:       #f0f2f6;
+  --surf3:       #e5e8ef;
+  --border:      rgba(0,0,0,0.08);
+  --border2:     rgba(0,0,0,0.15);
+  --accent:      #A81022;
+  --accent2:     #c41428;
+  --accent-glow: rgba(168,16,34,0.12);
+  --green:       #059669;
+  --green2:      #10b981;
+  --red:         #dc2626;
+  --blue:        #2563eb;
+  --text:        #111827;
+  --muted:       #6b7280;
+  --faint:       #9ca3af;
+  --radius:      12px;
+  --radius-lg:   20px;
+  --shadow:      0 4px 20px rgba(0,0,0,0.07);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,0.12);
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+
+.stApp{background:var(--bg)!important;min-height:100vh;}
+
+html,body,[class*="css"]{
+  font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+  font-size:17px!important;
+  color:var(--text)!important;
+  -webkit-font-smoothing:antialiased!important;
+  text-rendering:optimizeLegibility!important;
+}
+
+#MainMenu,footer,header,[data-testid="stToolbar"],[data-testid="stDecoration"],.stDeployButton{display:none!important;height:0!important;min-height:0!important;}
+
+[data-testid="stHeader"]{display:none!important;height:0!important;min-height:0!important;}
+
+.main .block-container{max-width:1380px!important;padding:0 2rem 5rem!important;margin:0 auto;}
+
+section.main>div:first-child{padding-top:0!important;}
+
+[data-testid="stAppViewContainer"]>section>div{padding-top:0!important;}
+
+[data-testid="stHorizontalBlock"]{gap:1.25rem!important;align-items:start!important;}
+
+[data-testid="column"]{
+  background:var(--surf)!important;
+  border:1px solid var(--border)!important;
+  border-radius:var(--radius-lg)!important;
+  padding:1.75rem!important;
+  box-shadow:var(--shadow)!important;
+  transition:border-color 0.25s ease,box-shadow 0.25s ease!important;
+}
+
+[data-testid="column"]:hover{border-color:var(--border2)!important;box-shadow:var(--shadow-lg)!important;}
+
+h1,h2,h3,h4{font-family:'Space Grotesk',system-ui,sans-serif!important;letter-spacing:-0.02em!important;color:var(--text)!important;}
+
+h3{font-size:1.2rem!important;font-weight:600!important;margin:0 0 1rem!important;}
+
+label,[data-testid="stWidgetLabel"] p,[data-testid="stTextArea"] label,[data-testid="stSelectbox"] label{
+  color:var(--muted)!important;
+  font-size:0.85rem!important;
+  text-transform:uppercase!important;
+  letter-spacing:0.09em!important;
+  font-weight:600!important;
+}
+
+.stButton>button{
+  width:100%!important;
+  font-family:'Space Grotesk',system-ui,sans-serif!important;
+  font-size:1.08rem!important;
+  font-weight:600!important;
+  letter-spacing:0.02em!important;
+  padding:0.85rem 1.5rem!important;
+  border-radius:10px!important;
+  border:none!important;
+  cursor:pointer!important;
+  transition:all 0.18s cubic-bezier(0.4,0,0.2,1)!important;
+}
+
+[data-testid="baseButton-primary"]{
+  background:linear-gradient(135deg,#A81022 0%,#8a0d1b 100%)!important;
+  color:#ffffff!important;
+  box-shadow:0 4px 18px rgba(168,16,34,0.35),0 1px 3px rgba(0,0,0,0.12)!important;
+}
+
+[data-testid="baseButton-primary"]:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:0 8px 28px rgba(168,16,34,0.5),0 2px 8px rgba(0,0,0,0.12)!important;
+}
+
+[data-testid="baseButton-primary"]:active{transform:translateY(0)!important;}
+
+[data-testid="baseButton-primary"]:disabled{
+  background:var(--surf3)!important;
+  color:var(--faint)!important;
+  box-shadow:none!important;
+  transform:none!important;
+  cursor:not-allowed!important;
+}
+
+[data-testid="baseButton-secondary"]{
+  background:linear-gradient(135deg,#A81022 0%,#8a0d1b 100%)!important;
+  color:#ffffff!important;
+  border:none!important;
+  box-shadow:0 4px 18px rgba(168,16,34,0.35),0 1px 3px rgba(0,0,0,0.12)!important;
+}
+
+[data-testid="baseButton-secondary"]:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:0 8px 28px rgba(168,16,34,0.5),0 2px 8px rgba(0,0,0,0.12)!important;
+}
+
+textarea{
+  background:#ffffff!important;
+  border:1px solid var(--border)!important;
+  border-radius:10px!important;
+  color:var(--text)!important;
+  font-family:'JetBrains Mono','Fira Code','Cascadia Code',monospace!important;
+  font-size:0.95rem!important;
+  line-height:1.65!important;
+  transition:border-color 0.2s ease,box-shadow 0.2s ease!important;
+  padding:0.85rem!important;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05)!important;
+}
+
+textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-glow)!important;outline:none!important;}
+
+textarea::placeholder{color:#d1d5db!important;}
+
+[data-testid="stSelectbox"] [data-baseweb="select"]>div{
+  background:var(--accent)!important;
+  border-color:#8a0d1b!important;
+  border-radius:10px!important;
+  color:#ffffff!important;
+  box-shadow:0 4px 18px rgba(168,16,34,0.3),0 1px 3px rgba(0,0,0,0.1)!important;
+  transition:box-shadow 0.2s!important;
+}
+
+[data-testid="stSelectbox"] [data-baseweb="select"]>div:hover{box-shadow:0 6px 24px rgba(168,16,34,0.45)!important;}
+
+[data-testid="stSelectbox"] [data-baseweb="select"]>div>div{color:#ffffff!important;}
+[data-testid="stSelectbox"] [data-baseweb="select"]>div span{color:#ffffff!important;}
+[data-testid="stSelectbox"] [data-baseweb="select"]>div svg{fill:rgba(255,255,255,0.85)!important;}
+
+[data-baseweb="popover"],[data-baseweb="menu"]{
+  background:#ffffff!important;
+  border:1px solid var(--border2)!important;
+  border-radius:10px!important;
+  box-shadow:var(--shadow-lg)!important;
+}
+
+[data-baseweb="menu"] li{color:var(--text)!important;font-size:1rem!important;}
+[data-baseweb="menu"] li:hover{background:var(--surf)!important;}
+
+[data-testid="stProgress"]{margin:0.4rem 0!important;}
+
+[data-testid="stProgress"]>div{background:var(--surf3)!important;border-radius:99px!important;height:5px!important;overflow:hidden!important;}
+
+[data-testid="stProgress"]>div>div{background:linear-gradient(90deg,var(--accent) 0%,var(--green2) 100%)!important;border-radius:99px!important;transition:width 0.5s ease!important;}
+
+[data-testid="stAlert"]{
+  background:#fff8f8!important;
+  border-radius:10px!important;
+  border:1px solid rgba(168,16,34,0.2)!important;
+  padding:0.85rem 1.1rem!important;
+  color:var(--text)!important;
+}
+
+[data-testid="stAlert"] p,[data-testid="stAlert"] span,[data-testid="stAlert"] div{color:var(--text)!important;font-size:1rem!important;}
+
+.stSuccess{border-color:rgba(5,150,105,0.35)!important;background:rgba(5,150,105,0.07)!important;}
+.stError{border-color:rgba(220,38,38,0.35)!important;background:rgba(220,38,38,0.07)!important;}
+.stWarning{border-color:rgba(168,16,34,0.25)!important;background:#fff8f8!important;}
+.stInfo{border-color:rgba(37,99,235,0.3)!important;background:rgba(37,99,235,0.06)!important;}
+
+[data-testid="stExpander"]{background:var(--surf)!important;border:1px solid var(--border)!important;border-radius:10px!important;}
+
+[data-testid="stExpander"] summary{color:var(--muted)!important;font-size:0.9rem!important;}
+
+[data-testid="stSidebar"]{background:var(--surf)!important;border-right:1px solid var(--border)!important;}
+
+[data-testid="stSidebar"] .block-container{padding:1.5rem 1.25rem!important;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+
+div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
+
+.section-label{
+  font-size:0.82rem;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  font-weight:700;
+  color:#A81022;
+  margin-bottom:0.5rem;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+
+.section-label::after{content:'';flex:1;height:1px;background:rgba(168,16,34,0.15);}
+"""
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Streamlit alkalmazás
 # ─────────────────────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="Sakk narráció",
+    page_title="ChessNarr · Sakk narráció",
     page_icon="♟️",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
-st.markdown("""
-<style>
-  div[data-testid="stVerticalBlock"] > div { gap: 0.5rem; }
-  .stButton button {
-    width: 100%;
-    font-size: 1.1rem;
-    padding: 0.6rem 0;
-    border-radius: 8px;
-  }
-  .pipeline-status {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #333;
-    margin-top: 0.3rem;
-  }
-</style>
-""", unsafe_allow_html=True)
+_inject_css(_RAW_CSS)
 
-st.title("♟️ Sakk narráció")
+render_sidebar()
+render_header()
 
 # ── Session state ─────────────────────────────────────────────────────────────
 
@@ -637,6 +881,24 @@ if st.session_state.playing:
         st.session_state.playing = False
         st.rerun()
 
+    game_display = selected["name"]
+    st.markdown(
+        f'<div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;'
+        f'padding:0.6rem 1.25rem;background:rgba(168,16,34,0.05);'
+        f'border:1px solid rgba(168,16,34,0.15);border-radius:12px;margin-bottom:0.75rem;">'
+        f'<span style="width:8px;height:8px;border-radius:50%;background:#A81022;'
+        f'box-shadow:0 0 8px rgba(168,16,34,0.6);flex-shrink:0;'
+        f'animation:nblink 1.5s ease-in-out infinite;"></span>'
+        f'<span style="font-size:0.82rem;font-weight:600;color:#A81022;letter-spacing:0.03em;">'
+        f'Most játszik</span>'
+        f'<span style="font-size:0.78rem;color:#6b7280;padding:0.15rem 0.6rem;'
+        f'background:rgba(0,0,0,0.05);border-radius:99px;border:1px solid rgba(0,0,0,0.08);">'
+        f'{game_display}</span>'
+        f'</div>'
+        f'<style>@keyframes nblink{{0%,100%{{opacity:1;box-shadow:0 0 8px rgba(168,16,34,0.6);}}50%{{opacity:0.3;box-shadow:0 0 3px rgba(168,16,34,0.3);}}}}</style>',
+        unsafe_allow_html=True,
+    )
+
     narration_data = load_json(selected["json"])
     paragraphs     = narration_data.get("paragraphs", [])
     player_html    = build_player_html(
@@ -644,11 +906,13 @@ if st.session_state.playing:
         narration_data=narration_data,
         autoplay=True,
     )
-    st.components.v1.html(player_html, height=620, scrolling=False)
+    st.components.v1.html(player_html, height=640, scrolling=False)
 
-    if st.button("⏹  Megállít", use_container_width=True):
-        st.session_state.playing = False
-        st.rerun()
+    gap_l, btn_col, gap_r = st.columns([2, 3, 2])
+    with btn_col:
+        if st.button("⏹  Megállítás", use_container_width=True, type="primary"):
+            st.session_state.playing = False
+            st.rerun()
 
 # ── ÁLLÓ MÓD ─────────────────────────────────────────────────────────────────
 
@@ -657,11 +921,11 @@ else:
 
     # ── Bal oszlop: PGN bevitel ───────────────────────────────────────────────
     with col_pgn:
-        st.subheader("Saját játszmád elemzése")
+        st.markdown('<div class="section-label">Saját játszma elemzése</div>', unsafe_allow_html=True)
 
         pgn_text = st.text_area(
-            "Illeszd be a PGN-t:",
-            height=310,
+            "PGN",
+            height=298,
             key="pgn_input",
             placeholder=(
                 '[Event "Live Chess"]\n'
@@ -677,18 +941,13 @@ else:
         )
 
         if st.button(
-            "Elemzés indítása!",
+            "Elemzés indítása",
             disabled=pipeline_is_running,
             use_container_width=True,
             type="primary",
         ):
             if pgn_text.strip():
-                progress = {
-                    "step": "Indítás...",
-                    "pct":  0.0,
-                    "done": False,
-                    "error": None,
-                }
+                progress = {"step": "Indítás...", "pct": 0.0, "done": False, "error": None}
                 st.session_state.pipeline_progress = progress
                 t = threading.Thread(
                     target=run_custom_pipeline,
@@ -701,38 +960,31 @@ else:
             else:
                 st.warning("Kérlek illessz be egy PGN-t az elemzés megkezdéséhez!")
 
-        # Folyamat jelzők
         prog = st.session_state.pipeline_progress
         if prog is not None:
-            st.progress(prog.get("pct", 0.0))
-            step      = prog.get("step", "")
-            has_error = prog.get("has_error", False)
-            done      = prog.get("done", False)
-            if has_error:
-                st.error(step)
-                tb = prog.get("traceback", "")
-                if tb:
-                    with st.expander("Részletes hibaüzenet (fejlesztőknek)"):
-                        st.code(tb, language="python")
-            elif done and prog.get("pct", 0) >= 1.0:
-                st.success(step)
-            else:
-                st.markdown(
-                    f'<div class="pipeline-status">{step}</div>',
-                    unsafe_allow_html=True,
-                )
+            render_pipeline_progress(prog)
 
     # ── Jobb oszlop: játszmaválasztó + sakktábla ──────────────────────────────
     with col_board:
         if not games:
-            st.info(
-                "Még nincs lejátszható játszma. "
-                "Futtasd le a `notebooks/jatek_elemzese.ipynb` notebookot, "
-                "vagy elemezd a saját játszmádat a bal oldali panelen!"
+            st.markdown(
+                '<div style="display:flex;flex-direction:column;align-items:center;'
+                'justify-content:center;padding:4rem 1.5rem;text-align:center;">'
+                '<div style="font-size:3.5rem;opacity:0.1;margin-bottom:1.25rem;">&#9818;</div>'
+                '<div style="font-size:0.95rem;font-weight:600;color:#9ca3af;margin-bottom:0.5rem;">'
+                'Nincs elemzett játszma</div>'
+                '<div style="font-size:0.8rem;color:#d1d5db;line-height:1.7;max-width:280px;">'
+                'Illeszd be a PGN-t a bal panelen és indítsd el az elemzést, '
+                'vagy futtasd le a <code style="color:#9ca3af;background:rgba(0,0,0,0.05);'
+                'padding:0 0.3rem;border-radius:4px;">jatek_elemzese.ipynb</code> notebookot.'
+                '</div></div>',
+                unsafe_allow_html=True,
             )
         else:
+            st.markdown('<div class="section-label">Játszma kiválasztása</div>', unsafe_allow_html=True)
+
             selected_name = st.selectbox(
-                "Válassz játszmát:",
+                "Játszma",
                 options=game_names,
                 label_visibility="collapsed",
             )
@@ -745,16 +997,35 @@ else:
             paragraphs     = narration_data.get("paragraphs", [])
             all_fens       = get_all_fens(narration_data, paragraphs)
             init_fen       = all_fens[0] if all_fens else chess.STARTING_FEN
+            move_count     = len(all_fens) - 1
+            para_count     = len(paragraphs)
             svg            = fen_to_svg(init_fen)
 
+            # Lépésszám a selectbox alatt
+            if move_count:
+                st.markdown(
+                    f'<div style="font-size:0.85rem;color:#9ca3af;margin:-0.15rem 0 0.25rem;'
+                    f'padding:0 0.15rem;">{move_count} lépés</div>',
+                    unsafe_allow_html=True,
+                )
+
+            # Sakktábla – teljes szélességgel, maximális méretben
             st.components.v1.html(
-                f'<style>svg{{width:100%;height:auto;display:block}}</style>'
-                f'<div style="width:100%;max-width:500px;margin:0 auto">{svg}</div>',
-                height=520,
+                f'<style>'
+                f'html,body{{margin:0;padding:0;background:#f8f9fb;'
+                f'display:flex;align-items:flex-start;justify-content:center;}}'
+                f'.frame{{width:min(calc(100vw - 8px),calc(100vh - 10px));'
+                f'border-radius:12px;overflow:hidden;'
+                f'box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 12px 40px rgba(0,0,0,0.10);'
+                f'margin:4px auto 0;}}'
+                f'svg{{width:100%;height:auto;display:block;}}'
+                f'</style>'
+                f'<div class="frame">{svg}</div>',
+                height=568,
                 scrolling=False,
             )
 
-            if st.button("▶  Lejátszás", use_container_width=True):
+            if st.button("▶  Lejátszás", use_container_width=True, type="primary"):
                 st.session_state.playing = True
                 st.rerun()
 
