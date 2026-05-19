@@ -62,6 +62,89 @@ _DEMO_CARD_HTML = """
 </div>
 """
 
+# Globális töltőkép – a document.body-ra kerül, Streamlit React-rootján kívül,
+# ezért túléli a rerenderelést. Megjelenik a Play kattintáskor, eltűnik mikor
+# a hang lejátszásra kész (chess-narr-started postMessage).
+_OVERLAY_INJECTOR_HTML = """<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:transparent;">
+<script>
+(function(){
+  try{
+    var par=window.parent, doc=par.document;
+
+    /* ── 1. postMessage hallgató (egyszer regisztrálva) ─────────────────── */
+    if(!par._chNarrMsg){
+      par._chNarrMsg=true;
+      par.addEventListener('message',function(e){
+        if(!e.data||e.data.type!=='chess-narr-started')return;
+        var ol=doc.getElementById('chess-gl-ol');
+        if(!ol)return;
+        ol.style.transition='opacity 0.55s ease';
+        ol.style.opacity='0';
+        setTimeout(function(){
+          ol.style.display='none';
+          ol.style.opacity='1';
+          ol.style.transition='';
+        },580);
+      });
+    }
+
+    /* ── 2. Overlay létrehozása (egyszer) ──────────────────────────────── */
+    if(!doc.getElementById('chess-gl-ol')){
+      var s=doc.createElement('style');
+      s.textContent=
+        '#chess-gl-ol{position:fixed;inset:0;z-index:99999;background:#f8f9fb;'+
+        'display:none;flex-direction:column;align-items:center;justify-content:center;'+
+        'gap:1.1rem;font-family:Inter,system-ui,sans-serif;}'+
+        '#chess-gl-ol .gl-logo{font-family:"Space Grotesk",system-ui,sans-serif;'+
+        'font-size:1.25rem;font-weight:700;color:#111827;letter-spacing:-0.02em;'+
+        'margin-bottom:0.5rem;}'+
+        '#chess-gl-ol .gl-logo span{color:#A81022;}'+
+        '#chess-gl-ol .gl-wrap{position:relative;width:64px;height:64px;}'+
+        '#chess-gl-ol .gl-ring{position:absolute;inset:0;border-radius:50%;'+
+        'border:4px solid rgba(168,16,34,0.13);border-top-color:#A81022;'+
+        'animation:glSpin 0.88s linear infinite;}'+
+        '#chess-gl-ol .gl-piece{position:absolute;top:50%;left:50%;'+
+        'transform:translate(-50%,-50%);font-size:2rem;color:#A81022;'+
+        'animation:glBounce 1.35s cubic-bezier(.36,.07,.19,.97) infinite;line-height:1;}'+
+        '#chess-gl-ol .gl-txt{font-size:0.82rem;font-weight:700;color:#A81022;'+
+        'letter-spacing:0.1em;text-transform:uppercase;}'+
+        '#chess-gl-ol .gl-sub{font-size:0.7rem;color:#9ca3af;letter-spacing:0.04em;}'+
+        '@keyframes glSpin{to{transform:rotate(360deg);}}'+
+        '@keyframes glBounce{0%,100%{transform:translate(-50%,-42%);}'+
+        '50%{transform:translate(-50%,-72%);}}';
+      doc.head.appendChild(s);
+
+      var ol=doc.createElement('div');
+      ol.id='chess-gl-ol';
+      ol.innerHTML=
+        '<div class="gl-logo">Chess<span>Narr</span></div>'+
+        '<div class="gl-wrap">'+
+          '<div class="gl-ring"></div>'+
+          '<div class="gl-piece">&#9818;</div>'+
+        '</div>'+
+        '<div class="gl-txt">Betöltés</div>'+
+        '<div class="gl-sub">A narráció töltése folyamatban&hellip;</div>';
+      doc.body.appendChild(ol);
+    }
+
+    /* ── 3. Kattintásfigyelő (minden rendernél frissítve) ──────────────── */
+    if(par._chClickH) doc.removeEventListener('click',par._chClickH);
+    par._chClickH=function(e){
+      var btn=e.target.closest('button');
+      if(btn&&/Play/.test(btn.textContent)){
+        var ol=doc.getElementById('chess-gl-ol');
+        if(ol){ol.style.display='flex';ol.style.opacity='1';ol.style.transition='';}
+      }
+    };
+    doc.addEventListener('click',par._chClickH);
+
+  }catch(ex){}
+})();
+</script>
+</body></html>"""
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Adatbetöltés
 # ─────────────────────────────────────────────────────────────────────────────
@@ -285,8 +368,9 @@ function mutatFen(idx){{
   }});}}
 }}
 function hideLoadOverlay(){{var ol=document.getElementById('load-overlay');if(ol){{ol.style.opacity='0';setTimeout(function(){{if(ol&&ol.parentNode)ol.parentNode.removeChild(ol);}},480);}}}}
-audio.addEventListener('loadedmetadata',()=>{{hideLoadOverlay();statusz.textContent='► Playing narration…';audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});}});
-audio.addEventListener('error',()=>{{hideLoadOverlay();}});
+function notifyParentLoaded(){{try{{window.parent.postMessage({{type:'chess-narr-started'}},'*');}}catch(e){{}}}}
+audio.addEventListener('loadedmetadata',()=>{{hideLoadOverlay();notifyParentLoaded();statusz.textContent='► Playing narration…';audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});}});
+audio.addEventListener('error',()=>{{hideLoadOverlay();notifyParentLoaded();}});
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
@@ -742,6 +826,10 @@ if "last_game" not in st.session_state:
 games      = find_games()
 game_names = [g["name"] for g in games]
 game_map   = {g["name"]: g for g in games}
+
+# Globális töltő overlay – minden rendernél injektálva, document.body-ra kerül,
+# ezért túléli a Streamlit rerenderelést. Asztali és mobilnézeten egyaránt aktív.
+stc.html(_OVERLAY_INJECTOR_HTML, height=0, scrolling=False)
 
 # ── LEJÁTSZÓ MÓD ─────────────────────────────────────────────────────────────
 
