@@ -271,7 +271,7 @@ audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Playing n
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
-(function(){{function setH(){{try{{var h=Math.max(400,window.parent.innerHeight-155);window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
+(function(){{function setH(){{try{{var vw=window.parent.innerWidth;var vh=window.parent.innerHeight;var h;if(vw<768){{var bsz=Math.min(vw-12,vh-78);h=Math.max(360,bsz+80);}}else{{h=Math.max(400,vh-155);}}window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
 </script>
 </body>
 </html>"""
@@ -624,6 +624,52 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 .chess-board-wrap::before{content:'';position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.18) 50%,transparent 100%);transform:skewX(-15deg);pointer-events:none;z-index:10;transition:none;}
 .chess-board-wrap:hover::before{left:150%;transition:left 0.55s ease;}
 .chess-board-wrap svg{width:100%!important;display:block;}
+
+.mobile-top-spacer{display:none;}
+
+@media (max-width:768px){
+  /* ── Csak függőleges görgetés, semmi vízszintes ─────────────────────── */
+  html,body{
+    height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;
+    max-width:100vw!important;touch-action:pan-y!important;
+  }
+  .stApp{
+    height:auto!important;min-height:100svh!important;
+    overflow-y:auto!important;overflow-x:hidden!important;max-width:100vw!important;
+  }
+  [data-testid="stAppViewContainer"]{
+    height:auto!important;overflow-y:auto!important;
+    overflow-x:hidden!important;max-width:100vw!important;
+  }
+  [data-testid="stMain"],[data-testid="stMainBlockContainer"]{
+    overflow-x:hidden!important;overflow-y:visible!important;
+    height:auto!important;max-width:100vw!important;
+  }
+  /* ── Minimális alsó padding: görgetés megáll a Play gombnál ─────────── */
+  .main .block-container{
+    padding:0.4rem 0.75rem 0.5rem!important;
+    max-width:100vw!important;overflow-x:hidden!important;
+  }
+  [data-testid="stMainBlockContainer"]{padding-bottom:0.5rem!important;}
+  /* ── Oszlopok egymás alá, 100% széles ───────────────────────────────── */
+  [data-testid="stHorizontalBlock"]{
+    flex-direction:column!important;gap:0.5rem!important;width:100%!important;
+  }
+  [data-testid="column"]{min-width:100%!important;width:100%!important;max-width:100%!important;}
+  /* ── Üres spacer-oszlopok elrejtése (gombsor középre igazítás) ────────
+     Desktop-on [_, btn, _] oszlopok centrázzák a gombot; mobilon elrejtjük. */
+  [data-testid="column"]:has([data-testid="stVerticalBlock"]:empty),
+  [data-testid="column"]:has([data-testid="stVerticalBlock"]:not(:has(*))){
+    display:none!important;padding:0!important;margin:0!important;min-height:0!important;
+  }
+  /* ── Elemek közti rés csökkentése ───────────────────────────────────── */
+  [data-testid="stVerticalBlock"]{gap:0.4rem!important;}
+  div[data-testid="stVerticalBlock"]>div{gap:0.4rem!important;}
+  /* ── Sakktábla méretezés ─────────────────────────────────────────────── */
+  .chess-board-wrap{width:min(100%,calc(100vw - 24px))!important;margin:4px auto!important;}
+  /* ── Mobilos spacer megjelenítése ────────────────────────────────────── */
+  .mobile-top-spacer{display:block!important;height:0.75rem!important;}
+}
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -689,7 +735,7 @@ if st.session_state.playing:
         narration_data=narration_data,
         autoplay=True,
     )
-    stc.html(player_html, height=540, scrolling=False)
+    stc.html(player_html, height=460, scrolling=False)
 
     st.markdown('<div id="ch-btn-row" style="height:0;overflow:hidden;"></div>', unsafe_allow_html=True)
     gap_l, btn_col, gap_r = st.columns([2, 3, 2])
@@ -723,6 +769,7 @@ else:
                 unsafe_allow_html=True,
             )
         else:
+            st.markdown('<div class="mobile-top-spacer"></div>', unsafe_allow_html=True)
             st.markdown('<div class="section-label">Select a game</div>', unsafe_allow_html=True)
 
             selected_name = st.selectbox(
