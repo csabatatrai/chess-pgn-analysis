@@ -271,7 +271,7 @@ audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Playing n
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
-(function(){{function setH(){{try{{var h=Math.max(400,window.parent.innerHeight-260);window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
+(function(){{function setH(){{try{{var h=Math.max(400,window.parent.innerHeight-155);window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
 </script>
 </body>
 </html>"""
@@ -689,8 +689,9 @@ if st.session_state.playing:
         narration_data=narration_data,
         autoplay=True,
     )
-    stc.html(player_html, height=490, scrolling=False)
+    stc.html(player_html, height=540, scrolling=False)
 
+    st.markdown('<div id="ch-btn-row" style="height:0;overflow:hidden;"></div>', unsafe_allow_html=True)
     gap_l, btn_col, gap_r = st.columns([2, 3, 2])
     with btn_col:
         if st.button("← Back", use_container_width=True, type="primary"):
