@@ -1,5 +1,7 @@
 # Chess PGN Analysis & Narration
 
+![Plycount Distribution](output/plots/plycount.png)
+
 Sakkjátszmák elemzésére, LLM-alapú narrációgenerálásra és interaktív lejátszásra épített pipeline, jelenleg még csak lokálisan futtatható!
 
 **Ellenőrizd, hogy a stockfish benne van-e a gyökérkönyvtárban, ha nincs, manuálisan innen letölthető, főkönyvtárba kicsomagolandó: https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-windows-x86-64-avx2.zip**
