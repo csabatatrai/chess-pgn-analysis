@@ -368,9 +368,26 @@ function mutatFen(idx){{
   }});}}
 }}
 function hideLoadOverlay(){{var ol=document.getElementById('load-overlay');if(ol){{ol.style.opacity='0';setTimeout(function(){{if(ol&&ol.parentNode)ol.parentNode.removeChild(ol);}},480);}}}}
-function notifyParentLoaded(){{try{{window.parent.postMessage({{type:'chess-narr-started'}},'*');}}catch(e){{}}}}
-audio.addEventListener('loadedmetadata',()=>{{hideLoadOverlay();notifyParentLoaded();statusz.textContent='► Playing narration…';audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});}});
-audio.addEventListener('error',()=>{{hideLoadOverlay();notifyParentLoaded();}});
+var _narrReady=false;
+function onNarrReady(){{
+  if(_narrReady)return;_narrReady=true;
+  hideLoadOverlay();
+  /* Parent overlay elrejtése: közvetlen DOM (same-origin), fallback postMessage */
+  try{{
+    var _ol=window.parent.document.getElementById('chess-gl-ol');
+    if(_ol){{_ol.style.transition='opacity 0.55s ease';_ol.style.opacity='0';
+      setTimeout(function(){{_ol.style.display='none';_ol.style.opacity='1';_ol.style.transition='';}},580);}}
+  }}catch(_e){{try{{window.parent.postMessage({{type:'chess-narr-started'}},'*');}}catch(_x){{}}}}
+  statusz.textContent='► Playing narration…';
+  audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});
+}}
+/* Több esemény: base64 audionál loadedmetadata elszalad a listener előtt */
+['loadedmetadata','canplay','play'].forEach(function(ev){{audio.addEventListener(ev,onNarrReady);}});
+/* Garantált fallback: ha a hang tényleg elindul, az overlay biztos eltűnik */
+audio.addEventListener('timeupdate',function(){{if(!_narrReady&&audio.currentTime>0.1)onNarrReady();}});
+audio.addEventListener('error',()=>{{onNarrReady();}});
+/* Azonnali ellenőrzés – base64 audio esetén readyState>=1 már script futásakor */
+if(audio.readyState>=1)setTimeout(onNarrReady,0);
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
@@ -762,6 +779,7 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
   .main .block-container{
     width:100%!important;max-width:100%!important;
     padding:0.4rem 0.75rem 0.5rem!important;
+    padding-left:0.75rem!important; /* ← MOBILOS IGAZÍTÁS: növeld jobbra toláshoz (pl. 1.5rem, 2rem…) */
     margin:0 auto!important;
     overflow-x:hidden!important;box-sizing:border-box!important;
   }
@@ -826,10 +844,6 @@ if "last_game" not in st.session_state:
 games      = find_games()
 game_names = [g["name"] for g in games]
 game_map   = {g["name"]: g for g in games}
-
-# Globális töltő overlay – minden rendernél injektálva, document.body-ra kerül,
-# ezért túléli a Streamlit rerenderelést. Asztali és mobilnézeten egyaránt aktív.
-stc.html(_OVERLAY_INJECTOR_HTML, height=0, scrolling=False)
 
 # ── LEJÁTSZÓ MÓD ─────────────────────────────────────────────────────────────
 
@@ -941,6 +955,9 @@ else:
             if st.button("▶  Play", use_container_width=True, type="primary"):
                 st.session_state.playing = True
                 st.rerun()
+
+    # ── Globális töltő overlay (tartalom után, 0px, nem tolja le a layout-ot) ──
+    stc.html(_OVERLAY_INJECTOR_HTML, height=0, scrolling=False)
 
     # ── Selectbox keresés tiltása < 10 játszma esetén ────────────────────────
     if len(games) < 10:
