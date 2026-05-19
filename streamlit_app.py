@@ -30,7 +30,7 @@ from src.tts_client import generate_audio
 from src.narrator import generate_narration
 
 CUSTOM_GAME_STEM    = "sajat_jatszma"
-CUSTOM_GAME_DISPLAY = "Saját játszmám"
+CUSTOM_GAME_DISPLAY = "My game"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Adatbetöltés
@@ -196,7 +196,7 @@ html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direc
   <div id="board-b" style="z-index:1;"></div>
 </div>
 <div id="info">
-  <span id="statusz">&#9654; Betöltés…</span>
+  <span id="statusz">&#9654; Loading…</span>
   <div id="pbar-wrap"><div id="pbar-fill"></div></div>
 </div>
 <audio id="narr" {autoplay_attr} src="data:audio/mpeg;base64,{mp3_data}" style="display:none"></audio>
@@ -233,10 +233,10 @@ function mutatFen(idx){{
     updatePbar(lastIdx);
   }});}}
 }}
-audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Narráció lejátszása…';audio.play().catch(()=>{{statusz.textContent='► Kattintson a lejátszáshoz!';}});}});
+audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Playing narration…';audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});}});
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
-audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Végállás – még látható…';setTimeout(()=>{{statusz.textContent='✓ Lejátszás befejezve.';}},3000);}});
-audio.addEventListener('error',()=>{{statusz.textContent='⚠ A hangfájl nem töltődött be.';}});
+audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
+audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
 (function(){{function setH(){{try{{var h=Math.max(450,window.parent.innerHeight-130);window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');}}catch(e){{}}}}setH();window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});setTimeout(setH,300);}})();
 </script>
 </body>
@@ -268,18 +268,18 @@ def _find_stockfish() -> str | None:
 def _parse_pgn(pgn_text: str) -> dict:
     game = chess.pgn.read_game(io.StringIO(pgn_text.strip()))
     if game is None:
-        raise ValueError("Nem sikerült értelmezni a PGN-t! Ellenőrizd a formátumot.")
+        raise ValueError("Failed to parse PGN! Check the format.")
     moves_uci = []
     board = game.board()
     for move in game.mainline_moves():
         moves_uci.append(move.uci())
         board.push(move)
     if not moves_uci:
-        raise ValueError("Nem találtam lépéseket a PGN-ben!")
+        raise ValueError("No moves found in the PGN!")
     headers = dict(game.headers)
     return {
-        "white":     headers.get("White", "Fehér"),
-        "black":     headers.get("Black", "Fekete"),
+        "white":     headers.get("White", "White"),
+        "black":     headers.get("Black", "Black"),
         "white_elo": headers.get("WhiteElo", "?"),
         "black_elo": headers.get("BlackElo", "?"),
         "eco":       headers.get("ECO", "?"),
@@ -309,7 +309,7 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
         while True:
             line = proc.stdout.readline()
             if not line:
-                raise RuntimeError("Stockfish váratlanul leállt!")
+                raise RuntimeError("Stockfish terminated unexpectedly!")
             if line.startswith(prefix):
                 return line.rstrip()
 
@@ -361,7 +361,7 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
                 "fen":         fen,
             })
             progress["pct"]  = 0.10 + 0.50 * (i + 1) / total
-            progress["step"] = f"Stockfish elemzés: {i + 1}/{total} lépés..."
+            progress["step"] = f"Stockfish analysis: {i + 1}/{total} moves..."
     finally:
         try:
             send("quit")
@@ -374,17 +374,17 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
 def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
     """Teljes pipeline futtatása egyedi PGN-re (háttérszálon hívva)."""
     try:
-        progress.update({"step": "PGN értelmezése...", "pct": 0.02})
+        progress.update({"step": "Parsing PGN...", "pct": 0.02})
         game_data = _parse_pgn(pgn_text)
 
-        progress.update({"step": "Stockfish keresése...", "pct": 0.07})
+        progress.update({"step": "Locating Stockfish...", "pct": 0.07})
         sf_path = _find_stockfish()
         if not sf_path:
             raise RuntimeError(
-                "Stockfish nem található! Telepítsd, vagy add meg az elérési utat config.py-ban."
+                "Stockfish not found! Install it or set the path in config.py."
             )
 
-        progress.update({"step": "Stockfish elemzés indítása...", "pct": 0.10})
+        progress.update({"step": "Starting Stockfish analysis...", "pct": 0.10})
         evaluations = _stockfish_analyze(game_data["moves_uci"], progress, sf_path)
 
         moves_for_json = (
@@ -411,7 +411,7 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
                 })
 
         progress.update({
-            "step": "LLM narráció generálása (API hívás, néhány másodperc)...",
+            "step": "Generating LLM narration (API call, a few seconds)...",
             "pct":  0.62,
         })
         narration_json = generate_narration(game_data, evaluations)
@@ -419,13 +419,13 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
         narration_json["black"] = game_data["black"]
         narration_json["moves"] = moves_for_json
 
-        progress.update({"step": "Narráció JSON mentése...", "pct": 0.78})
+        progress.update({"step": "Saving narration JSON...", "pct": 0.78})
         json_path = os.path.join(config.LLM_ANALYSIS_JSON_DIR, f"{CUSTOM_GAME_STEM}.json")
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(narration_json, f, ensure_ascii=False, indent=2)
 
         progress.update({
-            "step": "Hangfájl generálása TTS-sel (1-2 perc)...",
+            "step": "Generating audio with TTS (1–2 min)...",
             "pct":  0.82,
         })
         tts_text = "\n\n".join(p["text"] for p in narration_json.get("paragraphs", []))
@@ -433,7 +433,7 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
         generate_audio(tts_text, mp3_path)
 
         progress.update({
-            "step": "Kész! Válaszd ki a \"Saját játszmám\" opciót és nyomj Lejátszást!",
+            "step": "Done! Select \"My game\" and press Play!",
             "pct":  1.0,
             "done": True,
         })
@@ -441,7 +441,7 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
         tb = traceback.format_exc()
         err_msg = str(exc) or type(exc).__name__
         progress.update({
-            "step":      f"Hiba a(z) »{progress.get('step', '?')}« lépésnél: {err_msg}",
+            "step":      f"Error in step »{progress.get('step', '?')}«: {err_msg}",
             "pct":       progress.get("pct", 0.0),
             "done":      True,
             "has_error": True,
@@ -512,16 +512,16 @@ def render_sidebar() -> None:
             f'<span style="font-size:0.85rem;color:#4b5563;">{icon} {label}</span>'
             f'</div>'
             for num, icon, label in [
-                ("1", "📄", "PGN beillesztés"),
-                ("2", "♟", "Stockfish elemzés"),
-                ("3", "🤖", "AI narráció"),
-                ("4", "🔊", "Hangszintézis"),
+                ("1", "📄", "PGN input"),
+                ("2", "♟", "Stockfish analysis"),
+                ("3", "🤖", "AI narration"),
+                ("4", "🔊", "Speech synthesis"),
             ]
         )
         st.markdown(
             f'<div style="margin-bottom:1.5rem;">'
             f'<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.09em;'
-            f'color:#9ca3af;font-weight:600;margin-bottom:0.5rem;">Hogyan működik</div>'
+            f'color:#9ca3af;font-weight:600;margin-bottom:0.5rem;">How it works</div>'
             f'{steps_html}</div>',
             unsafe_allow_html=True,
         )
@@ -536,7 +536,7 @@ def render_sidebar() -> None:
         st.markdown(
             f'<div>'
             f'<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.09em;'
-            f'color:#9ca3af;font-weight:600;margin-bottom:0.65rem;">Konfiguráció</div>'
+            f'color:#9ca3af;font-weight:600;margin-bottom:0.65rem;">Configuration</div>'
             f'<div style="display:flex;flex-direction:column;gap:0.5rem;">'
             f'<div style="display:flex;justify-content:space-between;align-items:center;">'
             f'<span style="font-size:0.8rem;color:#6b7280;">LLM</span>'
@@ -545,7 +545,7 @@ def render_sidebar() -> None:
             f'<span style="font-size:0.8rem;color:#6b7280;">TTS</span>'
             f'{_badge(config.TTS_PROVIDER.upper(), tts_color)}</div>'
             f'<div style="display:flex;justify-content:space-between;align-items:center;">'
-            f'<span style="font-size:0.8rem;color:#6b7280;">Mélység</span>'
+            f'<span style="font-size:0.8rem;color:#6b7280;">Depth</span>'
             f'{_badge(f"depth {config.STOCKFISH_DEPTH}", "#6b7280")}</div>'
             f'</div></div>',
             unsafe_allow_html=True,
@@ -567,7 +567,7 @@ def render_header() -> None:
         'Chess<span style="color:#A81022;">Narr</span></div>'
         '<div style="font-size:0.72rem;color:#9ca3af;letter-spacing:0.08em;'
         'text-transform:uppercase;font-weight:500;margin-top:0.3rem;">'
-        'AI-alapú játszma kommentár</div>'
+        'AI-powered game commentary</div>'
         '</div></div>'
         '<div style="width:80px;height:2px;background:linear-gradient(90deg,transparent,#A8102255,transparent);'
         'margin:0.75rem auto 0;border-radius:99px;"></div>'
@@ -588,7 +588,7 @@ def render_pipeline_progress(prog: dict) -> None:
         st.error(step)
         tb = prog.get("traceback", "")
         if tb:
-            with st.expander("Részletes hibaüzenet"):
+            with st.expander("Error details"):
                 st.code(tb, language="python")
         return
 
@@ -597,10 +597,10 @@ def render_pipeline_progress(prog: dict) -> None:
         return
 
     pipeline_steps = [
-        (0.02, 0.10, "📄", "PGN értelmezés"),
-        (0.10, 0.62, "♟",  "Stockfish elemzés"),
-        (0.62, 0.82, "🤖", "AI narráció"),
-        (0.82, 1.00, "🔊", "Hangszintézis"),
+        (0.02, 0.10, "📄", "PGN parsing"),
+        (0.10, 0.62, "♟",  "Stockfish analysis"),
+        (0.62, 0.82, "🤖", "AI narration"),
+        (0.82, 1.00, "🔊", "Speech synthesis"),
     ]
 
     rows = []
@@ -852,6 +852,7 @@ textarea{
   transition:border-color 0.2s ease,box-shadow 0.2s ease!important;
   padding:0.85rem!important;
   box-shadow:0 1px 4px rgba(0,0,0,0.05)!important;
+  caret-color:#A81022!important;
 }
 
 textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-glow)!important;outline:none!important;}
@@ -967,7 +968,7 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 # ─────────────────────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="ChessNarrator · Sakk narráció",
+    page_title="ChessNarrator · Chess narration",
     page_icon="♟️",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -1039,7 +1040,7 @@ if st.session_state.playing:
 
     gap_l, btn_col, gap_r = st.columns([2, 3, 2])
     with btn_col:
-        if st.button("← Visszalépés", use_container_width=True, type="primary"):
+        if st.button("← Back", use_container_width=True, type="primary"):
             st.session_state.playing = False
             st.rerun()
 
@@ -1050,7 +1051,7 @@ else:
 
     # ── Bal oszlop: PGN bevitel ───────────────────────────────────────────────
     with col_pgn:
-        st.markdown('<div class="section-label">Saját játszma elemzése</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-label">Analyse your game</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="pgn-selectbox-placeholder"></div>', unsafe_allow_html=True)
         pgn_text = st.text_area(
@@ -1060,14 +1061,14 @@ else:
             label_visibility="collapsed",
             placeholder=(
                 '[Event "Live Chess"]\n'
-                '[White "Fehér"]\n'
-                '[Black "Fekete"]\n'
+                '[White "White"]\n'
+                '[Black "Black"]\n'
                 '[Result "1-0"]\n\n'
                 "1. e4 e5 2. Nf3 Nc6 3. Bb5 ..."
             ),
             help=(
-                "Bármilyen standard PGN formátum elfogadott – "
-                "fejléc nélkül, csak lépésekkel is működik."
+                "Any standard PGN format is accepted – "
+                "headers are optional, moves-only works too."
             ),
         )
 
@@ -1083,16 +1084,16 @@ else:
                 'justify-content:center;padding:4rem 1.5rem;text-align:center;">'
                 '<div style="font-size:3.5rem;opacity:0.1;margin-bottom:1.25rem;">&#9818;</div>'
                 '<div style="font-size:0.95rem;font-weight:600;color:#9ca3af;margin-bottom:0.5rem;">'
-                'Nincs elemzett játszma</div>'
+                'No analysed games</div>'
                 '<div style="font-size:0.8rem;color:#d1d5db;line-height:1.7;max-width:280px;">'
-                'Illeszd be a PGN-t a bal panelen és indítsd el az elemzést, '
-                'vagy futtasd le a <code style="color:#9ca3af;background:rgba(0,0,0,0.05);'
-                'padding:0 0.3rem;border-radius:4px;">jatek_elemzese.ipynb</code> notebookot.'
+                'Paste a PGN in the left panel and start the analysis, '
+                'or run the <code style="color:#9ca3af;background:rgba(0,0,0,0.05);'
+                'padding:0 0.3rem;border-radius:4px;">jatek_elemzese.ipynb</code> notebook.'
                 '</div></div>',
                 unsafe_allow_html=True,
             )
         else:
-            st.markdown('<div class="section-label">Játszma kiválasztása</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-label">Select a game</div>', unsafe_allow_html=True)
 
             selected_name = st.selectbox(
                 "Játszma",
@@ -1115,7 +1116,7 @@ else:
             if move_count:
                 st.markdown(
                     f'<div style="font-size:0.85rem;color:#9ca3af;margin:-0.15rem 0 0.25rem;'
-                    f'padding:0 0.15rem;">{move_count} lépés</div>',
+                    f'padding:0 0.15rem;">{move_count} ply (1/2 move)</div>',
                     unsafe_allow_html=True,
                 )
 
@@ -1129,13 +1130,13 @@ else:
     btn_col1, btn_col2 = st.columns([1, 1], gap="large")
     with btn_col1:
         if st.button(
-            "Elemzés indítása",
+            "Start analysis",
             disabled=pipeline_is_running,
             use_container_width=True,
             type="primary",
         ):
             if pgn_text.strip():
-                progress = {"step": "Indítás...", "pct": 0.0, "done": False, "error": None}
+                progress = {"step": "Starting...", "pct": 0.0, "done": False, "error": None}
                 st.session_state.pipeline_progress = progress
                 t = threading.Thread(
                     target=run_custom_pipeline,
@@ -1149,7 +1150,7 @@ else:
                 pass
     with btn_col2:
         if games:
-            if st.button("▶  Lejátszás", use_container_width=True, type="primary"):
+            if st.button("▶  Play", use_container_width=True, type="primary"):
                 st.session_state.playing = True
                 st.rerun()
 
