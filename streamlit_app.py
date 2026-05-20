@@ -30,6 +30,89 @@ from src.llm_client import generate_text
 from src.tts_client import generate_audio
 from src.narrator import generate_narration
 
+# Globális töltőkép – a document.body-ra kerül, Streamlit React-rootján kívül,
+# ezért túléli a rerenderelést. Megjelenik a Play kattintáskor, eltűnik mikor
+# a hang lejátszásra kész (chess-narr-started postMessage).
+_OVERLAY_INJECTOR_HTML = """<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:transparent;">
+<script>
+(function(){
+  try{
+    var par=window.parent, doc=par.document;
+
+    /* ── 1. postMessage hallgató (egyszer regisztrálva) ─────────────────── */
+    if(!par._chNarrMsg){
+      par._chNarrMsg=true;
+      par.addEventListener('message',function(e){
+        if(!e.data||e.data.type!=='chess-narr-started')return;
+        var ol=doc.getElementById('chess-gl-ol');
+        if(!ol)return;
+        ol.style.transition='opacity 0.55s ease';
+        ol.style.opacity='0';
+        setTimeout(function(){
+          ol.style.display='none';
+          ol.style.opacity='1';
+          ol.style.transition='';
+        },580);
+      });
+    }
+
+    /* ── 2. Overlay létrehozása (egyszer) ──────────────────────────────── */
+    if(!doc.getElementById('chess-gl-ol')){
+      var s=doc.createElement('style');
+      s.textContent=
+        '#chess-gl-ol{position:fixed;inset:0;z-index:99999;background:#f8f9fb;'+
+        'display:none;flex-direction:column;align-items:center;justify-content:center;'+
+        'gap:1.1rem;font-family:Inter,system-ui,sans-serif;}'+
+        '#chess-gl-ol .gl-logo{font-family:"Space Grotesk",system-ui,sans-serif;'+
+        'font-size:1.25rem;font-weight:700;color:#111827;letter-spacing:-0.02em;'+
+        'margin-bottom:0.5rem;}'+
+        '#chess-gl-ol .gl-logo span{color:#A81022;}'+
+        '#chess-gl-ol .gl-wrap{position:relative;width:64px;height:64px;}'+
+        '#chess-gl-ol .gl-ring{position:absolute;inset:0;border-radius:50%;'+
+        'border:4px solid rgba(168,16,34,0.13);border-top-color:#A81022;'+
+        'animation:glSpin 0.88s linear infinite;}'+
+        '#chess-gl-ol .gl-piece{position:absolute;top:50%;left:50%;'+
+        'transform:translate(-50%,-50%);font-size:2rem;color:#A81022;'+
+        'animation:glBounce 1.35s cubic-bezier(.36,.07,.19,.97) infinite;line-height:1;}'+
+        '#chess-gl-ol .gl-txt{font-size:0.82rem;font-weight:700;color:#A81022;'+
+        'letter-spacing:0.1em;text-transform:uppercase;}'+
+        '#chess-gl-ol .gl-sub{font-size:0.7rem;color:#9ca3af;letter-spacing:0.04em;}'+
+        '@keyframes glSpin{to{transform:rotate(360deg);}}'+
+        '@keyframes glBounce{0%,100%{transform:translate(-50%,-42%);}'+
+        '50%{transform:translate(-50%,-72%);}}';
+      doc.head.appendChild(s);
+
+      var ol=doc.createElement('div');
+      ol.id='chess-gl-ol';
+      ol.innerHTML=
+        '<div class="gl-logo">Chess<span>Narr</span></div>'+
+        '<div class="gl-wrap">'+
+          '<div class="gl-ring"></div>'+
+          '<div class="gl-piece">&#9818;</div>'+
+        '</div>'+
+        '<div class="gl-txt">Betöltés</div>'+
+        '<div class="gl-sub">A narráció töltése folyamatban&hellip;</div>';
+      doc.body.appendChild(ol);
+    }
+
+    /* ── 3. Kattintásfigyelő (minden rendernél frissítve) ──────────────── */
+    if(par._chClickH) doc.removeEventListener('click',par._chClickH);
+    par._chClickH=function(e){
+      var btn=e.target.closest('button');
+      if(btn&&/Play/.test(btn.textContent)){
+        var ol=doc.getElementById('chess-gl-ol');
+        if(ol){ol.style.display='flex';ol.style.opacity='1';ol.style.transition='';}
+      }
+    };
+    doc.addEventListener('click',par._chClickH);
+
+  }catch(ex){}
+})();
+</script>
+</body></html>"""
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Adatbetöltés
 # ─────────────────────────────────────────────────────────────────────────────
@@ -189,6 +272,14 @@ html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direc
 #statusz{{font-size:0.92rem;font-weight:600;letter-spacing:0.02em;color:#A81022;white-space:nowrap;flex-shrink:0;}}
 #pbar-wrap{{flex:1;height:10px;background:rgba(168,16,34,0.12);border-radius:99px;overflow:hidden;}}
 #pbar-fill{{width:0%;height:100%;background:linear-gradient(90deg,#A81022,#c41428);border-radius:99px;transition:width 0.35s ease;}}
+#load-overlay{{position:absolute;inset:0;z-index:50;background:rgba(248,249,251,0.93);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.65rem;border-radius:14px;transition:opacity 0.45s ease;pointer-events:none;}}
+#load-piece{{font-size:2.8rem;color:#A81022;animation:loadBounce 1.3s cubic-bezier(0.36,0.07,0.19,0.97) infinite;transform-origin:center bottom;}}
+#load-ring{{width:48px;height:48px;border:3px solid rgba(168,16,34,0.15);border-top-color:#A81022;border-radius:50%;animation:loadSpin 0.9s linear infinite;position:absolute;top:50%;left:50%;margin:-24px 0 0 -24px;}}
+#load-label{{font-size:0.78rem;font-weight:700;color:#A81022;letter-spacing:0.1em;text-transform:uppercase;}}
+#load-dots{{display:inline-block;animation:loadDots 1.4s steps(4,end) infinite;}}
+@keyframes loadBounce{{0%,100%{{transform:translateY(0) scale(1);}}45%{{transform:translateY(-14px) scale(1.08);}}55%{{transform:translateY(-14px) scale(1.08);}}}}
+@keyframes loadSpin{{to{{transform:rotate(360deg);}}}}
+@keyframes loadDots{{0%{{content:'';}}25%{{content:'.';}}50%{{content:'..';}}75%{{content:'...';}}100%{{content:'';}} }}
 </style>
 </head>
 <body>
@@ -196,6 +287,13 @@ html,body{{margin:0;padding:0 6px 6px;background:#f8f9fb;display:flex;flex-direc
   <div id="board-sizer">{init_svg}</div>
   <div id="board-a" style="z-index:2;">{init_svg}</div>
   <div id="board-b" style="z-index:1;"></div>
+  <div id="load-overlay">
+    <div style="position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+      <div id="load-ring"></div>
+      <div id="load-piece">♟</div>
+    </div>
+    <div id="load-label">Narration loading<span id="load-dots"></span></div>
+  </div>
 </div>
 <div id="info">
   <span id="statusz">&#9654; Loading…</span>
@@ -235,7 +333,31 @@ function mutatFen(idx){{
     updatePbar(lastIdx);
   }});}}
 }}
-audio.addEventListener('loadedmetadata',()=>{{statusz.textContent='► Playing narration…';audio.play().catch(()=>{{statusz.textContent='► Click to play!';}});}});
+function hideLoadOverlay(){{var ol=document.getElementById('load-overlay');if(ol){{ol.style.opacity='0';setTimeout(function(){{if(ol&&ol.parentNode)ol.parentNode.removeChild(ol);}},480);}}}}
+var _narrReady=false;
+function onNarrReady(){{
+  if(_narrReady)return;_narrReady=true;
+  hideLoadOverlay();
+  try{{
+    var _ol=window.parent.document.getElementById('chess-gl-ol');
+    if(_ol){{_ol.style.transition='opacity 0.55s ease';_ol.style.opacity='0';
+      setTimeout(function(){{_ol.style.display='none';_ol.style.opacity='1';_ol.style.transition='';}},580);}}
+  }}catch(_e){{try{{window.parent.postMessage({{type:'chess-narr-started'}},'*');}}catch(_x){{}}}}
+  statusz.textContent='► Playing narration…';
+  audio.play().catch(()=>{{
+    statusz.textContent='► Click anywhere to play';
+    document.body.style.cursor='pointer';
+    document.addEventListener('click',function startOnClick(){{
+      audio.play().catch(()=>{{}});
+      document.body.style.cursor='';
+      document.removeEventListener('click',startOnClick);
+    }},{{once:true}});
+  }});
+}}
+['loadedmetadata','canplay','play'].forEach(function(ev){{audio.addEventListener(ev,onNarrReady);}});
+audio.addEventListener('timeupdate',function(){{if(!_narrReady&&audio.currentTime>0.1)onNarrReady();}});
+audio.addEventListener('error',()=>{{onNarrReady();}});
+if(audio.readyState>=1)setTimeout(onNarrReady,0);
 audio.addEventListener('timeupdate',()=>{{if(befejezett||!audio.duration)return;mutatFen(getFenIdx((audio.currentTime+LOOKAHEAD)/audio.duration));}});
 audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePbar(TOTAL-1);statusz.textContent='⏸ Final position – still visible…';setTimeout(()=>{{statusz.textContent='✓ Playback complete.';}},3000);}});
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
@@ -1021,6 +1143,73 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 .chess-board-wrap::before{content:'';position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.18) 50%,transparent 100%);transform:skewX(-15deg);pointer-events:none;z-index:10;transition:none;}
 .chess-board-wrap:hover::before{left:150%;transition:left 0.55s ease;}
 .chess-board-wrap svg{width:100%!important;display:block;}
+
+@media (max-width:768px){
+  [data-testid="stSidebar"]{display:none!important;width:0!important;min-width:0!important;}
+  [data-testid="collapsedControl"]{display:none!important;width:0!important;}
+  html,body{
+    height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;
+    max-width:100vw!important;touch-action:pan-y!important;
+  }
+  .stApp{
+    height:auto!important;min-height:100svh!important;
+    overflow-y:auto!important;overflow-x:hidden!important;max-width:100vw!important;
+  }
+  [data-testid="stAppViewContainer"]{
+    height:auto!important;overflow-y:auto!important;
+    overflow-x:hidden!important;max-width:100vw!important;
+  }
+  section.main{
+    flex:1 1 0%!important;min-width:0!important;width:100%!important;
+    overflow-x:hidden!important;margin-left:0!important;
+  }
+  [data-testid="stMain"],[data-testid="stMainBlockContainer"]{
+    overflow-x:hidden!important;overflow-y:visible!important;height:auto!important;
+  }
+  .main .block-container{
+    width:100%!important;max-width:100%!important;
+    padding:0.4rem 0.75rem 0.5rem!important;
+    padding-left:0.75rem!important;
+    margin:0 auto!important;
+    overflow-x:hidden!important;box-sizing:border-box!important;
+  }
+  [data-testid="stMainBlockContainer"]{padding-bottom:0.5rem!important;}
+  [data-testid="stHorizontalBlock"]{
+    flex-direction:column!important;gap:0.5rem!important;
+    width:100%!important;align-items:stretch!important;
+    margin-left:0!important;margin-right:0!important;
+  }
+  [data-testid="column"]{
+    min-width:100%!important;width:100%!important;max-width:100%!important;
+    box-sizing:border-box!important;margin-left:0!important;margin-right:0!important;
+  }
+  [data-testid="column"]:has([data-testid="stVerticalBlock"]:empty),
+  [data-testid="column"]:has([data-testid="stVerticalBlock"]:not(:has(*))){
+    display:none!important;padding:0!important;margin:0!important;min-height:0!important;
+  }
+  [data-testid="stVerticalBlock"]{gap:0.4rem!important;}
+  div[data-testid="stVerticalBlock"]>div{gap:0.4rem!important;}
+  .chess-board-wrap{
+    width:min(100%,calc(100vw - 24px))!important;
+    margin:4px auto!important;display:block!important;
+  }
+}
+
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]{background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;}
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:hover{border:none!important;box-shadow:none!important;}
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"],
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child [data-testid="stVerticalBlock"]{justify-content:center!important;}
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"]>div,
+[data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child [data-testid="stVerticalBlock"]>div{flex:0 0 auto!important;}
+
+@media (max-width:768px){
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"]{min-height:calc(100svh - 80px)!important;justify-content:center!important;gap:2rem!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child{order:2!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2){order:1!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child{order:3!important;display:none!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child{height:auto!important;min-height:0!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"]{flex:0 0 auto!important;height:auto!important;}
+}
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1217,6 +1406,9 @@ else:
             if st.button("▶  Play", use_container_width=True, type="primary"):
                 st.session_state.playing = True
                 st.rerun()
+
+    # ── Globális töltő overlay ────────────────────────────────────────────────
+    stc.html(_OVERLAY_INJECTOR_HTML, height=0, scrolling=False)
 
     # ── Selectbox keresés tiltása < 10 játszma esetén (oszlopokon kívül, layout-semleges) ──
     if len(games) < 10:
