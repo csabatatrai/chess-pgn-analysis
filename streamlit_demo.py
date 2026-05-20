@@ -294,7 +294,7 @@ def build_player_html(
 <style>
 html{{margin:0;padding:0;background:#ffffff;}}
 body{{margin:0;padding:0 6px 6px;background:#ffffff;display:flex;flex-direction:column;align-items:center;font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}}
-#board-wrapper{{position:relative;width:min(calc(100vw - 12px),calc(100vh - 80px));border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 16px 48px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);margin-top:6px;transition:box-shadow 0.18s ease;}}
+#board-wrapper{{position:relative;width:min(calc(100vw - 12px),540px);border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.07),0 16px 48px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);margin-top:6px;transition:box-shadow 0.18s ease;}}
 #board-wrapper:hover{{box-shadow:0 8px 32px rgba(168,16,34,0.65),0 0 0 3px rgba(212,24,46,0.22),0 2px 8px rgba(0,0,0,0.14);}}
 #board-wrapper svg rect:first-child{{transition:fill 0.18s ease;}}
 #board-wrapper:hover svg rect:first-child{{fill:#d4182e!important;}}
@@ -308,7 +308,7 @@ body{{margin:0;padding:0 6px 6px;background:#ffffff;display:flex;flex-direction:
 #load-ring{{width:48px;height:48px;border:3px solid rgba(168,16,34,0.15);border-top-color:#A81022;border-radius:50%;animation:loadSpin 0.9s linear infinite;position:absolute;top:50%;left:50%;margin:-24px 0 0 -24px;}}
 #load-label{{font-size:0.78rem;font-weight:700;color:#A81022;letter-spacing:0.1em;text-transform:uppercase;}}
 #load-dots{{display:inline-block;animation:loadDots 1.4s steps(4,end) infinite;}}
-#info{{display:flex;align-items:center;gap:14px;width:min(calc(100vw - 12px),calc(100vh - 80px));margin-top:8px;padding:10px 16px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.07);border-radius:10px;}}
+#info{{display:flex;align-items:center;gap:14px;width:min(calc(100vw - 12px),540px);margin-top:8px;padding:10px 16px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.07);border-radius:10px;}}
 #statusz{{font-size:0.92rem;font-weight:600;letter-spacing:0.02em;color:#A81022;white-space:nowrap;flex-shrink:0;}}
 #pbar-wrap{{flex:1;height:10px;background:rgba(168,16,34,0.12);border-radius:99px;overflow:hidden;}}
 #pbar-fill{{width:0%;height:100%;background:linear-gradient(90deg,#A81022,#c41428);border-radius:99px;transition:width 0.35s ease;}}
@@ -402,18 +402,14 @@ audio.addEventListener('ended',()=>{{befejezett=true;mutatFen(TOTAL-1);updatePba
 audio.addEventListener('error',()=>{{statusz.textContent='⚠ Audio file failed to load.';}});
 (function(){{
   function setH(){{
-    /* Fix magasság iframe beágyazáshoz (portfólió oldal: 780px magas iframe).
-       window.parent cross-origin esetén nem olvasható, ezért fix értéket küldünk. */
-    var h=600;
-    try{{
-      var vw=window.innerWidth;
-      if(vw<768){{h=Math.max(360,vw+68);}}
-    }}catch(e){{}}
+    var h=document.body.scrollHeight;
+    if(!h||h<200)h=600;
     window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');
   }}
   setH();
   window.addEventListener('resize',function(){{clearTimeout(window._rht);window._rht=setTimeout(setH,120);}});
   setTimeout(setH,300);
+  setTimeout(setH,1000);
 }})();
 </script>
 </body>
@@ -844,13 +840,12 @@ div[data-testid="stVerticalBlock"]>div{gap:0.7rem!important;}
 [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child [data-testid="stVerticalBlock"]>div{flex:0 0 auto!important;}
 
 @media (max-width:768px){
-  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child{order:3!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"]{min-height:calc(100svh - 80px)!important;justify-content:center!important;gap:2rem!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child{order:2!important;}
   [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2){order:1!important;}
-  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child{order:2!important;}
-  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child,
-  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child{height:auto!important;min-height:0!important;}
-  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"],
-  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child [data-testid="stVerticalBlock"]{flex:0 0 auto!important;height:auto!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:last-child{order:3!important;display:none!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child{height:auto!important;min-height:0!important;}
+  [data-testid="stMarkdown"]:has(#ch-play-row)~[data-testid="stHorizontalBlock"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"]{flex:0 0 auto!important;height:auto!important;}
 }
 """
 

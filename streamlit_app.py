@@ -30,9 +30,6 @@ from src.llm_client import generate_text
 from src.tts_client import generate_audio
 from src.narrator import generate_narration
 
-CUSTOM_GAME_STEM    = "sajat_jatszma"
-CUSTOM_GAME_DISPLAY = "My game"
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Adatbetöltés
 # ─────────────────────────────────────────────────────────────────────────────
@@ -45,8 +42,7 @@ def find_games() -> list[dict]:
         stem = os.path.splitext(os.path.basename(jf))[0]
         mp3  = os.path.join(config.LLM_ANALYSIS_HANGOS_DIR, stem + ".mp3")
         if os.path.exists(mp3):
-            display = CUSTOM_GAME_DISPLAY if stem == CUSTOM_GAME_STEM else stem
-            games.append({"name": display, "stem": stem, "json": jf, "mp3": mp3})
+            games.append({"name": stem, "stem": stem, "json": jf, "mp3": mp3})
     return games
 
 
@@ -295,6 +291,51 @@ def _parse_pgn(pgn_text: str) -> dict:
     }
 
 
+def _make_game_stem(pgn_text: str) -> str:
+    """PGN headers alapján egyedi, sorszámozott fájlnevet generál.
+
+    Formátum: White_vs_Black_ECO_NNNN
+    A sorszám az első szabad 4 jegyű szám, amely nem ütközik
+    a json_narracio és hangos_narracio mappák meglévő fájljaival.
+    """
+    try:
+        game = chess.pgn.read_game(io.StringIO(pgn_text.strip()))
+    except Exception:
+        game = None
+
+    if game is not None:
+        white = game.headers.get("White", "White")
+        black = game.headers.get("Black", "Black")
+        eco   = game.headers.get("ECO", "")
+    else:
+        white, black, eco = "White", "Black", ""
+
+    def _sanitize(name: str) -> str:
+        name = re.sub(r"[^\w]", "_", name)
+        name = re.sub(r"_+", "_", name).strip("_")
+        return name or "Unknown"
+
+    white_s = _sanitize(white)
+    black_s = _sanitize(black)
+    eco_s   = re.sub(r"[^\w]", "", eco) or "XX"
+    base    = f"{white_s}_vs_{black_s}_{eco_s}"
+
+    existing: set[int] = set()
+    for pattern in [
+        os.path.join(config.LLM_ANALYSIS_JSON_DIR,   f"{base}_*.json"),
+        os.path.join(config.LLM_ANALYSIS_HANGOS_DIR, f"{base}_*.mp3"),
+    ]:
+        for f in glob.glob(pattern):
+            m = re.search(r"_(\d{4})\.\w+$", f)
+            if m:
+                existing.add(int(m.group(1)))
+
+    n = 1
+    while n in existing:
+        n += 1
+    return f"{base}_{n:04d}"
+
+
 def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
     """Közvetlen UCI subprocess – asyncio-mentes, háttérszálból is működik Windows-on."""
     import subprocess
@@ -382,6 +423,8 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
     try:
         progress.update({"step": "Parsing PGN...", "pct": 0.02})
         game_data = _parse_pgn(pgn_text)
+        game_stem = _make_game_stem(pgn_text)
+        progress["stem"] = game_stem
 
         progress.update({"step": "Locating Stockfish...", "pct": 0.07})
         sf_path = _find_stockfish()
@@ -426,20 +469,24 @@ def run_custom_pipeline(pgn_text: str, progress: dict) -> None:
         narration_json["moves"] = moves_for_json
 
         progress.update({"step": "Saving narration JSON...", "pct": 0.78})
-        json_path = os.path.join(config.LLM_ANALYSIS_JSON_DIR, f"{CUSTOM_GAME_STEM}.json")
+        json_path = os.path.join(config.LLM_ANALYSIS_JSON_DIR, f"{game_stem}.json")
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(narration_json, f, ensure_ascii=False, indent=2)
+
+        tts_text = "\n\n".join(p["text"] for p in narration_json.get("paragraphs", []))
+        txt_path = os.path.join(config.LLM_ANALYSIS_SZOVEGES_DIR, f"{game_stem}.txt")
+        with open(txt_path, "w", encoding="utf-8") as f:
+            f.write(tts_text)
 
         progress.update({
             "step": "Generating audio with TTS (1–2 min)...",
             "pct":  0.82,
         })
-        tts_text = "\n\n".join(p["text"] for p in narration_json.get("paragraphs", []))
-        mp3_path = os.path.join(config.LLM_ANALYSIS_HANGOS_DIR, f"{CUSTOM_GAME_STEM}.mp3")
+        mp3_path = os.path.join(config.LLM_ANALYSIS_HANGOS_DIR, f"{game_stem}.mp3")
         generate_audio(tts_text, mp3_path)
 
         progress.update({
-            "step": "Done! Select \"My game\" and press Play!",
+            "step": f"Done! \"{game_stem}\" is ready – press Play!",
             "pct":  1.0,
             "done": True,
         })
@@ -1088,6 +1135,9 @@ else:
         prog = st.session_state.pipeline_progress
         if prog is not None:
             render_pipeline_progress(prog)
+            if prog.get("done") and not prog.get("has_error") and prog.get("stem"):
+                if st.session_state.last_game != prog["stem"]:
+                    st.session_state.last_game = prog["stem"]
 
     # ── Jobb oszlop: játszmaválasztó + sakktábla ──────────────────────────────
     with col_board:

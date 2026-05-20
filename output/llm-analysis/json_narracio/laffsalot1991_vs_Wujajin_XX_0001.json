@@ -1,76 +1,54 @@
 {
   "paragraphs": [
     {
-      "text": "We kick things off with a rather traditional start — pawn to e4 by White, a move commonly seen in many popular openings. Black counters with pawn to c6, steering us into the Caro-Kann Defense, a solid choice aiming for a robust pawn structure. White develops the knight to f3, a natural move activating a piece and preparing to challenge the center. Now, Black plays pawn to d5, striking straight at the heart of White's center.",
+      "text": "We kick things off with a Caro-Kann Defense on the board! Black responds to pawn to e4 with c6, looking to establish a solid pawn structure. White brings out the knight to f3, eager to control the center, but Black quickly counters with pawn to d5, challenging White's central pawns. White pushes forward with pawn to e5, and Black continues with bishop to g4, targeting the knight and adding pressure. The opening is shaping up into a classic tussle for central domination.",
       "anchors": [
         {
-          "fen": "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
-          "trigger_word": "pawn to e4 by White"
+          "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+          "trigger_word": "pawn to e4 with c6"
         },
         {
-          "fen": "rnbqkbnr/pp1ppppp/2p5/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
-          "trigger_word": "White develops the knight to f3"
+          "fen": "rnbqkbnr/pp1ppppp/2p5/3pP3/8/5N2/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+          "trigger_word": "pawn to d5, challenging White"
         }
       ]
     },
     {
-      "text": "Everything seems textbook until White plays pawn to e5, closing the center and making things more cramped. Black keeps up the pressure with bishop to g4, pinning White's knight to the queen. White responds by expanding with pawn to d4 which is met by a solid pawn to e6 from Black. Then, White's pawn to h3 nudges the bishop back to h5, perhaps showing aggressive intentions with a potential g4 advance.",
+      "text": "As the middlegame unfolds, White's pawn to e5 creates a space advantage, pushing Black back and aiming for control. But Black defiantly plays bishop to g4, pinning the knight to the queen. White's response with pawn to d4 aims to undermine Black's pawn structure. It's a strategic battle with both sides maneuvering carefully to maintain control and piece activity.",
       "anchors": [
         {
-          "fen": "rn1qkbnr/pp2pppp/2p5/3pP3/6b1/5N2/PPPP1PPP/RNBQKB1R w KQkq - 1 4",
-          "trigger_word": "bishop to g4, pinning White's knight"
+          "fen": "rn1qkbnr/pp2pppp/2p5/3pP3/3P2b1/5N2/PPP2PPP/RNBQKB1R b KQkq - 1 4",
+          "trigger_word": "bishop to g4, pinning the knight"
         },
         {
-          "fen": "rn1qkbnr/pp3ppp/2p1p3/3pP2b/3P4/5N1P/PPP2PP1/RNBQKB1R w KQkq - 1 6",
-          "trigger_word": "pawn to h3 nudges the bishop"
+          "fen": "rn1qkbnr/pp2pppp/2p1p1b1/3pP3/3P2P1/5N1P/PPP2P2/RNBQKB1R w KQkq - 0 7",
+          "trigger_word": "pawn to d4 aims to undermine"
         }
       ]
     },
     {
-      "text": "Now, the board is getting fiery! White goes all-out with pawn to g4, challenging the bishop pair early. The bishops retreat one square each, leaving White's pawn structure a bit weakened. White attempts to reinforce the center with bishop to d3, but here's the kicker — pushing pawn to c5 from Black puts immediate pressure and forces White's pieces to shuffle. In an eager attempt, White plays bishop to b5, a clumsy blunder leaving the position vulnerable to Black's knight coming out to c6.",
+      "text": "And now, we hit a turning point as White plays queen to b1, a surprised move that allows Black to consolidate with rook to f4, doubling up the pressure on White's vulnerable center. Black seems to be having the upper hand until the wild and ambitious 52...Qc1+, a blunder that swings the evaluation pendulum wildly in White's favor. Such a miscalculation dissects Black's advantage, illustrating the thin margins between triumph and disaster in chess.",
       "anchors": [
         {
-          "fen": "rn1qkbnr/pp3ppp/2p1p1b1/3pP3/3P2P1/5N1P/PPP2P2/RNBQKB1R w KQkq - 1 7",
-          "trigger_word": "pawn to g4, challenging the bishop"
+          "fen": "r4rk1/3qn1p1/p1n1p1p1/Pp1pP1Pp/1PpP1r1P/2P2N2/3N1P2/R2QK2R w KQ - 1 22",
+          "trigger_word": "queen to b1, a surprised move"
         },
         {
-          "fen": "r2qkbnr/pp3ppp/2n1p1b1/1BppP3/3P2P1/5N1P/PPP2P2/RNBQK2R w KQkq - 2 9",
-          "trigger_word": "bishop to b5, a clumsy blunder"
+          "fen": "8/P5pk/1P4p1/4p2p/3p4/2p5/Q1q5/K7 b - - 1 52",
+          "trigger_word": "52...Qc1+, a blunder that swings"
         }
       ]
     },
     {
-      "text": "Moving into the real mess, White plays pawn to c3, trying to back up that lone bishop against the impending pawn storm. Black’s move of pawn to a6 forces White to retreat the bishop to d3, a defensive posture not exerting any pressure. Suddenly the board opens up when Black blunders with pawn to c4, an oversight that allows White to exchange bishops and develop with initiative. This errant push gives White a glimpse of a promising attack amid the chaos. Black's response with pawn to fxg6, capturing the bishop, makes the pawn structure even more dicey.",
+      "text": "In the final tumultuous moves, Black's relentless checks with the queen lead to a draw by repetition. Moves like queen to a3 ensure neither side breaks out of the perpetual checking loop. The game's key lesson is clear: even in seemingly superior positions, vigilance is paramount. Always evaluate whether your aggressive push risks exposing you to defensive counterplay.",
       "anchors": [
-        {
-          "fen": "r2qkbnr/1p3ppp/p1n1p1b1/3pP3/2pP2P1/2PB1N1P/PP3P2/RNBQK2R w KQkq - 0 10",
-          "trigger_word": "pawn to c3, trying to back up"
-        },
-        {
-          "fen": "r2qkbnr/1p3ppp/p1n1p1B1/3pP3/2pP2P1/5N1P/PP3P2/RNBQK2R b KQkq - 0 11",
-          "trigger_word": "pawn to fxg6, capturing the bishop"
-        }
-      ]
-    },
-    {
-      "text": "And now we're at a crucial ★ turning point! After a series of tactical exchanges and threats, White's queen darts to capture a loose pawn on b5, missing a concrete tactical shot. Immediately, Black reacts with rook to d2, exposing White's king and ramping up the pressure with a rook invasion. This is a tangible moment where capturing with the queen on b5 allowed Black a strong initiative. The correct move was retreating the queen earlier and shoring up defenses closer to home. Such tactical oversights often shift momentum in quick sways.",
-      "anchors": [
-        {
-          "fen": "8/6pk/4p1p1/PQ1pP2p/1PpP4/8/3q4/1K6 w - - 0 41",
-          "trigger_word": "★ turning point! After a series"
-        }
-      ]
-    },
-    {
-      "text": "Heading into the recent phases, both sides juggled aggressive threats amidst a whirlwind of pawn pushes and checks. In the last scene, Black checks with the queen to c1, slipping up by forcing a repetition of moves. This showcases a fundamental principle: even when under pressure, ensure your threats are meaningful and progress the position, not self-restrictive. White mirrors the maneuver with queen to b1, leaving the board in a deadlock. A key takeaway here is the importance of coordinating your pieces while maintaining composure under tactical heat — understand when your threats become hollow!",
-      "anchors": [
-        {
-          "fen": "8/P5pk/1P4p1/4p2p/3p4/2p5/Q7/K1q5 w - - 2 53",
-          "trigger_word": "checks with the queen to c1"
-        },
         {
           "fen": "8/P5pk/1P4p1/4p2p/3p4/q1p5/8/KQ6 w - - 8 56",
-          "trigger_word": "mirrors the maneuver with queen"
+          "trigger_word": "queen to a3 ensure neither side"
+        },
+        {
+          "fen": "8/P5pk/1P4p1/4p2p/3p4/2p5/Q7/K1q5 w - - 10 57",
+          "trigger_word": "lead to a draw by repetition"
         }
       ]
     }
