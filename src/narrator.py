@@ -19,6 +19,31 @@ import json
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.llm_client import generate_text
 
+_MAX_RETRIES = 2
+
+
+def _broken_anchors(narration: dict) -> list[str]:
+    """Visszaadja azokat a trigger_word-öket, amelyek nem szerepelnek szó szerint
+    a saját bekezdésük 'text' mezőjében."""
+    broken = []
+    for para in narration.get("paragraphs", []):
+        text = para.get("text", "")
+        for anchor in para.get("anchors", []):
+            tw = anchor.get("trigger_word", "")
+            if tw and tw not in text:
+                broken.append(tw)
+    return broken
+
+
+def _parse_llm_json(raw: str) -> dict:
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```", 2)[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+        raw = raw.rsplit("```", 1)[0].strip()
+    return json.loads(raw)
+
 
 NARRATION_SYSTEM_PROMPT = """\
 You are a passionate English-speaking chess commentator and coach.
@@ -59,6 +84,17 @@ Sentence structure:
 - 150–300:     significant advantage
 - > 300:       decisive superiority
 - mate != null: mating threat on the board
+
+## Stockfish best-move annotation [Stockfish: X]:
+When a move has a [Stockfish: X] annotation, it means Stockfish (single-thread, depth 6)
+suggested X as a stronger alternative. Important nuances to keep in mind:
+- Chess positions often have MULTIPLE equally good moves; X is one strong option, not
+  necessarily the only correct continuation.
+- Use X as a reference point for your explanation ("a move like X would have kept the
+  balance" / "defending with X was the engine's idea"), but do NOT present it as the
+  one and only truth — a different move could be equally valid.
+- Never read out the algebraic notation of X in the narration text (TTS rule); instead
+  describe it: "a rook retreat to d1", "pushing the pawn to e5", etc.
 
 ## Mandatory move description (for TTS — never write algebraic notation):
 - Nxe5   → knight takes e5
@@ -103,11 +139,19 @@ Word count: aim for the given target (±20%). Shorter game = fewer paragraphs is
 5. **Order**: trigger_words in the anchors array must appear in the SAME ORDER
    as they appear in the "text" field (top to bottom).
 
-6. **Completeness — MANDATORY**: Every move you specifically mention in every paragraph
-   needs an anchor. If you mention a move but don't anchor it, the board won't advance —
-   the viewer loses track. Especially critical: the last 2–3 moves MUST always be anchored.
+6. **Completeness — MANDATORY**: Every move you specifically mention needs an anchor.
+   Density rule: count the distinct moves you name in each paragraph → provide
+   at least ⌈count / 2⌉ anchors (round up). Examples: 2 moves → min 1 anchor;
+   4 moves → min 2 anchors; 5 moves → min 3 anchors.
+   The last 2–3 moves of the game MUST always be anchored — no exceptions.
 
-7. **FEN source**: Always copy the fen value from the input "fen:" field — never compute it!
+7. **Forward-only anchors**: Anchors must strictly advance forward through the game.
+   Each anchor's fen must belong to a position LATER than the previous anchor's fen.
+   If you refer back to an earlier moment ("as we saw on move X"), express it in text
+   only — do NOT create an anchor for it. Backward anchors are silently discarded by
+   the player and break the visual sync.
+
+8. **FEN source**: Always copy the fen value from the input "fen:" field — never compute it!
 
 ## Output — VALID JSON ONLY, no preamble, no markdown code block:
 {
@@ -214,13 +258,16 @@ def generate_narration(game_data: dict, evaluations: list) -> dict:
         delta_str = f" (Δ{abs(d):.0f})" if abs(d) > 0 else ""
         blame_str = f" ← {blame(i)}" if blame(i) else ""
 
+        best_san  = e.get("best_move_san")
+        best_str  = f" [Stockfish: {best_san}]" if best_san and blame(i) else ""
+
         marker = " ★FORDULÓPONT" if i == turning_idx else ""
         tag    = (" [MEGNYITÁS]" if move_num <= 8
                   else " [UTOLSÓ LÉPÉSEK]" if i >= n - 3
                   else "")
 
         lines.append(
-            f"{move_num}{dots}{san}: {cp_str}{delta_str}{blame_str}{marker}{tag} | fen: {e['fen']}"
+            f"{move_num}{dots}{san}: {cp_str}{delta_str}{blame_str}{best_str}{marker}{tag} | fen: {e['fen']}"
         )
 
     user_prompt = (
@@ -236,11 +283,45 @@ def generate_narration(game_data: dict, evaluations: list) -> dict:
         + "\n".join(lines)
     )
 
-    raw = generate_text(user_prompt, system_prompt=NARRATION_SYSTEM_PROMPT)
-    raw = raw.strip()
-    if raw.startswith("```"):
-        raw = raw.split("```", 2)[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-        raw = raw.rsplit("```", 1)[0].strip()
-    return json.loads(raw)
+    prompt = user_prompt
+    result = None
+
+    for attempt in range(_MAX_RETRIES + 1):
+        raw = generate_text(prompt, system_prompt=NARRATION_SYSTEM_PROMPT)
+        try:
+            result = _parse_llm_json(raw)
+        except json.JSONDecodeError:
+            if attempt < _MAX_RETRIES:
+                prompt = (
+                    user_prompt
+                    + f"\n\n## RETRY {attempt + 2}/{_MAX_RETRIES + 1} — JSON PARSE ERROR\n"
+                    "Your previous response was not valid JSON. "
+                    "Output ONLY the JSON object — no preamble, no markdown fences."
+                )
+                continue
+            raise
+
+        broken = _broken_anchors(result)
+        if not broken:
+            return result
+
+        if attempt < _MAX_RETRIES:
+            broken_lines = "\n".join(f'  • "{tw}"' for tw in broken)
+            prompt = (
+                user_prompt
+                + f"\n\n## RETRY {attempt + 2}/{_MAX_RETRIES + 1} — BROKEN ANCHORS\n"
+                f"{len(broken)} trigger_word(s) were NOT found verbatim in their paragraph text:\n"
+                f"{broken_lines}\n\n"
+                "Fix rules:\n"
+                "  1. COPY-PASTE the trigger_word character-perfect from the 'text' field.\n"
+                "  2. Do NOT edit the text to match — fix the trigger_word to match the text.\n"
+                "  3. Every anchor must reference a position LATER in the game than the previous anchor.\n"
+                "Regenerate the complete narration JSON with all anchors corrected."
+            )
+        else:
+            print(
+                f"[narrator] Warning: {len(broken)} broken anchor(s) remain after "
+                f"{_MAX_RETRIES} retries: {broken}"
+            )
+
+    return result

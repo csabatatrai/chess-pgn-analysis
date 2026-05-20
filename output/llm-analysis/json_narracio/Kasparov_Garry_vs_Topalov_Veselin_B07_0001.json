@@ -1,59 +1,47 @@
 {
   "paragraphs": [
     {
-      "text": "It's a battle of chess titans as Garry Kasparov faces Veselin Topalov in a B07 opening. Kasparov starts with pawn to e4, staking an immediate claim to the center. Topalov responds with pawn to d6, indicating a Pirc Defense setup. As the pieces develop, both players are eyeing control of the center. With knight to c3 by Kasparov and bishop to g7 from Topalov, we're seeing a standard fight for central dominance. Each move carefully maintains tension, setting the stage for a potentially explosive middlegame.",
+      "text": "The game begins with Garry Kasparov playing the Pirc Defense against Veselin Topalov, a flexible and popular choice in modern chess at the top levels. Kasparov kicks off with pawn to e4, and Topalov responds with d6. Both players focus on stabilizing their positions early on, and development proceeds smoothly. We see pawn to d4 taking a strong stance in the center, as the knights and bishops come into the game, reminding us of the elegant dance pieces perform in the opening. It's the calm before the storm, with both players trying to slowly set the stage for their strategic plans.",
       "anchors": [
         {
-          "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/3PP3/2N1B3/PPP2PPP/R2QKBNR b KQkq - 1 4",
-          "trigger_word": "with knight to c3 by Kasparov"
-        },
-        {
-          "fen": "rnbqk2r/ppp1ppbp/3p1np1/8/3PP3/2N1B3/PPPQ1PPP/R3KBNR b KQkq - 3 5",
-          "trigger_word": "bishop to g7 from Topalov"
+          "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 1 3",
+          "trigger_word": "We see pawn to d4 taking"
         }
       ]
     },
     {
-      "text": "Fast forward slightly, and Kasparov castles queenside with O-O-O, aiming for king safety and rapid rook activation. Meanwhile, Topalov presses on the queenside with pawn to b5, showing clear intent to expand and create some active play. Kasparov, unfazed, develops his minor pieces well. With knight to e2, preparations are on for further central strikes or re-routing pieces to more aggressive squares. Both players are adhering to opening principles, keeping their kings secure and their pieces active.",
+      "text": "Knight to c3 reveals Kasparov's intention to control both the d4 and e5 squares, establishing strong central control. Topalov plans a fianchetto with g6, which typically aims to bolster Black's kingside and provide a long-range sniper bishop effect. Meanwhile, White's dark-squared bishop lunges out to e3, challenging Black's control and preparing for the potential exchange of bishops. Fast forward, and Kasparov anchors his plan by bringing out the queen to d2, cleverly eyeing an opening on the kingside. These early moves maintain equilibrium, yet both players clearly understand the looming complexities of this opening.",
       "anchors": [
         {
-          "fen": "r2qk2r/pb1n1p1p/2pp1npQ/1p2p3/3PP3/P1N2P2/1PP1N1PP/2KR1B1R b kq - 1 11",
-          "trigger_word": "Kasparov castles queenside"
-        },
-        {
-          "fen": "rnbqk2r/p3ppbp/2pp1np1/1p6/3PP3/2N1BP2/PPPQN1PP/R3KB1R w KQkq - 0 7",
-          "trigger_word": "pawn to b5, showing clear"
+          "fen": "rnbqkb1r/ppp1pp1p/3p1np1/8/3PP3/2N1B3/PPP2PPP/R2QKBNR b KQkq - 1 4",
+          "trigger_word": "Meanwhile, White's dark-squared"
         }
       ]
     },
     {
-      "text": "As the game transitions to the middlegame, both players make crucial decisions. Kasparov advances with queen to f4, generating pressure on the dark squares and hinting at a possible kingside attack. Topalov, in return, attempts to break with pawn to e5 earlier providing counterplay and opening lines for his pieces. Excitement builds as potential tactics loom in the air. The exchange of material follows with Kasparov's rook to d4, controlling the open file and preparing to double rooks. The strategic maneuvering can't last forever, and soon we hit a critical juncture.",
+      "text": "In the middle game, Topalov castles with a kingside retreat, while Kasparov sets up a solid foundation for a queenside offensive by castling long. With e5, Topalov prepares to challenge the center, forcing Kasparov to rethink his pawn structure. White decides to reinforce his control over the center with f3, and Topalov counters aggressively with b5 to expand on the wing. As players shuttle their pieces into more aggressive positions, each develops a specific tactical storyline, waiting to exploit any minor slip by the other.",
       "anchors": [
         {
-          "fen": "b2r3r/k3qp1p/pn3np1/Npp5/4PQ2/P1N2PPB/1PP4P/1K1R3R w - - 2 20",
-          "trigger_word": "queen to f4, generating pressure"
-        },
-        {
-          "fen": "2kr3r/1b1nqp1p/p1pp1npQ/1p2p3/3PP3/PNN2P2/1PP3PP/1K1R1B1R w - - 1 13",
-          "trigger_word": "pawn to e5 earlier providing"
+          "fen": "r2qk2r/1b1n1p1p/p1pp1npQ/1p2p3/3PP3/P1N2P2/1PP1N1PP/2KR1B1R b - - 1 11",
+          "trigger_word": "Topalov castles with a kingside retreat"
         }
       ]
     },
     {
-      "text": "Here we reach ★the turning point★ in the game with Kasparov’s mistake on move 33. Kasparov plays the ambitious pawn to c3, which seems to threaten a powerful advancement. However, this blunder shifts the momentum significantly in favor of Topalov. The pawn move exposes weaknesses, contrary to the chess principle of keeping one's position solid, especially in sharply contested endings. Topalov misses his chance by capturing with the king instead of exploiting the major opportunity, allowing Kasparov to escape the worst consequences.",
+      "text": "The ★turning point arrives when Kasparov finds a brilliant sequence with rook to d7, brilliantly sacrificing to initiate deep complications in Topalov's position. This forces Topalov into a dangerous defense. Exchanging pieces quickly spirals into a precarious game for Black, as Kasparov's queen starts to dominate the board, and the tactical dance reaches a crescendo. The dynamics and pace are startling, and suddenly, Topalov finds himself attempting to patch leaks in his position rather than launching any counterplay of his own. This is the engine's idea: removing key defenders from Black's camp.",
       "anchors": [
         {
-          "fen": "3r3r/1R3p1p/Q5p1/1p6/1kq5/2P2PPB/7P/1K6 b - - 0 33",
-          "trigger_word": "★the turning point★ in the game"
+          "fen": "7r/3R1p1p/6p1/1p6/2q5/5PP1/1Q5P/1K1k1B2 b - - 7 37",
+          "trigger_word": "brilliant sequence with rook to d7"
         }
       ]
     },
     {
-      "text": "In the final flurry of moves, Kasparov finds himself driving Topalov's pieces into passive positions again. Kasparov plays queen to a7, increasing the pressure and threatening multiple targets. A series of precise and impactful moves sees the cracks in Topalov's defenses widen until it's undeniable. The lesson here is clear: even when the position appears tenuous, focusing on piece activity and exploiting every tactical chance often paves the way to victory. Kasparov’s resilience ultimately crowns him the victor.",
+      "text": "As the game closes, it's clear that Topalov's defenses have been thoroughly dismantled. Kasparov, with superb technique, corrals the black king into a confined area. White's king and bishop behave like a tactical task force, anticipating each escape attempt. With a delicate endgame composition and surgery-like incision into Topalov's defenses, Kasparov nears the win after moving his queen to a7, consolidating his advantageous position into a tangible victory. The lesson of this epic tussle? Always be vigilant of threats as they transpose — and ensure resources aren't overly committed before it’s time.",
       "anchors": [
         {
           "fen": "8/Q6p/6p1/5p2/5P2/2p3P1/3r3P/2K1k3 b - - 3 44",
-          "trigger_word": "queen to a7, increasing the pressure"
+          "trigger_word": "the win after moving his queen"
         }
       ]
     }

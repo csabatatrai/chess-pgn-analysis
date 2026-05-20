@@ -1,0 +1,455 @@
+{
+  "paragraphs": [
+    {
+      "text": "The game opens with Fischer playing pawn to e4 and Tal responding with c5 — the illustrious Sicilian Defence begins to take shape. This opening is famous for its asymmetry and promises a dynamic contest. As White's pieces flood the center, putting knights on f3 and c3, Fischer aims for a solid pawn structure with 3.d4 to wrestle control over the central d4 and e4 squares. Tal exchanges pawns with pawn takes d4, allowing Fischer to retake with knight takes d4, achieving good piece placement early on. Tal develops his knight to f6, eyeing that important e4 pawn and keeping White honest in the center.",
+      "anchors": [
+        {
+          "fen": "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq - 0 5",
+          "trigger_word": "knight takes d4"
+        }
+      ]
+    },
+    {
+      "text": "In the ensuing moves, Tal leverages his strategic skills by playing a6, preparing for b5 to harass the white bishop on c4. Fischer, meanwhile, focuses on reinforcing his center and developing actively with pieces like his queen to f3 and f4. Tal castles kingside to tuck his king safely away, while Fisher goes for a potent f5 pawn strike to destabilize Black's center, showing a fearless attacking mindset.",
+      "anchors": [
+        {
+          "fen": "rnb2rk1/2q1bppp/p2ppn2/1p3P2/3NP3/1BN2Q2/PPP3PP/R1B2RK1 w - - 0 11",
+          "trigger_word": "f5 pawn strike"
+        }
+      ]
+    },
+    {
+      "text": "However, it's when Tal pushes b4 that things really heat up. This aggressive pawn thrust pushes White's knight back to a conservative position, nc5 would have been better, leading to a slight advantage. But the real drama unfolds after 22.g7 — a bold pawn push by Fischer, aiming to create tactical chaos. Yet Tal's response, Kxg7, was marked by the engines as a mistake, opening the door for White's counterplay. Fischer doesn't capitalize on it immediately though — missing the opportune stockfish move, Rac1.",
+      "anchors": [
+        {
+          "fen": "4r1rk/q6p/N7/4pp2/1pP5/1B6/PP2Q1KP/R7 b - - 0 31",
+          "trigger_word": "Tal pushes b4"
+        }
+      ]
+    },
+    {
+      "text": "Finally, the turning point arrives when Tal plays Qg7, a serious blunder that offers White a shot back into the game. Potential moves like Qxa6 would have been more pressure maintaining. Despite the opportunity, Fischer is unable to take full advantage, shifting his pieces but missing the tactical shot that could disturb Black's solidity. Tal steadies the ship, plays Bb7 and builds a methodical constriction over White's position. Despite the hiccup, Tal keeps pushing, culminating in luxurious setup and leaving Fischer bereft of winning chances.",
+      "anchors": [
+        {
+          "fen": "4r1rk/6qp/N7/4pp2/1pP5/1B5K/PP2Q2P/R7 w - - 3 33",
+          "trigger_word": "when Tal plays Qg7"
+        }
+      ]
+    },
+    {
+      "text": "In the climax, Fischer's attempts to shore up defensive flaws with Bd1 proves insufficient as Tal locks on relentlessly. With Re6, Tal not only fortifies his e-file grip but prepares to double up and bombard White's king with fatal precision. Fischer's fortifications crumble under Tal's intense pressure, iterating the harsh lesson: even under pressure, capitalize when your adversary falters and exploit the center efficiently to reduce counter threats.",
+      "anchors": [
+        {
+          "fen": "6rk/6qp/N3r3/4pp2/1pP5/7K/PP2Q2P/R2B4 w - - 5 34",
+          "trigger_word": "fortifies his e-file grip"
+        }
+      ]
+    }
+  ],
+  "white": "Robert James Fischer",
+  "black": "Mikhail Tal",
+  "moves": [
+    {
+      "move_number": 0,
+      "color": "start",
+      "san": "",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    },
+    {
+      "move_number": 1,
+      "color": "white",
+      "san": "e4",
+      "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+    },
+    {
+      "move_number": 1,
+      "color": "black",
+      "san": "c5",
+      "fen": "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"
+    },
+    {
+      "move_number": 2,
+      "color": "white",
+      "san": "Nf3",
+      "fen": "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"
+    },
+    {
+      "move_number": 2,
+      "color": "black",
+      "san": "d6",
+      "fen": "rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3"
+    },
+    {
+      "move_number": 3,
+      "color": "white",
+      "san": "d4",
+      "fen": "rnbqkbnr/pp2pppp/3p4/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3"
+    },
+    {
+      "move_number": 3,
+      "color": "black",
+      "san": "cxd4",
+      "fen": "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4"
+    },
+    {
+      "move_number": 4,
+      "color": "white",
+      "san": "Nxd4",
+      "fen": "rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4"
+    },
+    {
+      "move_number": 4,
+      "color": "black",
+      "san": "Nf6",
+      "fen": "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 1 5"
+    },
+    {
+      "move_number": 5,
+      "color": "white",
+      "san": "Nc3",
+      "fen": "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq - 2 5"
+    },
+    {
+      "move_number": 5,
+      "color": "black",
+      "san": "a6",
+      "fen": "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6"
+    },
+    {
+      "move_number": 6,
+      "color": "white",
+      "san": "Bc4",
+      "fen": "rnbqkb1r/1p2pppp/p2p1n2/8/2BNP3/2N5/PPP2PPP/R1BQK2R b KQkq - 1 6"
+    },
+    {
+      "move_number": 6,
+      "color": "black",
+      "san": "e6",
+      "fen": "rnbqkb1r/1p3ppp/p2ppn2/8/2BNP3/2N5/PPP2PPP/R1BQK2R w KQkq - 0 7"
+    },
+    {
+      "move_number": 7,
+      "color": "white",
+      "san": "Bb3",
+      "fen": "rnbqkb1r/1p3ppp/p2ppn2/8/3NP3/1BN5/PPP2PPP/R1BQK2R b KQkq - 1 7"
+    },
+    {
+      "move_number": 7,
+      "color": "black",
+      "san": "Be7",
+      "fen": "rnbqk2r/1p2bppp/p2ppn2/8/3NP3/1BN5/PPP2PPP/R1BQK2R w KQkq - 2 8"
+    },
+    {
+      "move_number": 8,
+      "color": "white",
+      "san": "f4",
+      "fen": "rnbqk2r/1p2bppp/p2ppn2/8/3NPP2/1BN5/PPP3PP/R1BQK2R b KQkq - 0 8"
+    },
+    {
+      "move_number": 8,
+      "color": "black",
+      "san": "O-O",
+      "fen": "rnbq1rk1/1p2bppp/p2ppn2/8/3NPP2/1BN5/PPP3PP/R1BQK2R w KQ - 1 9"
+    },
+    {
+      "move_number": 9,
+      "color": "white",
+      "san": "Qf3",
+      "fen": "rnbq1rk1/1p2bppp/p2ppn2/8/3NPP2/1BN2Q2/PPP3PP/R1B1K2R b KQ - 2 9"
+    },
+    {
+      "move_number": 9,
+      "color": "black",
+      "san": "Qc7",
+      "fen": "rnb2rk1/1pq1bppp/p2ppn2/8/3NPP2/1BN2Q2/PPP3PP/R1B1K2R w KQ - 3 10"
+    },
+    {
+      "move_number": 10,
+      "color": "white",
+      "san": "O-O",
+      "fen": "rnb2rk1/1pq1bppp/p2ppn2/8/3NPP2/1BN2Q2/PPP3PP/R1B2RK1 b - - 4 10"
+    },
+    {
+      "move_number": 10,
+      "color": "black",
+      "san": "b5",
+      "fen": "rnb2rk1/2q1bppp/p2ppn2/1p6/3NPP2/1BN2Q2/PPP3PP/R1B2RK1 w - - 0 11"
+    },
+    {
+      "move_number": 11,
+      "color": "white",
+      "san": "f5",
+      "fen": "rnb2rk1/2q1bppp/p2ppn2/1p3P2/3NP3/1BN2Q2/PPP3PP/R1B2RK1 b - - 0 11"
+    },
+    {
+      "move_number": 11,
+      "color": "black",
+      "san": "b4",
+      "fen": "rnb2rk1/2q1bppp/p2ppn2/5P2/1p1NP3/1BN2Q2/PPP3PP/R1B2RK1 w - - 0 12"
+    },
+    {
+      "move_number": 12,
+      "color": "white",
+      "san": "Na4",
+      "fen": "rnb2rk1/2q1bppp/p2ppn2/5P2/Np1NP3/1B3Q2/PPP3PP/R1B2RK1 b - - 1 12"
+    },
+    {
+      "move_number": 12,
+      "color": "black",
+      "san": "e5",
+      "fen": "rnb2rk1/2q1bppp/p2p1n2/4pP2/Np1NP3/1B3Q2/PPP3PP/R1B2RK1 w - - 0 13"
+    },
+    {
+      "move_number": 13,
+      "color": "white",
+      "san": "Ne2",
+      "fen": "rnb2rk1/2q1bppp/p2p1n2/4pP2/Np2P3/1B3Q2/PPP1N1PP/R1B2RK1 b - - 1 13"
+    },
+    {
+      "move_number": 13,
+      "color": "black",
+      "san": "Bb7",
+      "fen": "rn3rk1/1bq1bppp/p2p1n2/4pP2/Np2P3/1B3Q2/PPP1N1PP/R1B2RK1 w - - 2 14"
+    },
+    {
+      "move_number": 14,
+      "color": "white",
+      "san": "Ng3",
+      "fen": "rn3rk1/1bq1bppp/p2p1n2/4pP2/Np2P3/1B3QN1/PPP3PP/R1B2RK1 b - - 3 14"
+    },
+    {
+      "move_number": 14,
+      "color": "black",
+      "san": "Nbd7",
+      "fen": "r4rk1/1bqnbppp/p2p1n2/4pP2/Np2P3/1B3QN1/PPP3PP/R1B2RK1 w - - 4 15"
+    },
+    {
+      "move_number": 15,
+      "color": "white",
+      "san": "Be3",
+      "fen": "r4rk1/1bqnbppp/p2p1n2/4pP2/Np2P3/1B2BQN1/PPP3PP/R4RK1 b - - 5 15"
+    },
+    {
+      "move_number": 15,
+      "color": "black",
+      "san": "Bc6",
+      "fen": "r4rk1/2qnbppp/p1bp1n2/4pP2/Np2P3/1B2BQN1/PPP3PP/R4RK1 w - - 6 16"
+    },
+    {
+      "move_number": 16,
+      "color": "white",
+      "san": "Bf2",
+      "fen": "r4rk1/2qnbppp/p1bp1n2/4pP2/Np2P3/1B3QN1/PPP2BPP/R4RK1 b - - 7 16"
+    },
+    {
+      "move_number": 16,
+      "color": "black",
+      "san": "Qb7",
+      "fen": "r4rk1/1q1nbppp/p1bp1n2/4pP2/Np2P3/1B3QN1/PPP2BPP/R4RK1 w - - 8 17"
+    },
+    {
+      "move_number": 17,
+      "color": "white",
+      "san": "Rfe1",
+      "fen": "r4rk1/1q1nbppp/p1bp1n2/4pP2/Np2P3/1B3QN1/PPP2BPP/R3R1K1 b - - 9 17"
+    },
+    {
+      "move_number": 17,
+      "color": "black",
+      "san": "d5",
+      "fen": "r4rk1/1q1nbppp/p1b2n2/3ppP2/Np2P3/1B3QN1/PPP2BPP/R3R1K1 w - - 0 18"
+    },
+    {
+      "move_number": 18,
+      "color": "white",
+      "san": "exd5",
+      "fen": "r4rk1/1q1nbppp/p1b2n2/3PpP2/Np6/1B3QN1/PPP2BPP/R3R1K1 b - - 0 18"
+    },
+    {
+      "move_number": 18,
+      "color": "black",
+      "san": "Nxd5",
+      "fen": "r4rk1/1q1nbppp/p1b5/3npP2/Np6/1B3QN1/PPP2BPP/R3R1K1 w - - 0 19"
+    },
+    {
+      "move_number": 19,
+      "color": "white",
+      "san": "Ne4",
+      "fen": "r4rk1/1q1nbppp/p1b5/3npP2/Np2N3/1B3Q2/PPP2BPP/R3R1K1 b - - 1 19"
+    },
+    {
+      "move_number": 19,
+      "color": "black",
+      "san": "Nf4",
+      "fen": "r4rk1/1q1nbppp/p1b5/4pP2/Np2Nn2/1B3Q2/PPP2BPP/R3R1K1 w - - 2 20"
+    },
+    {
+      "move_number": 20,
+      "color": "white",
+      "san": "c4",
+      "fen": "r4rk1/1q1nbppp/p1b5/4pP2/NpP1Nn2/1B3Q2/PP3BPP/R3R1K1 b - c3 0 20"
+    },
+    {
+      "move_number": 20,
+      "color": "black",
+      "san": "g6",
+      "fen": "r4rk1/1q1nbp1p/p1b3p1/4pP2/NpP1Nn2/1B3Q2/PP3BPP/R3R1K1 w - - 0 21"
+    },
+    {
+      "move_number": 21,
+      "color": "white",
+      "san": "fxg6",
+      "fen": "r4rk1/1q1nbp1p/p1b3P1/4p3/NpP1Nn2/1B3Q2/PP3BPP/R3R1K1 b - - 0 21"
+    },
+    {
+      "move_number": 21,
+      "color": "black",
+      "san": "f5",
+      "fen": "r4rk1/1q1nb2p/p1b3P1/4pp2/NpP1Nn2/1B3Q2/PP3BPP/R3R1K1 w - - 0 22"
+    },
+    {
+      "move_number": 22,
+      "color": "white",
+      "san": "g7",
+      "fen": "r4rk1/1q1nb1Pp/p1b5/4pp2/NpP1Nn2/1B3Q2/PP3BPP/R3R1K1 b - - 0 22"
+    },
+    {
+      "move_number": 22,
+      "color": "black",
+      "san": "Kxg7",
+      "fen": "r4r2/1q1nb1kp/p1b5/4pp2/NpP1Nn2/1B3Q2/PP3BPP/R3R1K1 w - - 0 23"
+    },
+    {
+      "move_number": 23,
+      "color": "white",
+      "san": "Qg3+",
+      "fen": "r4r2/1q1nb1kp/p1b5/4pp2/NpP1Nn2/1B4Q1/PP3BPP/R3R1K1 b - - 1 23"
+    },
+    {
+      "move_number": 23,
+      "color": "black",
+      "san": "Kh8",
+      "fen": "r4r1k/1q1nb2p/p1b5/4pp2/NpP1Nn2/1B4Q1/PP3BPP/R3R1K1 w - - 2 24"
+    },
+    {
+      "move_number": 24,
+      "color": "white",
+      "san": "Nec5",
+      "fen": "r4r1k/1q1nb2p/p1b5/2N1pp2/NpP2n2/1B4Q1/PP3BPP/R3R1K1 b - - 3 24"
+    },
+    {
+      "move_number": 24,
+      "color": "black",
+      "san": "Nxc5",
+      "fen": "r4r1k/1q2b2p/p1b5/2n1pp2/NpP2n2/1B4Q1/PP3BPP/R3R1K1 w - - 0 25"
+    },
+    {
+      "move_number": 25,
+      "color": "white",
+      "san": "Bxc5",
+      "fen": "r4r1k/1q2b2p/p1b5/2B1pp2/NpP2n2/1B4Q1/PP4PP/R3R1K1 b - - 0 25"
+    },
+    {
+      "move_number": 25,
+      "color": "black",
+      "san": "Bxc5+",
+      "fen": "r4r1k/1q5p/p1b5/2b1pp2/NpP2n2/1B4Q1/PP4PP/R3R1K1 w - - 0 26"
+    },
+    {
+      "move_number": 26,
+      "color": "white",
+      "san": "Nxc5",
+      "fen": "r4r1k/1q5p/p1b5/2N1pp2/1pP2n2/1B4Q1/PP4PP/R3R1K1 b - - 0 26"
+    },
+    {
+      "move_number": 26,
+      "color": "black",
+      "san": "Qc7",
+      "fen": "r4r1k/2q4p/p1b5/2N1pp2/1pP2n2/1B4Q1/PP4PP/R3R1K1 w - - 1 27"
+    },
+    {
+      "move_number": 27,
+      "color": "white",
+      "san": "Qe3",
+      "fen": "r4r1k/2q4p/p1b5/2N1pp2/1pP2n2/1B2Q3/PP4PP/R3R1K1 b - - 2 27"
+    },
+    {
+      "move_number": 27,
+      "color": "black",
+      "san": "Rae8",
+      "fen": "4rr1k/2q4p/p1b5/2N1pp2/1pP2n2/1B2Q3/PP4PP/R3R1K1 w - - 3 28"
+    },
+    {
+      "move_number": 28,
+      "color": "white",
+      "san": "Re2",
+      "fen": "4rr1k/2q4p/p1b5/2N1pp2/1pP2n2/1B2Q3/PP2R1PP/R5K1 b - - 4 28"
+    },
+    {
+      "move_number": 28,
+      "color": "black",
+      "san": "Nxe2+",
+      "fen": "4rr1k/2q4p/p1b5/2N1pp2/1pP5/1B2Q3/PP2n1PP/R5K1 w - - 0 29"
+    },
+    {
+      "move_number": 29,
+      "color": "white",
+      "san": "Qxe2",
+      "fen": "4rr1k/2q4p/p1b5/2N1pp2/1pP5/1B6/PP2Q1PP/R5K1 b - - 0 29"
+    },
+    {
+      "move_number": 29,
+      "color": "black",
+      "san": "Bxg2",
+      "fen": "4rr1k/2q4p/p7/2N1pp2/1pP5/1B6/PP2Q1bP/R5K1 w - - 0 30"
+    },
+    {
+      "move_number": 30,
+      "color": "white",
+      "san": "Nxa6",
+      "fen": "4rr1k/2q4p/N7/4pp2/1pP5/1B6/PP2Q1bP/R5K1 b - - 0 30"
+    },
+    {
+      "move_number": 30,
+      "color": "black",
+      "san": "Qa7+",
+      "fen": "4rr1k/q6p/N7/4pp2/1pP5/1B6/PP2Q1bP/R5K1 w - - 1 31"
+    },
+    {
+      "move_number": 31,
+      "color": "white",
+      "san": "Kxg2",
+      "fen": "4rr1k/q6p/N7/4pp2/1pP5/1B6/PP2Q1KP/R7 b - - 0 31"
+    },
+    {
+      "move_number": 31,
+      "color": "black",
+      "san": "Rg8+",
+      "fen": "4r1rk/q6p/N7/4pp2/1pP5/1B6/PP2Q1KP/R7 w - - 1 32"
+    },
+    {
+      "move_number": 32,
+      "color": "white",
+      "san": "Kh3",
+      "fen": "4r1rk/q6p/N7/4pp2/1pP5/1B5K/PP2Q2P/R7 b - - 2 32"
+    },
+    {
+      "move_number": 32,
+      "color": "black",
+      "san": "Qg7",
+      "fen": "4r1rk/6qp/N7/4pp2/1pP5/1B5K/PP2Q2P/R7 w - - 3 33"
+    },
+    {
+      "move_number": 33,
+      "color": "white",
+      "san": "Bd1",
+      "fen": "4r1rk/6qp/N7/4pp2/1pP5/7K/PP2Q2P/R2B4 b - - 4 33"
+    },
+    {
+      "move_number": 33,
+      "color": "black",
+      "san": "Re6",
+      "fen": "6rk/6qp/N3r3/4pp2/1pP5/7K/PP2Q2P/R2B4 w - - 5 34"
+    }
+  ]
+}

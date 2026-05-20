@@ -492,10 +492,33 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
             move = chess.Move.from_uci(uci)
             if move not in board.legal_moves:
                 break
-            san = board.san(move)
+            san     = board.san(move)
+            pre_fen = board.fen()
+
+            # Pre-move: legjobb alternatíva (depth 6, gyors heurisztika az LLM-nek)
+            send(f"position fen {pre_fen}")
+            send("go depth 6")
+            best_uci_alt = None
+            while True:
+                line = proc.stdout.readline().rstrip()
+                if line.startswith("bestmove"):
+                    parts = line.split()
+                    if len(parts) >= 2 and parts[1] not in ("(none)", uci):
+                        best_uci_alt = parts[1]
+                    break
+            best_move_san = None
+            if best_uci_alt:
+                try:
+                    tmp = chess.Board(pre_fen)
+                    best_move_san = tmp.san(chess.Move.from_uci(best_uci_alt))
+                except Exception:
+                    pass
+
             board.push(move)
             fen          = board.fen()
             side_to_move = board.turn
+
+            # Post-move: cp értékelés (depth 12)
             send(f"position fen {fen}")
             send("go depth 12")
             cp_white  = None
@@ -521,13 +544,14 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
                 except (ValueError, IndexError):
                     pass
             evals.append({
-                "move_number": (i // 2) + 1,
-                "color":       "white" if i % 2 == 0 else "black",
-                "uci":         uci,
-                "san":         san,
-                "cp":          cp_white,
-                "mate":        mate_val,
-                "fen":         fen,
+                "move_number":   (i // 2) + 1,
+                "color":         "white" if i % 2 == 0 else "black",
+                "uci":           uci,
+                "san":           san,
+                "cp":            cp_white,
+                "mate":          mate_val,
+                "fen":           fen,
+                "best_move_san": best_move_san,
             })
             progress["pct"]  = 0.10 + 0.50 * (i + 1) / total
             progress["step"] = f"Stockfish analysis: {i + 1}/{total} moves..."
