@@ -149,6 +149,58 @@ python src/03_stockfish_analysis.py
 
 ---
 
+## A narráció JSON fájlok felépítése
+
+A pipeline minden elemzett játszmához egy JSON fájlt ment az `output/llm-analysis/json_narracio/` mappába. Ezeket a Streamlit lejátszó tölti be.
+
+### Séma
+
+```json
+{
+  "white": "Kasparov, Garry",
+  "black": "Topalov, Veselin",
+  "paragraphs": [
+    {
+      "text": "A narráció szövege – természetes, élőkommentátor stílusban.",
+      "anchors": [
+        {
+          "fen": "<FEN a lépés UTÁN>",
+          "trigger_word": "<szó szerinti idézet a text mezőből>"
+        }
+      ]
+    }
+  ],
+  "moves": [
+    { "move_number": 0, "color": "start", "san": "",    "fen": "<kezdőállás FEN>" },
+    { "move_number": 1, "color": "white", "san": "e4",  "fen": "<e4 utáni FEN>"  },
+    { "move_number": 1, "color": "black", "san": "d6",  "fen": "<d6 utáni FEN>"  },
+    ...
+  ]
+}
+```
+
+### A `moves` tömb mezői
+
+| Mező | Típus | Jelentés |
+|---|---|---|
+| `move_number` | int | Sakkban szokásos lépésszám (fehér és fekete lépése azonos számot kap) |
+| `color` | `"white"` \| `"black"` \| `"start"` | Ki lépett |
+| `san` | string | **Standard Algebraic Notation** – az a lépés, amely az adott `fen` álláshoz **vezet** (az előző állásból) |
+| `fen` | string | A tábla állása a lépés **után** |
+
+A `san` és a `fen` tehát egy egységet alkotnak: **„ezt a lépést játszották (san), így jött létre ez az állás (fen)"**.  
+Az index 0 kivétel: a kezdőálláshoz nem tartozik lépés, ezért `san: ""`.
+
+### Az `anchors` szerepe
+
+Az anchorok a narráció hangos lejátszásának és a sakktábla megjelenítésének szinkronizálásához kellenek. Minden anchor megadja:
+- **`fen`** – melyik állást kell mutatni a táblán
+- **`trigger_word`** – a narráció szövegének melyik pontján (szó szerinti idézet) kell erre az állásra váltani
+
+A lejátszó a hang időbeli előrehaladása alapján, a `trigger_word` szóbeli pozíciójából számított arányból becsli, mikor lépjen a következő táblaállásra.
+
+---
+
 ## Technológiai stack
 
 | Eszköz | Szerepe |
