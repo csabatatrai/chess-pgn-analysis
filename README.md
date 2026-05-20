@@ -172,3 +172,10 @@ python src/03_stockfish_analysis.py
 - A DuckDB lekérdezőmotorként üzemel – nem hoz létre tartós `.duckdb` fájlt
 - A pipeline **bármilyen méretű PGN fájlra** működik, nem csak Lichess-re
 - Lichess havi dumpok: [database.lichess.org](https://database.lichess.org)
+
+<details>
+<summary>LICENSE</summary>
+
+This project is provided for portfolio and educational purposes. Commercial use is strictly prohibited. See the LICENSE file for details.
+
+</details>
