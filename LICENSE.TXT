@@ -1,0 +1,45 @@
+CUSTOM NON-COMMERCIAL SOURCE-AVAILABLE LICENSE
+
+
+
+Copyright (c) 2026 Csaba Attila Tátrai
+
+
+
+TERMS AND CONDITIONS
+
+
+
+1. Grant of License
+
+Subject to the terms and conditions of this License, the Copyright Holder hereby grants you a worldwide, royalty-free, non-exclusive, non-transferable license to view, download, execute, and modify the source code and software in this repository solely for personal, educational, research, or evaluation purposes.
+
+
+
+2. Commercial Use Restrictions
+
+You may NOT use this software, its source code, or any derivative works for any commercial purposes. Commercial purposes include, but are not limited to:
+
+- Selling, renting, or leasing the software or any part of it.
+
+- Using the software to provide commercial services to third parties.
+
+- Using the software within a commercial enterprise, business, or for-profit organization to support its internal business operations.
+
+- Integrating the software into a product or service that is sold or monetized.
+
+
+
+3. Attribution
+
+Any copies or substantial portions of the software, whether modified or unmodified, must retain the original copyright notice and this license text.
+
+
+
+4. No Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+For commercial licensing inquiries, please contact the Copyright Holder.
