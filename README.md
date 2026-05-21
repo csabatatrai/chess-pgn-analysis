@@ -1,8 +1,8 @@
 # Chess PGN Analysis & Narration
 
 <div align="center">
-<img src="output/plots/02-1 Megnyitás repertoárom.png" width="48%">
-<img src="output/plots/02-2 Magnus Carlsen megnyitás repertoárja.png" width="48%">
+<img src="output/plots/02-1 Megnyitás repertoárom.png" width="500" height="370">
+<img src="output/plots/02-2 Magnus Carlsen megnyitás repertoárja.png" width="500" height="370">
 </div>
 
 Sakkjátszmák elemzésére, LLM-alapú narrációgenerálásra és interaktív lejátszásra épített pipeline, jelenleg még csak lokálisan futtatható!
