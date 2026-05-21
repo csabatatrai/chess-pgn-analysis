@@ -1,24 +1,41 @@
-# Chess PGN Analysis & Narration
+# ChessNarr – AI-alapú sakk narrátor
 
 <div align="center">
 <img src="output/plots/02-1 Megnyitás repertoárom.png" width="500" height="370">
 <img src="output/plots/02-2 Magnus Carlsen megnyitás repertoárja.png" width="500" height="370">
 </div>
 
-Sakkjátszmák elemzésére, LLM-alapú narrációgenerálásra és interaktív lejátszásra épített pipeline, jelenleg még csak lokálisan futtatható!
-
-**Ellenőrizd, hogy a stockfish benne van-e a gyökérkönyvtárban, ha nincs, manuálisan innen letölthető, főkönyvtárba kicsomagolandó: https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-windows-x86-64-avx2.zip**
+Illeszts be bármilyen PGN-t, és a pipeline automatikusan elvégzi a Stockfish-elemzést, LLM-alapú angol kommentárt generál, majd TTS-sel hangosítja — a Streamlit lejátszó szinkronizáltan mutatja a táblaállásokat a hanghoz.
 
 ---
 
 ## Funkciók
 
-- **Saját PGN feltöltése** – bármilyen sakkjátszmát beilleszthetsz, a pipeline azonnal feldolgozza
-- **Stockfish elemzés** – lépésenkénti pozícióértékelés, hibák és brilliáns lépések detektálása
-- **LLM narráció** – a játszma szöveges elemzése OpenAI / Gemini / Anthropic / Mistral segítségével
-- **TTS hangosítás** – a narráció felolvasása OpenAI TTS vagy ElevenLabs hanggal
-- **Interaktív sakktábla lejátszó** – a narráció hangjával szinkronizált táblaállapot-váltás
-> Fejlesztés alatt: **Lichess bulk elemzés** – nagy (akár 31 GB+) PGN fájlok párhuzamos feldolgozása
+- **PGN bevitel a UI-ban** – bármilyen standard PGN elfogadott, a headerek opcionálisak
+- **Stockfish elemzés** – lépésenkénti cp-értékelés, fordulópont és hibák detektálása
+- **LLM narráció** – élő kommentátor stílusú angol szöveg, FEN-anchor szinkronizációval
+- **TTS hangosítás** – narráció felolvasása, szinkronizálva a sakktáblával
+- **Interaktív lejátszó** – a táblaállás valós időben vált a narráció hangja alapján
+- **Demo mód** – `streamlit_demo.py`: csak lejátszás, elemzési pipeline nélkül
+- **Bulk CLI pipeline** – nagy (akár 31 GB+) Lichess PGN fájlok párhuzamos feldolgozása
+
+---
+
+## Hogyan működik
+
+```
+PGN input
+   ↓
+Stockfish elemzés (UCI subprocess, depth 12)
+   ↓
+LLM narráció generálás (narrator.py – FEN-anchor szinkron)
+   ↓
+TTS hangosítás (MP3)
+   ↓
+Streamlit lejátszó (tábla + hang szinkron)
+```
+
+A `narrator.py` system promptja élő kommentátor stílust kér az LLM-től, és automatikusan újrapróbálja a kérést, ha az anchor trigger_word-ök nem egyeznek pontosan a narráció szövegével.
 
 ---
 
@@ -26,24 +43,30 @@ Sakkjátszmák elemzésére, LLM-alapú narrációgenerálásra és interaktív 
 
 ```
 chess-pgn-analysis/
-├── streamlit_app.py          # Streamlit dashboard (fő belépési pont)
+├── streamlit_app.py          # Fő Streamlit UI (pipeline + lejátszó)
+├── streamlit_demo.py         # Demo verzió (csak lejátszás)
 ├── config.py                 # Központi konfiguráció és env változók
-├── secrets.example.py        # API kulcs sablon (ezt másold le secrets.py-ként)
+├── secrets.example.py        # API kulcs sablon (másold le secrets.py-ként)
 ├── packages.txt              # Streamlit Cloud rendszercsomagok (stockfish)
 ├── requirements.txt          # Python függőségek
+├── notebooks/
+│   ├── jatek_elemzese.ipynb  # Egyedi játszma elemzés + narráció
+│   └── visualization.ipynb   # Statisztikai vizualizációk (Plotly)
 └── src/
-    ├── 01_pgn_to_parquet.py  # PGN → Parquet konverzió (multiprocessing)
-    ├── 02_analysis.py        # DuckDB/Polars statisztikák
-    ├── 03_stockfish_analysis.py  # Stockfish motor elemzés
-    ├── 04_tts.py             # TTS pipeline futtatása
+    ├── narrator.py           # LLM narráció logika (system prompt + anchor validáció)
     ├── llm_client.py         # LLM provider absztrakció
     ├── tts_client.py         # TTS provider absztrakció
-    └── run_pipeline.py       # Teljes pipeline egy lépésben
+    ├── run_pipeline.py       # Teljes bulk pipeline egy lépésben
+    ├── pgn_to_parquet.py     # PGN → Parquet konverzió (multiprocessing)
+    ├── 01_pgn_to_parquet.py  # CLI wrapper a konverzióhoz
+    ├── 02_analysis.py        # DuckDB/Polars statisztikák
+    ├── 03_stockfish_analysis.py  # Stockfish motor elemzés
+    └── 04_tts.py             # TTS pipeline futtatása
 ```
 
 ---
 
-## Gyors indítás (lokálisan)
+## Gyors indítás
 
 ### 1. Függőségek
 
@@ -51,39 +74,15 @@ chess-pgn-analysis/
 pip install -r requirements.txt
 ```
 
-Stockfish telepítése (ha nincs):
-- **Windows:** a pipeline automatikusan letölti az első futáskor
+Stockfish:
+- **Windows:** az app automatikusan letölti az első futáskor
 - **Linux/macOS:** `sudo apt install stockfish` vagy `brew install stockfish`
 
-### 2. PGN előkészítés és pipeline futtatása
-
-A notebookok és a Streamlit app előtt a `run_pipeline.py`-t kell futtatni egyszer – ez generálja az összes szükséges kimeneti fájlt (Parquet, JSON-ok). **A notebookok ezt automatikusan elvégzik, ha a fájlok még nem léteznek** – de kézzel is indítható:
-
-```bash
-python src/run_pipeline.py --pgn sajat_jatszmaim.pgn
-```
-
-Hasznos kapcsolók:
-```bash
-# Teszteléshez: csak az első 1000 játszma
-python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --max-games 1000
-
-# Ha a Parquet már megvan, kihagyja a konverziót
-python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --skip-conversion
-
-# Stockfish nélkül (gyorsabb)
-python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --skip-stockfish
-```
-
-### 3. API kulcsok
-
-Másold le a sablont és töltsd ki:
+### 2. API kulcsok
 
 ```bash
 cp secrets.example.py secrets.py
 ```
-
-A `secrets.py` tartalma:
 
 ```python
 CHAT_GPT_API_KEY   = "..."   # platform.openai.com/api-keys
@@ -101,23 +100,11 @@ Elég csak azokat kitölteni, amelyeket használni szeretnél.
 streamlit run streamlit_app.py
 ```
 
----
+Csak lejátszáshoz (meglévő narráció fájlok):
 
-## Streamlit Community Cloud deploy
-
-**TODOs**: Ahhoz, hogy streamlitre deployolható legyen továbbfejlesztést igényel! Még nem működik deployolva a Stockfish!
-
-1. Fork-old vagy push-old a repót GitHubra
-2. [share.streamlit.io](https://share.streamlit.io) → New app → válaszd ki a repót, main fájl: `streamlit_app.py`
-3. **Secrets** mezőbe add meg az API kulcsokat TOML formátumban:
-
-```toml
-GEMINI_API_KEY     = "..."
-CHAT_GPT_API_KEY   = "..."
-ELEVENLABS_API_KEY = "..."
+```bash
+streamlit run streamlit_demo.py
 ```
-
-A `packages.txt` automatikusan telepíti a Stockfish-t a Cloud-on (`apt install stockfish`).
 
 ---
 
@@ -128,8 +115,10 @@ A `config.py`-ban (vagy env változóval) állítható:
 | Változó | Lehetséges értékek | Alapértelmezett |
 |---|---|---|
 | `LLM_PROVIDER` | `openai` \| `gemini` \| `anthropic` \| `mistral` | `openai` |
+| `LLM_MODEL` | pl. `gpt-4o`, `gemini-2.0-flash-lite`, `claude-haiku-4-5-20251001` | provider alapértelmezése |
 | `TTS_PROVIDER` | `openai` \| `elevenlabs` | `openai` |
-| `LLM_MODEL` | pl. `gpt-4o`, `gemini-2.0-flash-lite` | provider alapértelmezése |
+| `TTS_VOICE_OPENAI` | `alloy` \| `echo` \| `fable` \| `onyx` \| `nova` \| `shimmer` | `onyx` |
+| `STOCKFISH_DEPTH` | egész szám | `18` |
 
 ---
 
@@ -141,22 +130,23 @@ Nagy PGN fájlok feldolgozásához (pl. havi Lichess dump):
 # Teljes pipeline
 python src/run_pipeline.py --pgn lichess_db_2024-01.pgn
 
-# Csak konverzió, elemzés kihagyásával
-python src/run_pipeline.py --pgn lichess_db_2024-01.pgn --skip-stockfish
+# Teszteléshez: csak az első 1000 játszma
+python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --max-games 1000
 
-# Lépésenként
-python src/01_pgn_to_parquet.py --pgn lichess_db_2024-01.pgn --workers 8
-python src/02_analysis.py
-python src/03_stockfish_analysis.py
+# Ha a Parquet már megvan, kihagyja a konverziót
+python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --skip-conversion
+
+# Stockfish nélkül (gyorsabb)
+python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --skip-stockfish
 ```
+
+Lichess havi dumpok: [database.lichess.org](https://database.lichess.org)
 
 ---
 
 ## A narráció JSON fájlok felépítése
 
-A pipeline minden elemzett játszmához egy JSON fájlt ment az `output/llm-analysis/json_narracio/` mappába. Ezeket a Streamlit lejátszó tölti be.
-
-### Séma
+A pipeline minden elemzett játszmához egy JSON fájlt ment az `output/llm-analysis/json_narracio/` mappába.
 
 ```json
 {
@@ -164,7 +154,7 @@ A pipeline minden elemzett játszmához egy JSON fájlt ment az `output/llm-anal
   "black": "Topalov, Veselin",
   "paragraphs": [
     {
-      "text": "A narráció szövege – természetes, élőkommentátor stílusban.",
+      "text": "Narráció szövege – élő kommentátor stílusban, angolul.",
       "anchors": [
         {
           "fen": "<FEN a lépés UTÁN>",
@@ -176,8 +166,7 @@ A pipeline minden elemzett játszmához egy JSON fájlt ment az `output/llm-anal
   "moves": [
     { "move_number": 0, "color": "start", "san": "",    "fen": "<kezdőállás FEN>" },
     { "move_number": 1, "color": "white", "san": "e4",  "fen": "<e4 utáni FEN>"  },
-    { "move_number": 1, "color": "black", "san": "d6",  "fen": "<d6 utáni FEN>"  },
-    ...
+    { "move_number": 1, "color": "black", "san": "d6",  "fen": "<d6 utáni FEN>"  }
   ]
 }
 ```
@@ -186,21 +175,36 @@ A pipeline minden elemzett játszmához egy JSON fájlt ment az `output/llm-anal
 
 | Mező | Típus | Jelentés |
 |---|---|---|
-| `move_number` | int | Sakkban szokásos lépésszám (fehér és fekete lépése azonos számot kap) |
+| `move_number` | int | Sakkban szokásos lépésszám |
 | `color` | `"white"` \| `"black"` \| `"start"` | Ki lépett |
-| `san` | string | **Standard Algebraic Notation** – az a lépés, amely az adott `fen` álláshoz **vezet** (az előző állásból) |
-| `fen` | string | A tábla állása a lépés **után** |
-
-A `san` és a `fen` tehát egy egységet alkotnak: **„ezt a lépést játszották (san), így jött létre ez az állás (fen)"**.  
-Az index 0 kivétel: a kezdőálláshoz nem tartozik lépés, ezért `san: ""`.
+| `san` | string | Az a lépés, amely az adott `fen` álláshoz vezet |
+| `fen` | string | A tábla állása a lépés után |
 
 ### Az `anchors` szerepe
 
-Az anchorok a narráció hangos lejátszásának és a sakktábla megjelenítésének szinkronizálásához kellenek. Minden anchor megadja:
+Az anchorok szinkronizálják a hangos lejátszást és a sakktáblát. Minden anchor megadja:
 - **`fen`** – melyik állást kell mutatni a táblán
-- **`trigger_word`** – a narráció szövegének melyik pontján (szó szerinti idézet) kell erre az állásra váltani
+- **`trigger_word`** – a narráció szövegének melyik pontján kell erre az állásra váltani (szó szerinti idézet)
 
-A lejátszó a hang időbeli előrehaladása alapján, a `trigger_word` szóbeli pozíciójából számított arányból becsli, mikor lépjen a következő táblaállásra.
+A `narrator.py` automatikusan validálja az anchorokat, és újragenerálja a narrációt, ha valamely `trigger_word` nem egyezik pontosan a bekezdés szövegével.
+
+---
+
+## Streamlit Community Cloud deploy
+
+**Megjegyzés:** A Stockfish Cloud-on való működése még nem teljesen megoldott, további fejlesztést igényel.
+
+1. Fork-old vagy push-old a repót GitHubra
+2. [share.streamlit.io](https://share.streamlit.io) → New app → főfájl: `streamlit_app.py`
+3. **Secrets** mezőbe add meg az API kulcsokat TOML formátumban:
+
+```toml
+CHAT_GPT_API_KEY   = "..."
+GEMINI_API_KEY     = "..."
+ELEVENLABS_API_KEY = "..."
+```
+
+A `packages.txt` automatikusan telepíti a Stockfish-t (`apt install stockfish`).
 
 ---
 
@@ -210,12 +214,12 @@ A lejátszó a hang időbeli előrehaladása alapján, a `trigger_word` szóbeli
 |---|---|
 | `streamlit` | Webes dashboard |
 | `python-chess` | PGN beolvasás, táblaállapot, SVG megjelenítés |
-| `stockfish` | Sakkmotor elemzés (lépésenkénti értékelés) |
-| `openai` / `google-generativeai` | LLM narráció |
-| `elevenlabs` | TTS hangosítás |
+| `stockfish` | Sakkmotor elemzés (UCI subprocess) |
+| `openai` / `google-genai` / `anthropic` / `mistralai` | LLM narráció |
+| `openai` / `elevenlabs` | TTS hangosítás |
 | `polars` | Nagy adathalmazok elemzése (LazyFrame) |
 | `duckdb` | SQL lekérdezések Parquet felett |
-| `pyarrow` / `parquet` | Hatékony adattárolás |
+| `pyarrow` | Hatékony adattárolás |
 | `plotly` | Interaktív vizualizációk |
 | `multiprocessing` | Párhuzamos PGN feldolgozás |
 
@@ -223,10 +227,10 @@ A lejátszó a hang időbeli előrehaladása alapján, a `trigger_word` szóbeli
 
 ## Megjegyzések
 
-- A `secrets.py` fájl nincs és ne kerüljön verziókövetésbe (`.gitignore`-ban van)
+- A `secrets.py` nincs verziókövetésben (`.gitignore`-ban van)
 - A DuckDB lekérdezőmotorként üzemel – nem hoz létre tartós `.duckdb` fájlt
-- A pipeline **bármilyen méretű PGN fájlra** működik, nem csak Lichess-re
-- Lichess havi dumpok: [database.lichess.org](https://database.lichess.org)
+- A pipeline bármilyen méretű PGN fájlra működik, nem csak Lichess-re
+- Stockfish Windows-on automatikusan letöltődik, ha nincs telepítve
 
 <details>
 <summary>LICENSE</summary>
