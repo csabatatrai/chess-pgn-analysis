@@ -913,20 +913,13 @@ if st.session_state.playing:
         autoplay=True,
     )
     st.markdown('<div id="ch-play-row" style="height:0;overflow:hidden;"></div>', unsafe_allow_html=True)
-    back_col, board_col, next_col = st.columns([1, 5, 1])
+    back_col, board_col = st.columns([1, 5])
     with back_col:
         if st.button("← Back", use_container_width=True, type="primary"):
             st.session_state.playing = False
             st.rerun()
     with board_col:
         stc.html(player_html, height=600, scrolling=False)
-    with next_col:
-        if len(games) > 1:
-            current_idx = game_names.index(st.session_state.last_game)
-            next_idx = (current_idx + 1) % len(game_names)
-            if st.button("Next →", use_container_width=True, type="primary"):
-                st.session_state.last_game = game_names[next_idx]
-                st.rerun()
 
 # ── ÁLLÓ MÓD ─────────────────────────────────────────────────────────────────
 
