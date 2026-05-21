@@ -386,6 +386,25 @@ def _find_stockfish() -> str | None:
     for c in candidates:
         if os.path.isfile(c):
             return c
+    if os.name == "nt":
+        try:
+            import tempfile, urllib.request, zipfile
+            os.makedirs(config.STOCKFISH_DIR, exist_ok=True)
+            with tempfile.TemporaryDirectory() as tmpdir:
+                archive = os.path.join(tmpdir, "stockfish.zip")
+                urllib.request.urlretrieve(config.STOCKFISH_DOWNLOAD_URL_WINDOWS, archive)
+                with zipfile.ZipFile(archive, "r") as zf:
+                    exes = [n for n in zf.namelist() if os.path.basename(n).lower().endswith(".exe") and "stockfish" in os.path.basename(n).lower()]
+                    if not exes:
+                        raise RuntimeError("A letöltött ZIP nem tartalmaz stockfish.exe fájlt.")
+                    zf.extract(exes[0], tmpdir)
+                    extracted = os.path.join(tmpdir, exes[0])
+                dest = config.STOCKFISH_BINARY
+                shutil.move(extracted, dest)
+                os.chmod(dest, 0o755)
+            return dest
+        except Exception:
+            pass
     return None
 
 

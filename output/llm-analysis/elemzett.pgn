@@ -1,0 +1,25 @@
+[Event "Live Chess"]
+[Site "Chess.com"]
+[Date "2026.01.19"]
+[Round "?"]
+[White "Wujajin"]
+[Black "RommGames"]
+[Result "1-0"]
+[WhiteElo "1096"]
+[BlackElo "1077"]
+[ECO "B07"]
+[Opening ""]
+[ParquetGameId "1113"]
+
+1. d4 { [%eval 0.36] } 1... d6 { [%eval 0.60] } 2. Bf4 { [%eval 0.47] } 2...
+Nf6 { [%eval 0.43] } 3. Nc3 { [%eval 0.54] } 3... g6 { [%eval 0.65] } 4. e4
+{ [%eval 0.65] } 4... Bg7 { [%eval 0.77] } 5. e5 { [%eval -0.46] } 5... dxe5
+{ [%eval 0.79] } 6. dxe5 { [%eval 0.53] } 6... Qxd1+ { [%eval 0.75] } 7. Rxd1
+{ [%eval 0.76] } 7... Nfd7 { [%eval 2.98] } 8. e6 { [%eval 0.40] } 8... Bxc3+
+{ [%eval 0.45] } 9. bxc3 { [%eval 0.47] } 9... fxe6 { [%eval 0.45] } 10. Bxc7
+{ [%eval 0.35] } 10... O-O { [%eval 0.52] } 11. Bb5 { [%eval 0.03] } 11... Nc6
+{ [%eval 0.92] } 12. Bxc6 { [%eval 0.45] } 12... bxc6 { [%eval 0.63] } 13. Nf3
+{ [%eval 0.61] } 13... Ba6 { [%eval 4.26] } 14. Nd4 { [%eval 0.09] } 14... Nc5
+{ [%eval 0.61] } 15. Nxc6 { [%eval 0.16] } 15... Rac8 { [%eval 4.38] } 16.
+Nxe7+ { [%eval 4.11] } 16... Kh8 { [%eval #2] } 17. Be5+ { [%eval #1] } 17...
+Rf6 { [%eval #1] } 18. Bxf6# { [%eval #0] } 1-0

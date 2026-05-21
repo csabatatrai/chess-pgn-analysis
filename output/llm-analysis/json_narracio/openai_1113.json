@@ -1,0 +1,269 @@
+{
+  "paragraphs": [
+    {
+      "text": "We're diving into a King's Indian Defense as White pushes the pawn to d4, setting up control in the center right off the bat. Black responds with pawn to d6, a somewhat passive start, but prepares fianchetto development. White's bishop leaps out to f4, marking the London System's influence in the game. This early development puts pressure on Black’s pawn structure and gifts White a stronghold on the queenside. Meanwhile, both sides continue to build their structures, with Black playing knight to f6 and White placing the knight on c3. It's the classic dance of early chess development.",
+      "anchors": [
+        {
+          "fen": "rnbqkb1r/ppp1pp1p/3p1np1/8/3P1B2/2N5/PPP1PPPP/R2QKBNR w KQkq - 0 4",
+          "trigger_word": "playing knight to f6 and White placing"
+        }
+      ]
+    },
+    {
+      "text": "As the opening progresses, White asserts more control by pushing pawn to e4, seizing central ground — Black decides on bishop to g7, getting ready for kingside castling. Then White boldly pushes pawn to e5, launching an early assault, perhaps a bit overzealous. Black captures with pawn takes e5, but then White sweeps up that pawn without hesitation. However, Black's move to exchange queens at d1 simplifies the position too early, perhaps hoping to reach a sturdy endgame prematurely. Both sides are still tethered closely, but after Black’s misstep with knight to d7, White could have capitalized more aggressively.",
+      "anchors": [
+        {
+          "fen": "rnbqk2r/ppp1ppbp/5np1/4P3/5B2/2N5/PPP2PPP/3RKBNR b Kkq - 0 7",
+          "trigger_word": "exchange queens at d1 simplifies the position"
+        }
+      ]
+    },
+    {
+      "text": "Into the middlegame now, and Black gives away the tension by playing bishop takes c3, trying to relieve some pressure. After White responds with pawn takes c3, both sides shuffle their pieces, aiming to secure a stronger foothold. As Black castles, seeking refuge, White crafts a plan with bishop back to b5, attempting to pin down the knight and create weaknesses. Black stumbles further by placing the knight to c6, an innocent-looking move but one that weakens the defense. With the capture on c6, White pries open Black's position even more.",
+      "anchors": [
+        {
+          "fen": "r1b2rk1/ppBnp2p/2n1p1p1/1B6/8/2P5/P1P2PPP/3RK1NR w K - 3 12",
+          "trigger_word": "placing the knight to c6, an"
+        }
+      ]
+    },
+    {
+      "text": "Now, things take a dramatic turn. Black retreats with bishop to a6, which seems to misunderstand the positional needs, and White misses an opportunity for a more forceful plan with rook takes d7. However, Black provides another chance as they bring the rook to a more active role, inadvertently leaving gaps. At the crucial moment, White lands a lethal blow with knight takes e7, and Black, almost oblivious, moves the king to h8. This move gifts White a winning combination — an immediate checkmate is looming.",
+      "anchors": [
+        {
+          "fen": "2r2rk1/p1B1N2p/b3p1p1/2n5/8/2P5/P1P2PPP/3RK2R b K - 0 16",
+          "trigger_word": "White lands a lethal blow with knight takes e7"
+        }
+      ]
+    },
+    {
+      "text": "The end is swift and precise, as White brings the rook into a central file with bishop to e5, check. Black’s desperate attempt to shield with the rook by playing rook to f6 merely delays the inevitable. White effortlessly captures with bishop takes f6, sealing the victory. The lesson here is the importance of maintaining flexibility and cohesion in your defense. In this game, Black's errors in judgment led to their downfall, highlighting the need for precision under pressure.",
+      "anchors": [
+        {
+          "fen": "2r4k/p3N2p/b3pBp1/2n5/8/2P5/P1P2PPP/3RK2R b K - 0 18",
+          "trigger_word": "White effortlessly captures with bishop takes f6"
+        }
+      ]
+    }
+  ],
+  "moves": [
+    {
+      "move_number": 0,
+      "color": "start",
+      "san": "",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    },
+    {
+      "move_number": 1,
+      "color": "white",
+      "san": "d4",
+      "fen": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
+    },
+    {
+      "move_number": 1,
+      "color": "black",
+      "san": "d6",
+      "fen": "rnbqkbnr/ppp1pppp/3p4/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2"
+    },
+    {
+      "move_number": 2,
+      "color": "white",
+      "san": "Bf4",
+      "fen": "rnbqkbnr/ppp1pppp/3p4/8/3P1B2/8/PPP1PPPP/RN1QKBNR b KQkq - 1 2"
+    },
+    {
+      "move_number": 2,
+      "color": "black",
+      "san": "Nf6",
+      "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/3P1B2/8/PPP1PPPP/RN1QKBNR w KQkq - 2 3"
+    },
+    {
+      "move_number": 3,
+      "color": "white",
+      "san": "Nc3",
+      "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/3P1B2/2N5/PPP1PPPP/R2QKBNR b KQkq - 3 3"
+    },
+    {
+      "move_number": 3,
+      "color": "black",
+      "san": "g6",
+      "fen": "rnbqkb1r/ppp1pp1p/3p1np1/8/3P1B2/2N5/PPP1PPPP/R2QKBNR w KQkq - 0 4"
+    },
+    {
+      "move_number": 4,
+      "color": "white",
+      "san": "e4",
+      "fen": "rnbqkb1r/ppp1pp1p/3p1np1/8/3PPB2/2N5/PPP2PPP/R2QKBNR b KQkq - 0 4"
+    },
+    {
+      "move_number": 4,
+      "color": "black",
+      "san": "Bg7",
+      "fen": "rnbqk2r/ppp1ppbp/3p1np1/8/3PPB2/2N5/PPP2PPP/R2QKBNR w KQkq - 1 5"
+    },
+    {
+      "move_number": 5,
+      "color": "white",
+      "san": "e5",
+      "fen": "rnbqk2r/ppp1ppbp/3p1np1/4P3/3P1B2/2N5/PPP2PPP/R2QKBNR b KQkq - 0 5"
+    },
+    {
+      "move_number": 5,
+      "color": "black",
+      "san": "dxe5",
+      "fen": "rnbqk2r/ppp1ppbp/5np1/4p3/3P1B2/2N5/PPP2PPP/R2QKBNR w KQkq - 0 6"
+    },
+    {
+      "move_number": 6,
+      "color": "white",
+      "san": "dxe5",
+      "fen": "rnbqk2r/ppp1ppbp/5np1/4P3/5B2/2N5/PPP2PPP/R2QKBNR b KQkq - 0 6"
+    },
+    {
+      "move_number": 6,
+      "color": "black",
+      "san": "Qxd1+",
+      "fen": "rnb1k2r/ppp1ppbp/5np1/4P3/5B2/2N5/PPP2PPP/R2qKBNR w KQkq - 0 7"
+    },
+    {
+      "move_number": 7,
+      "color": "white",
+      "san": "Rxd1",
+      "fen": "rnb1k2r/ppp1ppbp/5np1/4P3/5B2/2N5/PPP2PPP/3RKBNR b Kkq - 0 7"
+    },
+    {
+      "move_number": 7,
+      "color": "black",
+      "san": "Nfd7",
+      "fen": "rnb1k2r/pppnppbp/6p1/4P3/5B2/2N5/PPP2PPP/3RKBNR w Kkq - 1 8"
+    },
+    {
+      "move_number": 8,
+      "color": "white",
+      "san": "e6",
+      "fen": "rnb1k2r/pppnppbp/4P1p1/8/5B2/2N5/PPP2PPP/3RKBNR b Kkq - 0 8"
+    },
+    {
+      "move_number": 8,
+      "color": "black",
+      "san": "Bxc3+",
+      "fen": "rnb1k2r/pppnpp1p/4P1p1/8/5B2/2b5/PPP2PPP/3RKBNR w Kkq - 0 9"
+    },
+    {
+      "move_number": 9,
+      "color": "white",
+      "san": "bxc3",
+      "fen": "rnb1k2r/pppnpp1p/4P1p1/8/5B2/2P5/P1P2PPP/3RKBNR b Kkq - 0 9"
+    },
+    {
+      "move_number": 9,
+      "color": "black",
+      "san": "fxe6",
+      "fen": "rnb1k2r/pppnp2p/4p1p1/8/5B2/2P5/P1P2PPP/3RKBNR w Kkq - 0 10"
+    },
+    {
+      "move_number": 10,
+      "color": "white",
+      "san": "Bxc7",
+      "fen": "rnb1k2r/ppBnp2p/4p1p1/8/8/2P5/P1P2PPP/3RKBNR b Kkq - 0 10"
+    },
+    {
+      "move_number": 10,
+      "color": "black",
+      "san": "O-O",
+      "fen": "rnb2rk1/ppBnp2p/4p1p1/8/8/2P5/P1P2PPP/3RKBNR w K - 1 11"
+    },
+    {
+      "move_number": 11,
+      "color": "white",
+      "san": "Bb5",
+      "fen": "rnb2rk1/ppBnp2p/4p1p1/1B6/8/2P5/P1P2PPP/3RK1NR b K - 2 11"
+    },
+    {
+      "move_number": 11,
+      "color": "black",
+      "san": "Nc6",
+      "fen": "r1b2rk1/ppBnp2p/2n1p1p1/1B6/8/2P5/P1P2PPP/3RK1NR w K - 3 12"
+    },
+    {
+      "move_number": 12,
+      "color": "white",
+      "san": "Bxc6",
+      "fen": "r1b2rk1/ppBnp2p/2B1p1p1/8/8/2P5/P1P2PPP/3RK1NR b K - 0 12"
+    },
+    {
+      "move_number": 12,
+      "color": "black",
+      "san": "bxc6",
+      "fen": "r1b2rk1/p1Bnp2p/2p1p1p1/8/8/2P5/P1P2PPP/3RK1NR w K - 0 13"
+    },
+    {
+      "move_number": 13,
+      "color": "white",
+      "san": "Nf3",
+      "fen": "r1b2rk1/p1Bnp2p/2p1p1p1/8/8/2P2N2/P1P2PPP/3RK2R b K - 1 13"
+    },
+    {
+      "move_number": 13,
+      "color": "black",
+      "san": "Ba6",
+      "fen": "r4rk1/p1Bnp2p/b1p1p1p1/8/8/2P2N2/P1P2PPP/3RK2R w K - 2 14"
+    },
+    {
+      "move_number": 14,
+      "color": "white",
+      "san": "Nd4",
+      "fen": "r4rk1/p1Bnp2p/b1p1p1p1/8/3N4/2P5/P1P2PPP/3RK2R b K - 3 14"
+    },
+    {
+      "move_number": 14,
+      "color": "black",
+      "san": "Nc5",
+      "fen": "r4rk1/p1B1p2p/b1p1p1p1/2n5/3N4/2P5/P1P2PPP/3RK2R w K - 4 15"
+    },
+    {
+      "move_number": 15,
+      "color": "white",
+      "san": "Nxc6",
+      "fen": "r4rk1/p1B1p2p/b1N1p1p1/2n5/8/2P5/P1P2PPP/3RK2R b K - 0 15"
+    },
+    {
+      "move_number": 15,
+      "color": "black",
+      "san": "Rac8",
+      "fen": "2r2rk1/p1B1p2p/b1N1p1p1/2n5/8/2P5/P1P2PPP/3RK2R w K - 1 16"
+    },
+    {
+      "move_number": 16,
+      "color": "white",
+      "san": "Nxe7+",
+      "fen": "2r2rk1/p1B1N2p/b3p1p1/2n5/8/2P5/P1P2PPP/3RK2R b K - 0 16"
+    },
+    {
+      "move_number": 16,
+      "color": "black",
+      "san": "Kh8",
+      "fen": "2r2r1k/p1B1N2p/b3p1p1/2n5/8/2P5/P1P2PPP/3RK2R w K - 1 17"
+    },
+    {
+      "move_number": 17,
+      "color": "white",
+      "san": "Be5+",
+      "fen": "2r2r1k/p3N2p/b3p1p1/2n1B3/8/2P5/P1P2PPP/3RK2R b K - 2 17"
+    },
+    {
+      "move_number": 17,
+      "color": "black",
+      "san": "Rf6",
+      "fen": "2r4k/p3N2p/b3prp1/2n1B3/8/2P5/P1P2PPP/3RK2R w K - 3 18"
+    },
+    {
+      "move_number": 18,
+      "color": "white",
+      "san": "Bxf6#",
+      "fen": "2r4k/p3N2p/b3pBp1/2n5/8/2P5/P1P2PPP/3RK2R b K - 0 18"
+    }
+  ],
+  "white": "Wujajin",
+  "black": "RommGames"
+}

@@ -48,7 +48,7 @@ def download_stockfish_windows(target_dir: str) -> str:
         urllib.request.urlretrieve(config.STOCKFISH_DOWNLOAD_URL_WINDOWS, archive_path)
 
         with zipfile.ZipFile(archive_path, "r") as zip_file:
-            candidates = [name for name in zip_file.namelist() if os.path.basename(name).lower() == "stockfish.exe"]
+            candidates = [name for name in zip_file.namelist() if os.path.basename(name).lower().endswith(".exe") and "stockfish" in os.path.basename(name).lower()]
             if not candidates:
                 raise RuntimeError("A letöltött Stockfish ZIP nem tartalmaz stockfish.exe fájlt.")
             member = candidates[0]
