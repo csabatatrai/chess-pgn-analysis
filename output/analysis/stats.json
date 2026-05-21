@@ -1,0 +1,2179 @@
+{
+  "total_games": 1377,
+  "results": [
+    {
+      "result": "1-0",
+      "count": 685,
+      "pct": 49.75
+    },
+    {
+      "result": "0-1",
+      "count": 640,
+      "pct": 46.48
+    },
+    {
+      "result": "1/2-1/2",
+      "count": 52,
+      "pct": 3.78
+    }
+  ],
+  "elo_histogram": [
+    {
+      "elo_bucket": 400.0,
+      "count": 28
+    },
+    {
+      "elo_bucket": 500.0,
+      "count": 21
+    },
+    {
+      "elo_bucket": 600.0,
+      "count": 30
+    },
+    {
+      "elo_bucket": 700.0,
+      "count": 132
+    },
+    {
+      "elo_bucket": 800.0,
+      "count": 362
+    },
+    {
+      "elo_bucket": 900.0,
+      "count": 594
+    },
+    {
+      "elo_bucket": 1000.0,
+      "count": 1076
+    },
+    {
+      "elo_bucket": 1100.0,
+      "count": 447
+    },
+    {
+      "elo_bucket": 1200.0,
+      "count": 11
+    },
+    {
+      "elo_bucket": 1600.0,
+      "count": 3
+    },
+    {
+      "elo_bucket": 2000.0,
+      "count": 6
+    }
+  ],
+  "elo_stats": {
+    "avg_white": 995.3023082650782,
+    "avg_black": 997.3603871928518,
+    "median_white": 1034.0,
+    "median_black": 1032.0
+  },
+  "top_openings": [
+    {
+      "eco": "D00",
+      "opening": "",
+      "count": 357,
+      "white_win_pct": 54.1,
+      "black_win_pct": 43.1,
+      "draw_pct": 2.8
+    },
+    {
+      "eco": "B10",
+      "opening": "",
+      "count": 169,
+      "white_win_pct": 41.4,
+      "black_win_pct": 54.4,
+      "draw_pct": 4.1
+    },
+    {
+      "eco": "A40",
+      "opening": "",
+      "count": 133,
+      "white_win_pct": 48.1,
+      "black_win_pct": 48.1,
+      "draw_pct": 3.8
+    },
+    {
+      "eco": "B12",
+      "opening": "",
+      "count": 114,
+      "white_win_pct": 49.1,
+      "black_win_pct": 48.2,
+      "draw_pct": 2.6
+    },
+    {
+      "eco": "D02",
+      "opening": "",
+      "count": 85,
+      "white_win_pct": 51.8,
+      "black_win_pct": 43.5,
+      "draw_pct": 4.7
+    },
+    {
+      "eco": "B13",
+      "opening": "",
+      "count": 79,
+      "white_win_pct": 54.4,
+      "black_win_pct": 43.0,
+      "draw_pct": 2.5
+    },
+    {
+      "eco": "A45",
+      "opening": "",
+      "count": 69,
+      "white_win_pct": 47.8,
+      "black_win_pct": 46.4,
+      "draw_pct": 5.8
+    },
+    {
+      "eco": "A00",
+      "opening": "",
+      "count": 35,
+      "white_win_pct": 54.3,
+      "black_win_pct": 31.4,
+      "draw_pct": 14.3
+    },
+    {
+      "eco": "B18",
+      "opening": "",
+      "count": 20,
+      "white_win_pct": 45.0,
+      "black_win_pct": 55.0,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "B00",
+      "opening": "",
+      "count": 18,
+      "white_win_pct": 22.2,
+      "black_win_pct": 66.7,
+      "draw_pct": 11.1
+    },
+    {
+      "eco": "B15",
+      "opening": "",
+      "count": 17,
+      "white_win_pct": 47.1,
+      "black_win_pct": 41.2,
+      "draw_pct": 11.8
+    },
+    {
+      "eco": "A80",
+      "opening": "",
+      "count": 15,
+      "white_win_pct": 53.3,
+      "black_win_pct": 46.7,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "A04",
+      "opening": "",
+      "count": 13,
+      "white_win_pct": 38.5,
+      "black_win_pct": 53.8,
+      "draw_pct": 7.7
+    },
+    {
+      "eco": "A41",
+      "opening": "",
+      "count": 13,
+      "white_win_pct": 38.5,
+      "black_win_pct": 61.5,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "B50",
+      "opening": "",
+      "count": 13,
+      "white_win_pct": 61.5,
+      "black_win_pct": 38.5,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "B01",
+      "opening": "",
+      "count": 12,
+      "white_win_pct": 50.0,
+      "black_win_pct": 41.7,
+      "draw_pct": 8.3
+    },
+    {
+      "eco": "D10",
+      "opening": "",
+      "count": 12,
+      "white_win_pct": 50.0,
+      "black_win_pct": 41.7,
+      "draw_pct": 8.3
+    },
+    {
+      "eco": "C50",
+      "opening": "",
+      "count": 12,
+      "white_win_pct": 58.3,
+      "black_win_pct": 41.7,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "B07",
+      "opening": "",
+      "count": 11,
+      "white_win_pct": 63.6,
+      "black_win_pct": 27.3,
+      "draw_pct": 9.1
+    },
+    {
+      "eco": "A48",
+      "opening": "",
+      "count": 11,
+      "white_win_pct": 45.5,
+      "black_win_pct": 45.5,
+      "draw_pct": 9.1
+    },
+    {
+      "eco": "A43",
+      "opening": "",
+      "count": 10,
+      "white_win_pct": 50.0,
+      "black_win_pct": 40.0,
+      "draw_pct": 10.0
+    },
+    {
+      "eco": "A01",
+      "opening": "",
+      "count": 9,
+      "white_win_pct": 44.4,
+      "black_win_pct": 55.6,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "C41",
+      "opening": "",
+      "count": 8,
+      "white_win_pct": 50.0,
+      "black_win_pct": 50.0,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "B11",
+      "opening": "",
+      "count": 8,
+      "white_win_pct": 37.5,
+      "black_win_pct": 62.5,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "B06",
+      "opening": "",
+      "count": 8,
+      "white_win_pct": 50.0,
+      "black_win_pct": 50.0,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "C00",
+      "opening": "",
+      "count": 7,
+      "white_win_pct": 42.9,
+      "black_win_pct": 57.1,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "C40",
+      "opening": "",
+      "count": 4,
+      "white_win_pct": 25.0,
+      "black_win_pct": 75.0,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "C55",
+      "opening": "",
+      "count": 4,
+      "white_win_pct": 75.0,
+      "black_win_pct": 25.0,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "B08",
+      "opening": "",
+      "count": 4,
+      "white_win_pct": 50.0,
+      "black_win_pct": 50.0,
+      "draw_pct": 0.0
+    },
+    {
+      "eco": "A11",
+      "opening": "",
+      "count": 4,
+      "white_win_pct": 100.0,
+      "black_win_pct": 0.0,
+      "draw_pct": 0.0
+    }
+  ],
+  "time_controls": [
+    {
+      "time_class": "Egyéb",
+      "count": 1293,
+      "pct": 93.9
+    },
+    {
+      "time_class": "Blitz",
+      "count": 49,
+      "pct": 3.56
+    },
+    {
+      "time_class": "Rapid",
+      "count": 20,
+      "pct": 1.45
+    },
+    {
+      "time_class": "Correspondence",
+      "count": 10,
+      "pct": 0.73
+    },
+    {
+      "time_class": "Bullet",
+      "count": 5,
+      "pct": 0.36
+    }
+  ],
+  "move_count_dist": [
+    {
+      "num_moves": 1,
+      "count": 5
+    },
+    {
+      "num_moves": 3,
+      "count": 2
+    },
+    {
+      "num_moves": 4,
+      "count": 1
+    },
+    {
+      "num_moves": 7,
+      "count": 5
+    },
+    {
+      "num_moves": 8,
+      "count": 1
+    },
+    {
+      "num_moves": 9,
+      "count": 4
+    },
+    {
+      "num_moves": 10,
+      "count": 1
+    },
+    {
+      "num_moves": 11,
+      "count": 6
+    },
+    {
+      "num_moves": 12,
+      "count": 2
+    },
+    {
+      "num_moves": 13,
+      "count": 7
+    },
+    {
+      "num_moves": 14,
+      "count": 4
+    },
+    {
+      "num_moves": 15,
+      "count": 3
+    },
+    {
+      "num_moves": 16,
+      "count": 7
+    },
+    {
+      "num_moves": 17,
+      "count": 5
+    },
+    {
+      "num_moves": 18,
+      "count": 2
+    },
+    {
+      "num_moves": 19,
+      "count": 10
+    },
+    {
+      "num_moves": 20,
+      "count": 14
+    },
+    {
+      "num_moves": 21,
+      "count": 11
+    },
+    {
+      "num_moves": 22,
+      "count": 3
+    },
+    {
+      "num_moves": 23,
+      "count": 8
+    },
+    {
+      "num_moves": 24,
+      "count": 8
+    },
+    {
+      "num_moves": 25,
+      "count": 6
+    },
+    {
+      "num_moves": 26,
+      "count": 13
+    },
+    {
+      "num_moves": 27,
+      "count": 15
+    },
+    {
+      "num_moves": 28,
+      "count": 9
+    },
+    {
+      "num_moves": 29,
+      "count": 20
+    },
+    {
+      "num_moves": 30,
+      "count": 15
+    },
+    {
+      "num_moves": 31,
+      "count": 17
+    },
+    {
+      "num_moves": 32,
+      "count": 10
+    },
+    {
+      "num_moves": 33,
+      "count": 12
+    },
+    {
+      "num_moves": 34,
+      "count": 14
+    },
+    {
+      "num_moves": 35,
+      "count": 18
+    },
+    {
+      "num_moves": 36,
+      "count": 17
+    },
+    {
+      "num_moves": 37,
+      "count": 13
+    },
+    {
+      "num_moves": 38,
+      "count": 15
+    },
+    {
+      "num_moves": 39,
+      "count": 18
+    },
+    {
+      "num_moves": 40,
+      "count": 12
+    },
+    {
+      "num_moves": 41,
+      "count": 20
+    },
+    {
+      "num_moves": 42,
+      "count": 13
+    },
+    {
+      "num_moves": 43,
+      "count": 14
+    },
+    {
+      "num_moves": 44,
+      "count": 19
+    },
+    {
+      "num_moves": 45,
+      "count": 17
+    },
+    {
+      "num_moves": 46,
+      "count": 19
+    },
+    {
+      "num_moves": 47,
+      "count": 14
+    },
+    {
+      "num_moves": 48,
+      "count": 20
+    },
+    {
+      "num_moves": 49,
+      "count": 17
+    },
+    {
+      "num_moves": 50,
+      "count": 18
+    },
+    {
+      "num_moves": 51,
+      "count": 21
+    },
+    {
+      "num_moves": 52,
+      "count": 21
+    },
+    {
+      "num_moves": 53,
+      "count": 19
+    },
+    {
+      "num_moves": 54,
+      "count": 23
+    },
+    {
+      "num_moves": 55,
+      "count": 23
+    },
+    {
+      "num_moves": 56,
+      "count": 17
+    },
+    {
+      "num_moves": 57,
+      "count": 19
+    },
+    {
+      "num_moves": 58,
+      "count": 19
+    },
+    {
+      "num_moves": 59,
+      "count": 14
+    },
+    {
+      "num_moves": 60,
+      "count": 18
+    },
+    {
+      "num_moves": 61,
+      "count": 16
+    },
+    {
+      "num_moves": 62,
+      "count": 15
+    },
+    {
+      "num_moves": 63,
+      "count": 14
+    },
+    {
+      "num_moves": 64,
+      "count": 17
+    },
+    {
+      "num_moves": 65,
+      "count": 18
+    },
+    {
+      "num_moves": 66,
+      "count": 13
+    },
+    {
+      "num_moves": 67,
+      "count": 18
+    },
+    {
+      "num_moves": 68,
+      "count": 10
+    },
+    {
+      "num_moves": 69,
+      "count": 11
+    },
+    {
+      "num_moves": 70,
+      "count": 19
+    },
+    {
+      "num_moves": 71,
+      "count": 13
+    },
+    {
+      "num_moves": 72,
+      "count": 14
+    },
+    {
+      "num_moves": 73,
+      "count": 7
+    },
+    {
+      "num_moves": 74,
+      "count": 9
+    },
+    {
+      "num_moves": 75,
+      "count": 14
+    },
+    {
+      "num_moves": 76,
+      "count": 13
+    },
+    {
+      "num_moves": 77,
+      "count": 12
+    },
+    {
+      "num_moves": 78,
+      "count": 16
+    },
+    {
+      "num_moves": 79,
+      "count": 9
+    },
+    {
+      "num_moves": 80,
+      "count": 7
+    },
+    {
+      "num_moves": 81,
+      "count": 13
+    },
+    {
+      "num_moves": 82,
+      "count": 10
+    },
+    {
+      "num_moves": 83,
+      "count": 10
+    },
+    {
+      "num_moves": 84,
+      "count": 5
+    },
+    {
+      "num_moves": 85,
+      "count": 14
+    },
+    {
+      "num_moves": 86,
+      "count": 10
+    },
+    {
+      "num_moves": 87,
+      "count": 8
+    },
+    {
+      "num_moves": 88,
+      "count": 8
+    },
+    {
+      "num_moves": 89,
+      "count": 13
+    },
+    {
+      "num_moves": 90,
+      "count": 11
+    },
+    {
+      "num_moves": 91,
+      "count": 7
+    },
+    {
+      "num_moves": 92,
+      "count": 9
+    },
+    {
+      "num_moves": 93,
+      "count": 10
+    },
+    {
+      "num_moves": 94,
+      "count": 6
+    },
+    {
+      "num_moves": 95,
+      "count": 3
+    },
+    {
+      "num_moves": 96,
+      "count": 4
+    },
+    {
+      "num_moves": 97,
+      "count": 14
+    },
+    {
+      "num_moves": 98,
+      "count": 5
+    },
+    {
+      "num_moves": 99,
+      "count": 10
+    },
+    {
+      "num_moves": 100,
+      "count": 5
+    },
+    {
+      "num_moves": 101,
+      "count": 6
+    },
+    {
+      "num_moves": 102,
+      "count": 8
+    },
+    {
+      "num_moves": 103,
+      "count": 5
+    },
+    {
+      "num_moves": 104,
+      "count": 7
+    },
+    {
+      "num_moves": 105,
+      "count": 11
+    },
+    {
+      "num_moves": 106,
+      "count": 5
+    },
+    {
+      "num_moves": 107,
+      "count": 6
+    },
+    {
+      "num_moves": 108,
+      "count": 1
+    },
+    {
+      "num_moves": 109,
+      "count": 4
+    },
+    {
+      "num_moves": 110,
+      "count": 4
+    },
+    {
+      "num_moves": 111,
+      "count": 6
+    },
+    {
+      "num_moves": 112,
+      "count": 6
+    },
+    {
+      "num_moves": 113,
+      "count": 2
+    },
+    {
+      "num_moves": 114,
+      "count": 11
+    },
+    {
+      "num_moves": 115,
+      "count": 5
+    },
+    {
+      "num_moves": 116,
+      "count": 4
+    },
+    {
+      "num_moves": 117,
+      "count": 9
+    },
+    {
+      "num_moves": 118,
+      "count": 1
+    },
+    {
+      "num_moves": 119,
+      "count": 2
+    },
+    {
+      "num_moves": 120,
+      "count": 10
+    },
+    {
+      "num_moves": 121,
+      "count": 7
+    },
+    {
+      "num_moves": 122,
+      "count": 8
+    },
+    {
+      "num_moves": 123,
+      "count": 4
+    },
+    {
+      "num_moves": 124,
+      "count": 2
+    },
+    {
+      "num_moves": 125,
+      "count": 3
+    },
+    {
+      "num_moves": 126,
+      "count": 6
+    },
+    {
+      "num_moves": 127,
+      "count": 5
+    },
+    {
+      "num_moves": 128,
+      "count": 4
+    },
+    {
+      "num_moves": 129,
+      "count": 5
+    },
+    {
+      "num_moves": 130,
+      "count": 2
+    },
+    {
+      "num_moves": 131,
+      "count": 1
+    },
+    {
+      "num_moves": 132,
+      "count": 5
+    },
+    {
+      "num_moves": 133,
+      "count": 2
+    },
+    {
+      "num_moves": 134,
+      "count": 1
+    },
+    {
+      "num_moves": 135,
+      "count": 1
+    },
+    {
+      "num_moves": 136,
+      "count": 4
+    },
+    {
+      "num_moves": 137,
+      "count": 3
+    },
+    {
+      "num_moves": 138,
+      "count": 6
+    },
+    {
+      "num_moves": 139,
+      "count": 2
+    },
+    {
+      "num_moves": 140,
+      "count": 4
+    },
+    {
+      "num_moves": 141,
+      "count": 3
+    },
+    {
+      "num_moves": 142,
+      "count": 4
+    },
+    {
+      "num_moves": 143,
+      "count": 2
+    },
+    {
+      "num_moves": 144,
+      "count": 2
+    },
+    {
+      "num_moves": 145,
+      "count": 2
+    },
+    {
+      "num_moves": 146,
+      "count": 1
+    },
+    {
+      "num_moves": 147,
+      "count": 3
+    },
+    {
+      "num_moves": 148,
+      "count": 1
+    },
+    {
+      "num_moves": 149,
+      "count": 1
+    },
+    {
+      "num_moves": 150,
+      "count": 3
+    },
+    {
+      "num_moves": 151,
+      "count": 4
+    },
+    {
+      "num_moves": 152,
+      "count": 1
+    },
+    {
+      "num_moves": 154,
+      "count": 3
+    },
+    {
+      "num_moves": 155,
+      "count": 5
+    },
+    {
+      "num_moves": 156,
+      "count": 2
+    },
+    {
+      "num_moves": 158,
+      "count": 1
+    },
+    {
+      "num_moves": 159,
+      "count": 1
+    },
+    {
+      "num_moves": 160,
+      "count": 1
+    },
+    {
+      "num_moves": 165,
+      "count": 1
+    },
+    {
+      "num_moves": 168,
+      "count": 2
+    },
+    {
+      "num_moves": 170,
+      "count": 1
+    },
+    {
+      "num_moves": 173,
+      "count": 1
+    },
+    {
+      "num_moves": 174,
+      "count": 1
+    },
+    {
+      "num_moves": 176,
+      "count": 1
+    },
+    {
+      "num_moves": 181,
+      "count": 1
+    },
+    {
+      "num_moves": 189,
+      "count": 1
+    },
+    {
+      "num_moves": 190,
+      "count": 1
+    },
+    {
+      "num_moves": 192,
+      "count": 1
+    }
+  ],
+  "move_stats": {
+    "avg_moves": 66.70370370370371,
+    "median_moves": 60.0,
+    "min_moves": 1,
+    "max_moves": 192,
+    "p25": 41.0,
+    "p75": 87.0
+  },
+  "daily_activity": [
+    {
+      "date": "2024.01.08",
+      "count": 10
+    },
+    {
+      "date": "2024.01.09",
+      "count": 7
+    },
+    {
+      "date": "2024.08.17",
+      "count": 2
+    },
+    {
+      "date": "2024.09.09",
+      "count": 1
+    },
+    {
+      "date": "2024.10.08",
+      "count": 1
+    },
+    {
+      "date": "2024.12.05",
+      "count": 1
+    },
+    {
+      "date": "2025.01.09",
+      "count": 1
+    },
+    {
+      "date": "2025.01.12",
+      "count": 1
+    },
+    {
+      "date": "2025.05.13",
+      "count": 1
+    },
+    {
+      "date": "2025.05.17",
+      "count": 1
+    },
+    {
+      "date": "2025.05.27",
+      "count": 1
+    },
+    {
+      "date": "2025.06.06",
+      "count": 1
+    },
+    {
+      "date": "2025.09.02",
+      "count": 11
+    },
+    {
+      "date": "2025.09.03",
+      "count": 8
+    },
+    {
+      "date": "2025.09.05",
+      "count": 2
+    },
+    {
+      "date": "2025.09.06",
+      "count": 1
+    },
+    {
+      "date": "2025.09.07",
+      "count": 5
+    },
+    {
+      "date": "2025.09.08",
+      "count": 4
+    },
+    {
+      "date": "2025.09.09",
+      "count": 4
+    },
+    {
+      "date": "2025.09.10",
+      "count": 8
+    },
+    {
+      "date": "2025.09.11",
+      "count": 4
+    },
+    {
+      "date": "2025.09.12",
+      "count": 10
+    },
+    {
+      "date": "2025.09.13",
+      "count": 4
+    },
+    {
+      "date": "2025.09.14",
+      "count": 7
+    },
+    {
+      "date": "2025.09.15",
+      "count": 4
+    },
+    {
+      "date": "2025.09.16",
+      "count": 8
+    },
+    {
+      "date": "2025.09.17",
+      "count": 1
+    },
+    {
+      "date": "2025.09.18",
+      "count": 2
+    },
+    {
+      "date": "2025.09.19",
+      "count": 8
+    },
+    {
+      "date": "2025.09.20",
+      "count": 1
+    },
+    {
+      "date": "2025.09.21",
+      "count": 8
+    },
+    {
+      "date": "2025.09.22",
+      "count": 6
+    },
+    {
+      "date": "2025.09.23",
+      "count": 11
+    },
+    {
+      "date": "2025.09.24",
+      "count": 5
+    },
+    {
+      "date": "2025.09.25",
+      "count": 5
+    },
+    {
+      "date": "2025.09.26",
+      "count": 3
+    },
+    {
+      "date": "2025.09.27",
+      "count": 6
+    },
+    {
+      "date": "2025.09.28",
+      "count": 2
+    },
+    {
+      "date": "2025.09.29",
+      "count": 11
+    },
+    {
+      "date": "2025.09.30",
+      "count": 2
+    },
+    {
+      "date": "2025.10.01",
+      "count": 4
+    },
+    {
+      "date": "2025.10.02",
+      "count": 6
+    },
+    {
+      "date": "2025.10.03",
+      "count": 23
+    },
+    {
+      "date": "2025.10.04",
+      "count": 10
+    },
+    {
+      "date": "2025.10.05",
+      "count": 10
+    },
+    {
+      "date": "2025.10.06",
+      "count": 16
+    },
+    {
+      "date": "2025.10.07",
+      "count": 10
+    },
+    {
+      "date": "2025.10.08",
+      "count": 27
+    },
+    {
+      "date": "2025.10.09",
+      "count": 16
+    },
+    {
+      "date": "2025.10.10",
+      "count": 13
+    },
+    {
+      "date": "2025.10.11",
+      "count": 14
+    },
+    {
+      "date": "2025.10.12",
+      "count": 25
+    },
+    {
+      "date": "2025.10.13",
+      "count": 14
+    },
+    {
+      "date": "2025.10.14",
+      "count": 7
+    },
+    {
+      "date": "2025.10.15",
+      "count": 6
+    },
+    {
+      "date": "2025.10.16",
+      "count": 9
+    },
+    {
+      "date": "2025.10.17",
+      "count": 3
+    },
+    {
+      "date": "2025.10.18",
+      "count": 16
+    },
+    {
+      "date": "2025.10.19",
+      "count": 22
+    },
+    {
+      "date": "2025.10.20",
+      "count": 5
+    },
+    {
+      "date": "2025.10.22",
+      "count": 3
+    },
+    {
+      "date": "2025.10.23",
+      "count": 12
+    },
+    {
+      "date": "2025.10.24",
+      "count": 14
+    },
+    {
+      "date": "2025.10.25",
+      "count": 17
+    },
+    {
+      "date": "2025.10.26",
+      "count": 13
+    },
+    {
+      "date": "2025.10.27",
+      "count": 11
+    },
+    {
+      "date": "2025.10.28",
+      "count": 18
+    },
+    {
+      "date": "2025.10.29",
+      "count": 10
+    },
+    {
+      "date": "2025.10.30",
+      "count": 10
+    },
+    {
+      "date": "2025.10.31",
+      "count": 5
+    },
+    {
+      "date": "2025.11.01",
+      "count": 11
+    },
+    {
+      "date": "2025.11.02",
+      "count": 15
+    },
+    {
+      "date": "2025.11.03",
+      "count": 5
+    },
+    {
+      "date": "2025.11.04",
+      "count": 7
+    },
+    {
+      "date": "2025.11.05",
+      "count": 12
+    },
+    {
+      "date": "2025.11.06",
+      "count": 15
+    },
+    {
+      "date": "2025.11.07",
+      "count": 5
+    },
+    {
+      "date": "2025.11.08",
+      "count": 14
+    },
+    {
+      "date": "2025.11.09",
+      "count": 8
+    },
+    {
+      "date": "2025.11.10",
+      "count": 6
+    },
+    {
+      "date": "2025.11.11",
+      "count": 4
+    },
+    {
+      "date": "2025.11.12",
+      "count": 12
+    },
+    {
+      "date": "2025.11.13",
+      "count": 23
+    },
+    {
+      "date": "2025.11.14",
+      "count": 25
+    },
+    {
+      "date": "2025.11.15",
+      "count": 22
+    },
+    {
+      "date": "2025.11.16",
+      "count": 5
+    },
+    {
+      "date": "2025.11.17",
+      "count": 3
+    },
+    {
+      "date": "2025.11.18",
+      "count": 4
+    },
+    {
+      "date": "2025.11.19",
+      "count": 4
+    },
+    {
+      "date": "2025.11.20",
+      "count": 1
+    },
+    {
+      "date": "2025.11.21",
+      "count": 8
+    },
+    {
+      "date": "2025.11.22",
+      "count": 2
+    },
+    {
+      "date": "2025.11.23",
+      "count": 7
+    },
+    {
+      "date": "2025.11.25",
+      "count": 4
+    },
+    {
+      "date": "2025.11.26",
+      "count": 3
+    },
+    {
+      "date": "2025.11.27",
+      "count": 8
+    },
+    {
+      "date": "2025.11.28",
+      "count": 7
+    },
+    {
+      "date": "2025.11.29",
+      "count": 9
+    },
+    {
+      "date": "2025.11.30",
+      "count": 11
+    },
+    {
+      "date": "2025.12.01",
+      "count": 5
+    },
+    {
+      "date": "2025.12.02",
+      "count": 8
+    },
+    {
+      "date": "2025.12.03",
+      "count": 2
+    },
+    {
+      "date": "2025.12.04",
+      "count": 13
+    },
+    {
+      "date": "2025.12.05",
+      "count": 6
+    },
+    {
+      "date": "2025.12.06",
+      "count": 8
+    },
+    {
+      "date": "2025.12.07",
+      "count": 12
+    },
+    {
+      "date": "2025.12.08",
+      "count": 8
+    },
+    {
+      "date": "2025.12.09",
+      "count": 7
+    },
+    {
+      "date": "2025.12.10",
+      "count": 6
+    },
+    {
+      "date": "2025.12.11",
+      "count": 6
+    },
+    {
+      "date": "2025.12.12",
+      "count": 3
+    },
+    {
+      "date": "2025.12.14",
+      "count": 9
+    },
+    {
+      "date": "2025.12.15",
+      "count": 5
+    },
+    {
+      "date": "2025.12.16",
+      "count": 5
+    },
+    {
+      "date": "2025.12.17",
+      "count": 1
+    },
+    {
+      "date": "2025.12.18",
+      "count": 3
+    },
+    {
+      "date": "2025.12.19",
+      "count": 1
+    },
+    {
+      "date": "2025.12.20",
+      "count": 6
+    },
+    {
+      "date": "2025.12.21",
+      "count": 2
+    },
+    {
+      "date": "2025.12.22",
+      "count": 4
+    },
+    {
+      "date": "2025.12.23",
+      "count": 3
+    },
+    {
+      "date": "2025.12.24",
+      "count": 4
+    },
+    {
+      "date": "2025.12.25",
+      "count": 3
+    },
+    {
+      "date": "2025.12.26",
+      "count": 15
+    },
+    {
+      "date": "2025.12.27",
+      "count": 12
+    },
+    {
+      "date": "2025.12.28",
+      "count": 9
+    },
+    {
+      "date": "2025.12.29",
+      "count": 8
+    },
+    {
+      "date": "2025.12.30",
+      "count": 9
+    },
+    {
+      "date": "2025.12.31",
+      "count": 8
+    },
+    {
+      "date": "2026.01.01",
+      "count": 6
+    },
+    {
+      "date": "2026.01.02",
+      "count": 11
+    },
+    {
+      "date": "2026.01.03",
+      "count": 8
+    },
+    {
+      "date": "2026.01.04",
+      "count": 5
+    },
+    {
+      "date": "2026.01.05",
+      "count": 4
+    },
+    {
+      "date": "2026.01.06",
+      "count": 3
+    },
+    {
+      "date": "2026.01.07",
+      "count": 2
+    },
+    {
+      "date": "2026.01.08",
+      "count": 7
+    },
+    {
+      "date": "2026.01.09",
+      "count": 5
+    },
+    {
+      "date": "2026.01.10",
+      "count": 9
+    },
+    {
+      "date": "2026.01.11",
+      "count": 4
+    },
+    {
+      "date": "2026.01.12",
+      "count": 6
+    },
+    {
+      "date": "2026.01.13",
+      "count": 5
+    },
+    {
+      "date": "2026.01.14",
+      "count": 3
+    },
+    {
+      "date": "2026.01.15",
+      "count": 3
+    },
+    {
+      "date": "2026.01.16",
+      "count": 6
+    },
+    {
+      "date": "2026.01.17",
+      "count": 13
+    },
+    {
+      "date": "2026.01.18",
+      "count": 7
+    },
+    {
+      "date": "2026.01.19",
+      "count": 9
+    },
+    {
+      "date": "2026.01.20",
+      "count": 5
+    },
+    {
+      "date": "2026.01.21",
+      "count": 6
+    },
+    {
+      "date": "2026.01.22",
+      "count": 7
+    },
+    {
+      "date": "2026.01.23",
+      "count": 8
+    },
+    {
+      "date": "2026.01.24",
+      "count": 5
+    },
+    {
+      "date": "2026.01.25",
+      "count": 11
+    },
+    {
+      "date": "2026.01.26",
+      "count": 2
+    },
+    {
+      "date": "2026.01.27",
+      "count": 5
+    },
+    {
+      "date": "2026.01.28",
+      "count": 3
+    },
+    {
+      "date": "2026.01.29",
+      "count": 2
+    },
+    {
+      "date": "2026.01.30",
+      "count": 4
+    },
+    {
+      "date": "2026.01.31",
+      "count": 1
+    },
+    {
+      "date": "2026.02.01",
+      "count": 6
+    },
+    {
+      "date": "2026.02.02",
+      "count": 1
+    },
+    {
+      "date": "2026.02.03",
+      "count": 1
+    },
+    {
+      "date": "2026.02.04",
+      "count": 4
+    },
+    {
+      "date": "2026.02.05",
+      "count": 1
+    },
+    {
+      "date": "2026.02.07",
+      "count": 3
+    },
+    {
+      "date": "2026.02.08",
+      "count": 1
+    },
+    {
+      "date": "2026.02.09",
+      "count": 3
+    },
+    {
+      "date": "2026.02.10",
+      "count": 5
+    },
+    {
+      "date": "2026.02.11",
+      "count": 1
+    },
+    {
+      "date": "2026.02.12",
+      "count": 5
+    },
+    {
+      "date": "2026.02.13",
+      "count": 5
+    },
+    {
+      "date": "2026.02.14",
+      "count": 7
+    },
+    {
+      "date": "2026.02.15",
+      "count": 3
+    },
+    {
+      "date": "2026.02.16",
+      "count": 1
+    },
+    {
+      "date": "2026.02.17",
+      "count": 1
+    },
+    {
+      "date": "2026.02.18",
+      "count": 2
+    },
+    {
+      "date": "2026.02.20",
+      "count": 4
+    },
+    {
+      "date": "2026.02.21",
+      "count": 8
+    },
+    {
+      "date": "2026.02.22",
+      "count": 5
+    },
+    {
+      "date": "2026.02.23",
+      "count": 1
+    },
+    {
+      "date": "2026.02.24",
+      "count": 2
+    },
+    {
+      "date": "2026.02.25",
+      "count": 1
+    },
+    {
+      "date": "2026.02.26",
+      "count": 1
+    },
+    {
+      "date": "2026.02.27",
+      "count": 4
+    },
+    {
+      "date": "2026.02.28",
+      "count": 6
+    },
+    {
+      "date": "2026.03.01",
+      "count": 2
+    },
+    {
+      "date": "2026.03.02",
+      "count": 5
+    },
+    {
+      "date": "2026.03.04",
+      "count": 1
+    },
+    {
+      "date": "2026.03.11",
+      "count": 1
+    },
+    {
+      "date": "2026.03.14",
+      "count": 1
+    },
+    {
+      "date": "2026.03.15",
+      "count": 1
+    },
+    {
+      "date": "2026.03.17",
+      "count": 1
+    },
+    {
+      "date": "2026.03.18",
+      "count": 3
+    },
+    {
+      "date": "2026.03.19",
+      "count": 5
+    },
+    {
+      "date": "2026.03.20",
+      "count": 1
+    },
+    {
+      "date": "2026.03.21",
+      "count": 2
+    },
+    {
+      "date": "2026.03.25",
+      "count": 1
+    },
+    {
+      "date": "2026.03.26",
+      "count": 4
+    },
+    {
+      "date": "2026.03.27",
+      "count": 1
+    },
+    {
+      "date": "2026.03.28",
+      "count": 6
+    },
+    {
+      "date": "2026.03.29",
+      "count": 3
+    },
+    {
+      "date": "2026.03.30",
+      "count": 2
+    },
+    {
+      "date": "2026.03.31",
+      "count": 6
+    },
+    {
+      "date": "2026.04.01",
+      "count": 2
+    },
+    {
+      "date": "2026.04.02",
+      "count": 1
+    },
+    {
+      "date": "2026.04.04",
+      "count": 1
+    },
+    {
+      "date": "2026.04.05",
+      "count": 4
+    },
+    {
+      "date": "2026.04.06",
+      "count": 5
+    },
+    {
+      "date": "2026.04.07",
+      "count": 1
+    },
+    {
+      "date": "2026.04.08",
+      "count": 3
+    },
+    {
+      "date": "2026.04.11",
+      "count": 3
+    },
+    {
+      "date": "2026.04.14",
+      "count": 2
+    },
+    {
+      "date": "2026.04.15",
+      "count": 2
+    },
+    {
+      "date": "2026.04.16",
+      "count": 1
+    },
+    {
+      "date": "2026.04.18",
+      "count": 5
+    },
+    {
+      "date": "2026.04.19",
+      "count": 4
+    },
+    {
+      "date": "2026.04.20",
+      "count": 4
+    },
+    {
+      "date": "2026.04.26",
+      "count": 1
+    },
+    {
+      "date": "2026.04.27",
+      "count": 6
+    },
+    {
+      "date": "2026.04.28",
+      "count": 3
+    },
+    {
+      "date": "2026.04.29",
+      "count": 5
+    },
+    {
+      "date": "2026.04.30",
+      "count": 1
+    },
+    {
+      "date": "2026.05.01",
+      "count": 6
+    },
+    {
+      "date": "2026.05.02",
+      "count": 1
+    },
+    {
+      "date": "2026.05.04",
+      "count": 1
+    },
+    {
+      "date": "2026.05.05",
+      "count": 3
+    },
+    {
+      "date": "2026.05.07",
+      "count": 1
+    },
+    {
+      "date": "2026.05.08",
+      "count": 1
+    },
+    {
+      "date": "2026.05.09",
+      "count": 1
+    },
+    {
+      "date": "2026.05.12",
+      "count": 2
+    },
+    {
+      "date": "2026.05.13",
+      "count": 1
+    },
+    {
+      "date": "2026.05.14",
+      "count": 3
+    },
+    {
+      "date": "2026.05.15",
+      "count": 1
+    }
+  ],
+  "terminations": [],
+  "top_players": [
+    {
+      "player": "Wujajin",
+      "games": 1377,
+      "peak_elo": 1195
+    },
+    {
+      "player": "mosimate123",
+      "games": 9,
+      "peak_elo": 732
+    },
+    {
+      "player": "Jlee446",
+      "games": 5,
+      "peak_elo": 831
+    },
+    {
+      "player": "Coach-Mae",
+      "games": 5,
+      "peak_elo": 2000
+    },
+    {
+      "player": "betswew",
+      "games": 4,
+      "peak_elo": 898
+    },
+    {
+      "player": "Kamiklari",
+      "games": 3,
+      "peak_elo": 1081
+    },
+    {
+      "player": "TURMANA123",
+      "games": 3,
+      "peak_elo": 928
+    },
+    {
+      "player": "krishna-wadhwa",
+      "games": 3,
+      "peak_elo": 930
+    },
+    {
+      "player": "oussamamha",
+      "games": 3,
+      "peak_elo": 959
+    },
+    {
+      "player": "Kostyan904",
+      "games": 3,
+      "peak_elo": 943
+    },
+    {
+      "player": "jisseong",
+      "games": 2,
+      "peak_elo": 958
+    },
+    {
+      "player": "peplluis1",
+      "games": 2,
+      "peak_elo": 914
+    },
+    {
+      "player": "Coach-Anna",
+      "games": 2,
+      "peak_elo": 2000
+    },
+    {
+      "player": "leero1",
+      "games": 2,
+      "peak_elo": 959
+    },
+    {
+      "player": "akdas95",
+      "games": 2,
+      "peak_elo": 1004
+    },
+    {
+      "player": "Alinani7",
+      "games": 2,
+      "peak_elo": 1026
+    },
+    {
+      "player": "tekaua07",
+      "games": 2,
+      "peak_elo": 864
+    },
+    {
+      "player": "salimoq",
+      "games": 2,
+      "peak_elo": 869
+    },
+    {
+      "player": "NEOSNAKESDESIGN",
+      "games": 2,
+      "peak_elo": 970
+    },
+    {
+      "player": "Melo118",
+      "games": 2,
+      "peak_elo": 1056
+    }
+  ],
+  "eco_categories": [
+    {
+      "eco_cat": "A",
+      "count": 342,
+      "pct": 24.84
+    },
+    {
+      "eco_cat": "B",
+      "count": 496,
+      "pct": 36.02
+    },
+    {
+      "eco_cat": "C",
+      "count": 63,
+      "pct": 4.58
+    },
+    {
+      "eco_cat": "D",
+      "count": 468,
+      "pct": 33.99
+    },
+    {
+      "eco_cat": "E",
+      "count": 8,
+      "pct": 0.58
+    }
+  ],
+  "rating_advantage": [
+    {
+      "elo_diff_bucket": -400.0,
+      "count": 1,
+      "white_win_pct": 0.0,
+      "black_win_pct": 100.0,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": -300.0,
+      "count": 1,
+      "white_win_pct": 100.0,
+      "black_win_pct": 0.0,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": -200.0,
+      "count": 3,
+      "white_win_pct": 0.0,
+      "black_win_pct": 100.0,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": -150.0,
+      "count": 7,
+      "white_win_pct": 14.3,
+      "black_win_pct": 85.7,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": -100.0,
+      "count": 23,
+      "white_win_pct": 30.4,
+      "black_win_pct": 69.6,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": -50.0,
+      "count": 630,
+      "white_win_pct": 14.4,
+      "black_win_pct": 81.1,
+      "draw_pct": 4.4
+    },
+    {
+      "elo_diff_bucket": 0.0,
+      "count": 640,
+      "white_win_pct": 83.8,
+      "black_win_pct": 12.8,
+      "draw_pct": 3.4
+    },
+    {
+      "elo_diff_bucket": 50.0,
+      "count": 21,
+      "white_win_pct": 95.2,
+      "black_win_pct": 4.8,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": 100.0,
+      "count": 1,
+      "white_win_pct": 100.0,
+      "black_win_pct": 0.0,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": 150.0,
+      "count": 3,
+      "white_win_pct": 100.0,
+      "black_win_pct": 0.0,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": 200.0,
+      "count": 1,
+      "white_win_pct": 100.0,
+      "black_win_pct": 0.0,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": 250.0,
+      "count": 1,
+      "white_win_pct": 0.0,
+      "black_win_pct": 100.0,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": 400.0,
+      "count": 1,
+      "white_win_pct": 100.0,
+      "black_win_pct": 0.0,
+      "draw_pct": 0.0
+    },
+    {
+      "elo_diff_bucket": 450.0,
+      "count": 1,
+      "white_win_pct": 0.0,
+      "black_win_pct": 100.0,
+      "draw_pct": 0.0
+    }
+  ]
+}
