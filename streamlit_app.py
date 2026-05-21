@@ -537,9 +537,9 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
             fen          = board.fen()
             side_to_move = board.turn
 
-            # Post-move: cp értékelés (depth 12)
+            # Post-move: cp értékelés
             send(f"position fen {fen}")
-            send("go depth 12")
+            send(f"go depth {config.STOCKFISH_DEPTH}")
             cp_white  = None
             mate_val  = None
             last_info = ""
@@ -560,6 +560,7 @@ def _stockfish_analyze(moves_uci: list, progress: dict, sf_path: str) -> list:
                         cp_white = sign * sval
                     elif stype == "mate":
                         mate_val = sign * sval
+                        cp_white = 10000 if mate_val > 0 else -10000
                 except (ValueError, IndexError):
                     pass
             evals.append({
