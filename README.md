@@ -49,6 +49,15 @@ chess-pgn-analysis/
 ├── secrets.example.py        # API kulcs sablon (másold le secrets.py-ként)
 ├── packages.txt              # Streamlit Cloud rendszercsomagok (stockfish)
 ├── requirements.txt          # Python függőségek
+├── bin/
+│   └── stockfish/            # Stockfish bináris (automatikusan letöltve)
+├── data/
+│   ├── pgns/                 # Forrás PGN fájlok (játékosonként)
+│   │   ├── sakkpartik.pgn
+│   │   └── Carlsen_7484_games.pgn
+│   └── parquet/              # Feldolgozott parquet fájlok (PGN névvel)
+│       ├── sakkpartik.parquet
+│       └── Carlsen_7484_games.parquet
 ├── notebooks/
 │   ├── jatek_elemzese.ipynb  # Egyedi játszma elemzés + narráció
 │   └── visualization.ipynb   # Statisztikai vizualizációk (Plotly)
@@ -122,23 +131,35 @@ A `config.py`-ban (vagy env változóval) állítható:
 
 ---
 
-## Lichess bulk pipeline (CLI)
+## Bulk pipeline (CLI)
 
-Nagy PGN fájlok feldolgozásához (pl. havi Lichess dump):
+A PGN fájlok a `data/pgns/` mappába kerülnek, a feldolgozott parquet fájlok a `data/parquet/` mappába – azonos fájlnévvel, `.parquet` kiterjesztéssel.
+
+### Egy fájl – teljes pipeline (konverzió + elemzés + Stockfish)
 
 ```bash
-# Teljes pipeline
-python src/run_pipeline.py --pgn lichess_db_2024-01.pgn
-
-# Teszteléshez: csak az első 1000 játszma
-python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --max-games 1000
-
-# Ha a Parquet már megvan, kihagyja a konverziót
-python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --skip-conversion
+python src/run_pipeline.py --pgn data/pgns/sakkpartik.pgn
 
 # Stockfish nélkül (gyorsabb)
-python src/run_pipeline.py --pgn sajat_jatszmaim.pgn --skip-stockfish
+python src/run_pipeline.py --pgn data/pgns/sakkpartik.pgn --skip-stockfish
+
+# Teszteléshez: csak az első 1000 játszma
+python src/run_pipeline.py --pgn data/pgns/sakkpartik.pgn --max-games 1000
 ```
+
+### Egész mappa – batch konverzió
+
+Csak azokat a PGN-eket dolgozza fel, amelyekhez még nincs parquet, vagy amelyek újabbak a meglévő parquet-nél.
+
+```bash
+# Csak az újak/hiányosak
+python src/run_pipeline.py --pgns-dir data/pgns/
+
+# Kényszerített újrafeldolgozás (mind)
+python src/run_pipeline.py --pgns-dir data/pgns/ --force
+```
+
+Batch módban az elemzés (stats, Stockfish) nem fut – az egy adott játékosra vonatkozó döntés. Elemzéshez használd az egyfájlos `--pgn` módot.
 
 Lichess havi dumpok: [database.lichess.org](https://database.lichess.org)
 

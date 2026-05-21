@@ -31,11 +31,10 @@ import chess.engine
 # ─────────────────────────────────────────────
 
 def stockfish_data_binary() -> str:
-    """A projekt adatkatalogusában tárolt Windows Stockfish bináris elérési útja."""
-    data_dir = os.path.join(os.path.dirname(__file__), "..", "data", "stockfish")
+    """A config.STOCKFISH_DIR-ben tárolt Stockfish bináris elérési útja."""
     if os.name == "nt":
-        return os.path.join(data_dir, "stockfish.exe")
-    return os.path.join(data_dir, "stockfish")
+        return os.path.join(config.STOCKFISH_DIR, "stockfish.exe")
+    return os.path.join(config.STOCKFISH_DIR, "stockfish")
 
 
 def download_stockfish_windows(target_dir: str) -> str:
@@ -73,7 +72,7 @@ def find_stockfish() -> str:
         if path:
             return path
 
-    # 3. Root stockfish mappa vagy a data/stockfish telepített binárisa
+    # 3. bin/stockfish telepített binárisa
     candidate_files = []
     if os.name == "nt":
         candidate_files.extend([

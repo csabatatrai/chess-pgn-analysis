@@ -83,7 +83,6 @@ MAX_GAMES = int(os.environ.get("LICHESS_MAX_GAMES", 0))
 OUTPUT_DIR = os.environ.get("LICHESS_OUTPUT_DIR", "output")
 if not os.path.isabs(OUTPUT_DIR):
     OUTPUT_DIR = os.path.join(ROOT_DIR, OUTPUT_DIR)
-PARQUET_DIR = os.path.join(OUTPUT_DIR, "parquet")
 ANALYSIS_DIR = os.path.join(OUTPUT_DIR, "analysis")
 PLOTS_DIR = os.path.join(OUTPUT_DIR, "plots")
 LLM_ANALYSIS_DIR = os.path.join(OUTPUT_DIR, "llm-analysis")
@@ -112,13 +111,25 @@ STOCKFISH_MOVES_LIMIT = int(os.environ.get("STOCKFISH_MOVES_LIMIT", 300))
 DATA_DIR = os.environ.get("LICHESS_DATA_DIR", "data")
 if not os.path.isabs(DATA_DIR):
     DATA_DIR = os.path.join(ROOT_DIR, DATA_DIR)
-STOCKFISH_DIR = os.path.join(DATA_DIR, "stockfish")
+
+STOCKFISH_DIR = os.environ.get("STOCKFISH_DIR", os.path.join(ROOT_DIR, "bin", "stockfish"))
+if not os.path.isabs(STOCKFISH_DIR):
+    STOCKFISH_DIR = os.path.join(ROOT_DIR, STOCKFISH_DIR)
 STOCKFISH_BINARY = os.path.join(STOCKFISH_DIR, "stockfish.exe")
 
 # ─────────────────────────────────────────────
-# PARQUET FÁJL NEVEI
+# PARQUET KÖNYVTÁR ÉS FÁJL NEVEK
 # ─────────────────────────────────────────────
-GAMES_PARQUET = os.path.join(PARQUET_DIR, "mychessdotcomgames.parquet")
+PARQUET_DIR = os.path.join(DATA_DIR, "parquet")
+
+
+def pgn_to_parquet_path(pgn_path: str) -> str:
+    """PGN fájl nevéből deriválja a parquet elérési útját (data/parquet/<stem>.parquet)."""
+    stem = os.path.splitext(os.path.basename(pgn_path))[0]
+    return os.path.join(PARQUET_DIR, stem + ".parquet")
+
+
+GAMES_PARQUET = pgn_to_parquet_path(PGN_FILE)
 MOVES_PARQUET = os.path.join(PARQUET_DIR, "moves.parquet")   # Opcionális, nagy méret!
 
 # ─────────────────────────────────────────────
